@@ -19,11 +19,16 @@
 #ifndef _GNU_SOURCE
 #define _GNU_SOURCE  // for memmem()
 #endif
+#include <string.h>  // NOLINT(modernize-deprecated-headers)
+
+#include <algorithm>
 #include <array>
 #include <cstddef>
 #include <cstdint>
 #include <cstring>
+#include <iostream>
 #include <random>
+#include <string>
 #include <vector>
 
 #include "memseek/memory_read.hpp"
@@ -112,9 +117,9 @@ std::size_t stdSearchScan(const MemoryRead& memory, const Value& target) {
     std::size_t count = 0;
     auto cursor = memoryData.begin();
     const auto end = memoryData.end();
-    while (cursor + targetData.size() <= end) {
-        const auto hit = std::search(cursor, end, targetData.begin(),
-                                     targetData.end());
+    while (static_cast<std::size_t>(end - cursor) >= targetData.size()) {
+        const auto hit =
+            std::search(cursor, end, targetData.begin(), targetData.end());
         if (hit == end) {
             break;
         }
@@ -128,32 +133,32 @@ std::size_t stdSearchScan(const MemoryRead& memory, const Value& target) {
 std::size_t horspoolScan(const MemoryRead& memory, const Value& target) {
     const auto memoryData = memory.data();
     const auto targetData = target.data();
-    const std::size_t n = memoryData.size();
-    const std::size_t m = targetData.size();
-    if (m == 0 || n < m) {
+    const std::size_t memorySize = memoryData.size();
+    const std::size_t targetDataSize = targetData.size();
+    if (targetDataSize == 0 || memorySize < targetDataSize) {
         return 0;
     }
     // 坏字符表: 256 项,记录模式中每个字节最后出现的位置
     std::array<std::size_t, 256> shift{};
-    shift.fill(m);
-    for (std::size_t i = 0; i + 1 < m; ++i) {
-        shift[static_cast<unsigned char>(std::to_integer<unsigned>(
-            targetData[i]))] = m - 1 - i;
+    shift.fill(targetDataSize);
+    for (std::size_t i = 0; i + 1 < targetDataSize; ++i) {
+        shift[static_cast<unsigned char>(
+            std::to_integer<unsigned>(targetData[i]))] = targetDataSize - 1 - i;
     }
 
     std::size_t count = 0;
     std::size_t pos = 0;
-    while (pos + m <= n) {
-        std::size_t j = m - 1;
-        while (memoryData[pos + j] == targetData[j]) {
-            if (j == 0) {
+    while (pos + targetDataSize <= memorySize) {
+        std::size_t targetIndex = targetDataSize - 1;
+        while (memoryData[pos + targetIndex] == targetData[targetIndex]) {
+            if (targetIndex == 0) {
                 ++count;
                 break;
             }
-            --j;
+            --targetIndex;
         }
-        pos += shift[static_cast<unsigned char>(std::to_integer<unsigned>(
-            memoryData[pos + m - 1]))];
+        pos += shift[static_cast<unsigned char>(
+            std::to_integer<unsigned>(memoryData[pos + targetDataSize - 1]))];
     }
     return count;
 }
@@ -168,6 +173,17 @@ void reportThroughput(benchmark::State& state, std::size_t bufferSize) {
     state.SetLabel("bytes=" + std::to_string(bufferSize));
 }
 
+void printBenchmarkLegend() {
+    std::cerr << "\n"
+              << "========== Benchmark legend ==========\n"
+              << "[YOUR IMPLEMENTATION / 自研实现]\n"
+              << "  BM_ScanExact* -> MemoryScanner::scanExact\n"
+              << "[BASELINES / 对照实现]\n"
+              << "  BM_Baseline* -> glibc memmem / std::search / "
+                 "Boyer-Moore-Horspool\n"
+              << "======================================\n\n";
+}
+
 constexpr std::size_t K_DEFAULT_BUFFER_SIZE = 4 * 1024 * 1024;  // 4 MiB
 
 }  // namespace
@@ -177,75 +193,81 @@ constexpr std::size_t K_DEFAULT_BUFFER_SIZE = 4 * 1024 * 1024;  // 4 MiB
 // ---------------------------------------------------------------------------
 
 // Realistic case: random 4 MiB buffer, scan for a uint32 value.
-static void BM_ScanExactU32Random(benchmark::State& state) {
+static void bmScanExactU32Random(benchmark::State& state) {
     const auto buffer = makeRandomBuffer(K_DEFAULT_BUFFER_SIZE, 42);
     MemoryRead memory(0x1000'0000, buffer);
     Value target(static_cast<std::uint32_t>(0xDEADBEEF));
-    for (auto _ : state) {
+    for (auto iteration : state) {
+        static_cast<void>(iteration);
         auto results = MemoryScanner::scanExact(memory, target);
         benchmark::DoNotOptimize(results);
     }
     reportThroughput(state, K_DEFAULT_BUFFER_SIZE);
 }
-BENCHMARK(BM_ScanExactU32Random);
+BENCHMARK(bmScanExactU32Random)->Name("BM_ScanExactU32Random");
 
 // Worst case: buffer is filled with the pattern's first byte, so the
 // first-byte pre-filter never helps and every offset does a full compare.
-static void BM_ScanExactU32Adversarial(benchmark::State& state) {
+static void bmScanExactU32Adversarial(benchmark::State& state) {
     const auto buffer =
         makeAdversarialBuffer(K_DEFAULT_BUFFER_SIZE, std::byte{0xEF});
     MemoryRead memory(0x1000'0000, buffer);
     Value target(static_cast<std::uint32_t>(0xDEADBEEF));
-    for (auto _ : state) {
+    for (auto iteration : state) {
+        static_cast<void>(iteration);
         auto results = MemoryScanner::scanExact(memory, target);
         benchmark::DoNotOptimize(results);
     }
     reportThroughput(state, K_DEFAULT_BUFFER_SIZE);
 }
-BENCHMARK(BM_ScanExactU32Adversarial);
+BENCHMARK(bmScanExactU32Adversarial)->Name("BM_ScanExactU32Adversarial");
 
 // Many matches: buffer is entirely the repeated 4-byte pattern.
-static void BM_ScanExactU32AllMatches(benchmark::State& state) {
+static void bmScanExactU32AllMatches(benchmark::State& state) {
     const auto buffer =
         makeAdversarialBuffer(K_DEFAULT_BUFFER_SIZE, std::byte{0xEF});
     MemoryRead memory(0x1000'0000, buffer);
     Value target(static_cast<std::uint32_t>(0xEFEFEFEF));
-    for (auto _ : state) {
+    for (auto iteration : state) {
+        static_cast<void>(iteration);
         auto results = MemoryScanner::scanExact(memory, target);
         benchmark::DoNotOptimize(results);
     }
     reportThroughput(state, K_DEFAULT_BUFFER_SIZE);
 }
-BENCHMARK(BM_ScanExactU32AllMatches);
+BENCHMARK(bmScanExactU32AllMatches)->Name("BM_ScanExactU32AllMatches");
 
 // Longer pattern (16-byte string): measures how the scan scales with
 // pattern length.
-static void BM_ScanExactString16Random(benchmark::State& state) {
+static void bmScanExactString16Random(benchmark::State& state) {
     const auto buffer = makeRandomBuffer(K_DEFAULT_BUFFER_SIZE, 7);
     MemoryRead memory(0x1000'0000, buffer);
     Value target(std::string(16, 'x'));
-    for (auto _ : state) {
+    for (auto iteration : state) {
+        static_cast<void>(iteration);
         auto results = MemoryScanner::scanExact(memory, target);
         benchmark::DoNotOptimize(results);
     }
     reportThroughput(state, K_DEFAULT_BUFFER_SIZE);
 }
-BENCHMARK(BM_ScanExactString16Random);
+BENCHMARK(bmScanExactString16Random)->Name("BM_ScanExactString16Random");
 
 // Scaling with buffer size: 1 MiB / 4 MiB / 16 MiB.
-static void BM_ScanExactU32SizeScaling(benchmark::State& state) {
+static void bmScanExactU32SizeScaling(benchmark::State& state) {
     const std::size_t size =
         static_cast<std::size_t>(state.range(0)) * 1024 * 1024;
     const auto buffer = makeRandomBuffer(size, 99);
     MemoryRead memory(0x1000'0000, buffer);
     Value target(static_cast<std::uint32_t>(0x12345678));
-    for (auto _ : state) {
+    for (auto iteration : state) {
+        static_cast<void>(iteration);
         auto results = MemoryScanner::scanExact(memory, target);
         benchmark::DoNotOptimize(results);
     }
     reportThroughput(state, size);
 }
-BENCHMARK(BM_ScanExactU32SizeScaling)
+BENCHMARK(bmScanExactU32SizeScaling)
+    ->Name("BM_ScanExactU32SizeScaling")
     ->Arg(1)
     ->Arg(4)
     ->Arg(16)
@@ -255,74 +277,82 @@ BENCHMARK(BM_ScanExactU32SizeScaling)
 // Mature tool baselines: our implementation vs glibc memmem
 // ---------------------------------------------------------------------------
 
-static void BM_BaselineMemmemU32Random(benchmark::State& state) {
+static void bmBaselineMemmemU32Random(benchmark::State& state) {
     const auto buffer = makeRandomBuffer(K_DEFAULT_BUFFER_SIZE, 42);
     MemoryRead memory(0x1000'0000, buffer);
     Value target(static_cast<std::uint32_t>(0xDEADBEEF));
-    for (auto _ : state) {
+    for (auto iteration : state) {
+        static_cast<void>(iteration);
         auto count = memmemScan(memory, target);
         benchmark::DoNotOptimize(count);
     }
     reportThroughput(state, K_DEFAULT_BUFFER_SIZE);
 }
-BENCHMARK(BM_BaselineMemmemU32Random);
+BENCHMARK(bmBaselineMemmemU32Random)->Name("BM_BaselineMemmemU32Random");
 
-static void BM_BaselineMemmemString16Random(benchmark::State& state) {
+static void bmBaselineMemmemString16Random(benchmark::State& state) {
     const auto buffer = makeRandomBuffer(K_DEFAULT_BUFFER_SIZE, 7);
     MemoryRead memory(0x1000'0000, buffer);
     Value target(std::string(16, 'x'));
-    for (auto _ : state) {
+    for (auto iteration : state) {
+        static_cast<void>(iteration);
         auto count = memmemScan(memory, target);
         benchmark::DoNotOptimize(count);
     }
     reportThroughput(state, K_DEFAULT_BUFFER_SIZE);
 }
-BENCHMARK(BM_BaselineMemmemString16Random);
+BENCHMARK(bmBaselineMemmemString16Random)
+    ->Name("BM_BaselineMemmemString16Random");
 
 // C++ 标准库 std::search 基线
-static void BM_BaselineStdSearchU32Random(benchmark::State& state) {
+static void bmBaselineStdSearchU32Random(benchmark::State& state) {
     const auto buffer = makeRandomBuffer(K_DEFAULT_BUFFER_SIZE, 42);
     MemoryRead memory(0x1000'0000, buffer);
     Value target(static_cast<std::uint32_t>(0xDEADBEEF));
-    for (auto _ : state) {
+    for (auto iteration : state) {
+        static_cast<void>(iteration);
         auto count = stdSearchScan(memory, target);
         benchmark::DoNotOptimize(count);
     }
     reportThroughput(state, K_DEFAULT_BUFFER_SIZE);
 }
-BENCHMARK(BM_BaselineStdSearchU32Random);
+BENCHMARK(bmBaselineStdSearchU32Random)->Name("BM_BaselineStdSearchU32Random");
 
 // Boyer-Moore-Horspool 经典算法基线
-static void BM_BaselineHorspoolU32Random(benchmark::State& state) {
+static void bmBaselineHorspoolU32Random(benchmark::State& state) {
     const auto buffer = makeRandomBuffer(K_DEFAULT_BUFFER_SIZE, 42);
     MemoryRead memory(0x1000'0000, buffer);
     Value target(static_cast<std::uint32_t>(0xDEADBEEF));
-    for (auto _ : state) {
+    for (auto iteration : state) {
+        static_cast<void>(iteration);
         auto count = horspoolScan(memory, target);
         benchmark::DoNotOptimize(count);
     }
     reportThroughput(state, K_DEFAULT_BUFFER_SIZE);
 }
-BENCHMARK(BM_BaselineHorspoolU32Random);
+BENCHMARK(bmBaselineHorspoolU32Random)->Name("BM_BaselineHorspoolU32Random");
 
-static void BM_BaselineHorspoolString16Random(benchmark::State& state) {
+static void bmBaselineHorspoolString16Random(benchmark::State& state) {
     const auto buffer = makeRandomBuffer(K_DEFAULT_BUFFER_SIZE, 7);
     MemoryRead memory(0x1000'0000, buffer);
     Value target(std::string(16, 'x'));
-    for (auto _ : state) {
+    for (auto iteration : state) {
+        static_cast<void>(iteration);
         auto count = horspoolScan(memory, target);
         benchmark::DoNotOptimize(count);
     }
     reportThroughput(state, K_DEFAULT_BUFFER_SIZE);
 }
-BENCHMARK(BM_BaselineHorspoolString16Random);
+BENCHMARK(bmBaselineHorspoolString16Random)
+    ->Name("BM_BaselineHorspoolString16Random");
 
 // ---------------------------------------------------------------------------
 // Correctness guard: benchmarks are useless if the scan is wrong.
 // ---------------------------------------------------------------------------
 
-static void BM_ScanExactCorrectnessGuard(benchmark::State& state) {
-    for (auto _ : state) {
+static void bmScanExactCorrectnessGuard(benchmark::State& state) {
+    for (auto iteration : state) {
+        static_cast<void>(iteration);
         state.PauseTiming();
         std::vector<std::byte> buffer = makeRandomBuffer(64 * 1024, 1234);
         const std::array<std::byte, 4> pattern = {
@@ -333,15 +363,29 @@ static void BM_ScanExactCorrectnessGuard(benchmark::State& state) {
         state.ResumeTiming();
 
         auto results = MemoryScanner::scanExact(memory, target);
-        bool ok = results.size() == 1 &&
-                  results[0].address() == 0x4000'0000 + (32 * 1024);
-        if (!ok) {
+        bool isCorrect = results.size() == 1 &&
+                         results[0].address() == 0x4000'0000 + (32 * 1024);
+        if (!isCorrect) {
             state.SkipWithError("scanExact produced wrong results!");
             break;
         }
         benchmark::DoNotOptimize(results);
     }
 }
-BENCHMARK(BM_ScanExactCorrectnessGuard);
+BENCHMARK(bmScanExactCorrectnessGuard)->Name("BM_ScanExactCorrectnessGuard");
 
-BENCHMARK_MAIN();
+int main(int argc, char** argv) {
+    benchmark::MaybeReenterWithoutASLR(argc, argv);
+    printBenchmarkLegend();
+
+    benchmark::Initialize(&argc, argv);
+    benchmark::AddCustomContext("implementation", "MemoryScanner::scanExact");
+    benchmark::AddCustomContext(
+        "baselines", "glibc memmem; std::search; Boyer-Moore-Horspool");
+    if (benchmark::ReportUnrecognizedArguments(argc, argv)) {
+        return 1;
+    }
+    benchmark::RunSpecifiedBenchmarks();
+    benchmark::Shutdown();
+    return 0;
+}

@@ -42,6 +42,8 @@ fi
 
 # ---------------------------------------------------------------- 运行 + 打印表格
 echo "==> 运行扫描性能基准 (${FILTER}) ..."
+echo ">>> 自研实现: BM_ScanExact* -> MemoryScanner::scanExact"
+echo ">>> 对照实现: BM_Baseline* -> glibc memmem / std::search / Boyer-Moore-Horspool"
 RAW="$(mktemp)"
 "${BINARY}" \
     --benchmark_filter="${FILTER}" \

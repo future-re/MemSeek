@@ -20,7 +20,7 @@ list(APPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake")
 include(CodeCoverage)
 add_subdirectory(src)
 
-option(MEMSEEK_BUILD_BENCHMARKS "Build Google Benchmark performance tests" OFF)
+option(MEMSEEK_BUILD_BENCHMARKS "Build Google Benchmark performance tests" ON)
 
 if(BUILD_TESTING)
   add_subdirectory(tests)
