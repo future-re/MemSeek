@@ -18,6 +18,9 @@ class MemoryRead {
     MemoryRead(std::uintptr_t address, std::size_t size)
         : m_address(address), m_buffer(size) {}
 
+    static std::expected<MemoryRead, std::string> readMemory(
+        pid_t pid, const MemoryRegion& region);
+
     [[nodiscard]]
     std::uintptr_t address() const noexcept {
         return m_address;
@@ -37,8 +40,5 @@ class MemoryRead {
     std::size_t size() const noexcept {
         return m_buffer.size();
     }
-
-    static std::expected<MemoryRead, std::string> readMemory(
-        pid_t pid, const MemoryRegion& region);
 };
 }  // namespace memseek

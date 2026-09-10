@@ -136,6 +136,12 @@ class Value {
     }
 
     [[nodiscard]]
+    bool operator==(std::span<const std::byte> other) const noexcept {
+        return m_data.size() == other.size() &&
+               std::memcmp(m_data.data(), other.data(), m_data.size()) == 0;
+    }
+
+    [[nodiscard]]
     std::string_view asStringRef() const {
         if (m_type != ValueType::STR) {
             throw std::runtime_error("Value is not a string");
