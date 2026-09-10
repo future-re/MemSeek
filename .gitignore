@@ -10,3 +10,5 @@ mkdocs/docs/doxygen-output/
 mkdocs/docs/coverage_html/
 default.profraw
 test/integration/integration-report-*
+# 基准测试结果
+.benchmarks/
