@@ -40,5 +40,10 @@ class MemoryRead {
     std::size_t size() const noexcept {
         return m_buffer.size();
     }
+
+    [[nodiscard]]
+    std::vector<std::byte>& buffer() noexcept {
+        return m_buffer;
+    }
 };
 }  // namespace memseek

@@ -21,14 +21,13 @@ endif()
 add_executable(scan_benchmark
     scan_benchmark.cpp
     scan_benchmark_helpers.cpp
-    scan_exact_benchmark.cpp
-    large_region_benchmark.cpp)
+    scan_exact_benchmark.cpp)
 target_link_libraries(scan_benchmark PRIVATE memseek_lib benchmark::benchmark)
 target_compile_options(scan_benchmark PRIVATE
     $<$<CXX_COMPILER_ID:GNU,Clang>:-O2>)
 
 add_custom_target(run_benchmarks
-    COMMAND scan_benchmark --benchmark_filter='BM_Scan|BM_Baseline'
+    COMMAND scan_benchmark --benchmark_filter='BM_ScanExact'
     WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
     DEPENDS scan_benchmark
     USES_TERMINAL

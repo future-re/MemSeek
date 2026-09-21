@@ -1,14 +1,11 @@
 #!/usr/bin/env bash
 # 快速扫描性能测试脚本
 #
-# 一次运行即可看到:
-#   1. 自己的实现 (MemoryScanner::scanExact) 各场景的耗时与吞吐量
-#   2. 行业标准算法 (glibc memmem / std::search / Boyer-Moore-Horspool) 的参照
-#   3. 自动配对的倍数对比
+# 第一层只运行一个最小的 scanExact benchmark。
 #
 # 用法:
 #   ./benchmarks/quick_perf.sh                                    # 全部基准
-#   ./benchmarks/quick_perf.sh --filter BM_ScanExactU32Random     # 只跑指定基准
+#   ./benchmarks/quick_perf.sh --filter BM_ScanExactRandom         # 只跑指定基准
 
 set -euo pipefail
 
@@ -17,7 +14,7 @@ BUILD_DIR="${ROOT}/build"
 BENCH_DIR="${BUILD_DIR}/benchmarks"
 BINARY="${BENCH_DIR}/scan_benchmark"
 
-FILTER="BM_Scan|BM_Baseline"
+FILTER="BM_ScanExact"
 
 # ---------------------------------------------------------------- 参数解析
 while [[ $# -gt 0 ]]; do
@@ -42,8 +39,7 @@ fi
 
 # ---------------------------------------------------------------- 运行 + 打印表格
 echo "==> 运行扫描性能基准 (${FILTER}) ..."
-echo ">>> 自研实现: BM_ScanExact* -> MemoryScanner::scanExact"
-echo ">>> 对照实现: BM_Baseline* -> glibc memmem / std::search / Boyer-Moore-Horspool"
+echo ">>> MemoryScanner::scanExact"
 RAW="$(mktemp)"
 "${BINARY}" \
     --benchmark_filter="${FILTER}" \

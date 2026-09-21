@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""解析 scan_benchmark 的 JSON 结果,打印可读的吞吐量表格和前后对比。
+"""打印 benchmark 结果,或比较优化前后的结果。
 
 用法:
   compare.py --show results.json        # 打印单次结果的吞吐量表
@@ -64,36 +64,6 @@ def show_single(path: Path) -> None:
     for name, (time_ns, bps) in sorted(results.items()):
         throughput = fmt_bytes_per_sec(bps) if bps else "        -"
         print(f"{name:<42} {fmt_time(time_ns):>10} {throughput:>12}")
-
-    # ---- 自己的实现 vs 行业标准算法/成熟工具 ----
-    # 按场景后缀自动配对: BM_ScanExactU32Random
-    #   ↔ BM_BaselineMemmemU32Random / BM_BaselineStdSearchU32Random /
-    #     BM_BaselineHorspoolU32Random
-    BASELINES = {
-        "BM_BaselineMemmem": "glibc memmem",
-        "BM_BaselineStdSearch": "std::search",
-        "BM_BaselineHorspool": "Boyer-Moore-Horspool",
-    }
-    scan = {n[len("BM_ScanExact"):]: v[0] for n, v in results.items()
-            if n.startswith("BM_ScanExact")}
-    baselines = {
-        label: {n[len(prefix):]: v[0] for n, v in results.items()
-                if n.startswith(prefix)}
-        for prefix, label in BASELINES.items()
-    }
-
-    rows = []
-    for key in sorted(scan):
-        t = scan[key]
-        for label, table in baselines.items():
-            if key in table and table[key] > 0:
-                rows.append((key, label, table[key] / t))
-    if rows:
-        print("\n与行业标准算法对比 (>1.00x = 自己的实现更快)")
-        print("-" * 70)
-        print(f"{'场景':<26} {'参照算法':<26} {'倍数':>8}")
-        for key, label, ratio in rows:
-            print(f"{key:<26} {label:<26} {ratio:7.2f}x")
     print()
 
 
