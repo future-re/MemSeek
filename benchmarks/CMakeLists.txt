@@ -18,7 +18,11 @@ if(NOT TARGET benchmark::benchmark)
     FetchContent_MakeAvailable(benchmark)
 endif()
 
-add_executable(scan_benchmark scan_benchmark.cpp)
+add_executable(scan_benchmark
+    scan_benchmark.cpp
+    scan_benchmark_helpers.cpp
+    scan_exact_benchmark.cpp
+    large_region_benchmark.cpp)
 target_link_libraries(scan_benchmark PRIVATE memseek_lib benchmark::benchmark)
 target_compile_options(scan_benchmark PRIVATE
     $<$<CXX_COMPILER_ID:GNU,Clang>:-O2>)

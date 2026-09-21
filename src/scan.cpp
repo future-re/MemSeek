@@ -21,7 +21,7 @@ std::vector<ScanResult> MemoryScanner::scanExact(const MemoryRead& memory,
          offset + targetData.size() <= memoryData.size(); ++offset) {
         const auto memoryBegin =
             memoryData.begin() + static_cast<std::ptrdiff_t>(offset);
-        if(targetData[0]!=memoryBegin[0]) {
+        if (targetData[0] != memoryBegin[0]) {
             continue;
         }
         if (std::equal(targetData.begin(), targetData.end(), memoryBegin)) {
@@ -44,16 +44,21 @@ std::vector<ScanResult> MemoryScanner::scanExact(pid_t pid,
     }
     const auto& memory = *memoryResult;
     for (const auto& region : memory.getRegions()) {
-        auto readResult = MemoryRead::readMemory(pid, region);
-        if (!readResult) {
-            continue;
-        }
-        const auto& memoryRead = *readResult;
-        auto tmpResults = scanExact(memoryRead, target);
+        auto tmpResults = scanExact(pid, region, target);
         if (!tmpResults.empty()) {
             results.insert(results.end(), tmpResults.begin(), tmpResults.end());
         }
     }
     return results;
+}
+
+std::vector<ScanResult> MemoryScanner::scanExact(pid_t pid,
+                                                 const MemoryRegion& region,
+                                                 const Value& target) {
+    const auto memoryResult = MemoryRead::readMemory(pid, region);
+    if (!memoryResult) {
+        return {};
+    }
+    return scanExact(*memoryResult, target);
 }
 }  // namespace memseek

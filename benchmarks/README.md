@@ -5,12 +5,15 @@
 
 ## 目录内容
 
-| 文件                 | 说明                                                      |
-| -------------------- | --------------------------------------------------------- |
-| `scan_benchmark.cpp` | 基准测试主体,直接调用 `include/memseek/scan.hpp` 中的实现 |
-| `quick_perf.sh`      | 一键构建 + 运行 + 打印表格 + 前后对比的快捷脚本           |
-| `compare.py`         | 解析 JSON 结果,打印吞吐量表 / 加速比对比                  |
-| `CMakeLists.txt`     | 构建配置,通过 `-DMEMSEEK_BUILD_BENCHMARKS=ON` 启用        |
+| 文件                              | 说明                                               |
+| --------------------------------- | -------------------------------------------------- |
+| `scan_benchmark.cpp`              | benchmark 入口、上下文信息和 `main()`              |
+| `scan_benchmark_helpers.hpp/.cpp` | 数据生成、基线算法和公共报告工具                   |
+| `scan_exact_benchmark.cpp`        | 常规内存扫描、基线算法和正确性守卫                 |
+| `large_region_benchmark.cpp`      | 500 MiB 进程 region 读取与扫描场景                 |
+| `quick_perf.sh`                   | 一键构建 + 运行 + 打印表格 + 前后对比的快捷脚本    |
+| `compare.py`                      | 解析 JSON 结果,打印吞吐量表 / 加速比对比           |
+| `CMakeLists.txt`                  | 构建配置,通过 `-DMEMSEEK_BUILD_BENCHMARKS=ON` 启用 |
 
 ## 快速开始
 
@@ -80,16 +83,24 @@ BM_ScanExact_U32_Random                    2.23 ms     1.10 ms     2.03x
    `memmem`(经过高度优化的 Two-Way 算法)作为成熟扫描工具的参照,
    衡量自己与业界水平的差距。
 
-| 基准                            | 数据特征                   | 度量目的                      |
-| ------------------------------- | -------------------------- | ----------------------------- |
-| `BM_ScanExact_U32_Random`       | 随机 4 MiB,几乎无匹配      | 典型场景吞吐量(自己的实现)   |
-| `BM_ScanExact_U32_Adversarial`  | 缓冲区全部为模式首字节     | 最坏情况:首字节预过滤完全失效 |
-| `BM_ScanExact_U32_AllMatches`   | 缓冲区全部命中             | 结果构建开销占主导的场景      |
-| `BM_ScanExact_String16_Random`  | 16 字节长模式              | 模式长度扩展性                |
-| `BM_ScanExact_U32_SizeScaling`  | 1/4/16 MiB                 | 缓存行为随缓冲区大小的变化    |
-| `BM_BaselineMemmem_U32Random`   | 同 Random 场景             | 成熟工具参照:glibc memmem     |
-| `BM_BaselineMemmem_String16Random` | 同 String16 场景        | 成熟工具参照:glibc memmem     |
-| `BM_ScanExact_CorrectnessGuard` | 内嵌已知模式并校验结果     | 防止"越优化越错"的正确性守卫  |
+| 基准                               | 数据特征                                | 度量目的                          |
+| ---------------------------------- | --------------------------------------- | --------------------------------- |
+| `BM_ScanExact_U32_Random`          | 随机 4 MiB,几乎无匹配                   | 典型场景吞吐量(自己的实现)        |
+| `BM_ScanExact_U32_Adversarial`     | 缓冲区全部为模式首字节                  | 最坏情况:首字节预过滤完全失效     |
+| `BM_ScanExact_U32_AllMatches`      | 缓冲区全部命中                          | 结果构建开销占主导的场景          |
+| `BM_ScanExact_String16_Random`     | 16 字节长模式                           | 模式长度扩展性                    |
+| `BM_ScanExact_U32_SizeScaling`     | 1/4/16 MiB                              | 缓存行为随缓冲区大小的变化        |
+| `BM_BaselineMemmem_U32Random`      | 同 Random 场景                          | 成熟工具参照:glibc memmem         |
+| `BM_BaselineMemmem_String16Random` | 同 String16 场景                        | 成熟工具参照:glibc memmem         |
+| `BM_ScanExact_CorrectnessGuard`    | 内嵌已知模式并校验结果                  | 防止"越优化越错"的正确性守卫      |
+| `BM_ScanExact500MiBInMemory`       | 已在当前进程中准备 500 MiB 的随机数据   | 只测扫描算法吞吐量                |
+| `BM_Read500MiBProcessRegion`       | 使用 `process_vm_readv` 读取上述 region | 测量进程内存读取吞吐量和 peak RSS |
+| `BM_ScanExact500MiBProcessRegion`  | 读取指定 region 后执行扫描              | 测量真实 region 扫描端到端性能    |
+
+500 MiB 场景会在 benchmark 进程中保留一块随机填充的内存，并在其中植入 3 个
+`uint32_t` 目标值。相关 benchmark 固定执行一次，避免基准框架为了达到最小测量时间
+而重复分配和读取数百 MiB 数据。`peak_rss_mib` 是进程运行期间观测到的峰值 RSS，
+主要用于观察进程读取带来的额外内存占用。
 
 ## 手动使用(Google Benchmark 原生方式)
 

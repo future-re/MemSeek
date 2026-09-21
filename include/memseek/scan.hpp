@@ -1,6 +1,8 @@
 #pragma once
 
 #include <cstdint>
+#include <span>
+#include <vector>
 
 #include "memseek/memory_read.hpp"
 #include "memseek/value.hpp"
@@ -10,7 +12,7 @@ class ScanResult {
    public:
     explicit ScanResult(uintptr_t address = 0,
                         std::span<const std::byte> data = {})
-        : m_address(address), m_data(data) {}
+        : m_address(address), m_data(data.begin(), data.end()) {}
 
     [[nodiscard]] uintptr_t address() const { return m_address; }
 
@@ -24,7 +26,9 @@ class ScanResult {
 
    private:
     uintptr_t m_address{};
-    std::span<const std::byte> m_data;
+    // A scan result must outlive the MemoryRead used by the scanner.  Owning
+    // the matched bytes also makes results from process scans safe to return.
+    std::vector<std::byte> m_data;
 };
 
 class MemoryScanner {
@@ -35,6 +39,13 @@ class MemoryScanner {
 
     [[nodiscard]]
     static std::vector<ScanResult> scanExact(pid_t pid, MemoryScanLevel level,
+                                             const Value& target);
+
+    // Scan one already-selected process region.  This is useful for callers
+    // that need to measure a known region without scanning the whole process.
+    [[nodiscard]]
+    static std::vector<ScanResult> scanExact(pid_t pid,
+                                             const MemoryRegion& region,
                                              const Value& target);
 };
 
