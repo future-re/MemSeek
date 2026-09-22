@@ -62,7 +62,7 @@ std::vector<ScanResult> MemoryScanner::scanRegion(pid_t pid,
     auto chunkRegion = MemoryChunkRange(region);
     std::vector<ScanResult> results;
     for (auto chunk : chunkRegion) {
-        auto scanRead = reader.read(chunk, target);
+        auto scanRead = reader.read(chunk, region, target);
         if (!scanRead) {
             continue;
         }

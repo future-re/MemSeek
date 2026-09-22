@@ -17,6 +17,7 @@ class MemoryReader {
 
     [[nodiscard]]
     std::expected<MemoryRead, std::string> read(const MemoryChunk& chunk,
+                                                const MemoryRegion& region,
                                                 const Value& target) const;
 
    private:
