@@ -63,6 +63,7 @@ std::vector<ScanResult> MemoryScanner::scanBuffer(const MemoryRead& memory,
     }
     return results;
 }
+
 std::vector<ScanResult> MemoryScanner::scanRegion(pid_t pid,
                                                   const MemoryRegion& region,
                                                   const Value& target) {

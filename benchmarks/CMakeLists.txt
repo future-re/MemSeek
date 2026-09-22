@@ -33,3 +33,22 @@ add_custom_target(run_benchmarks
     USES_TERMINAL
     COMMENT "Running scan performance benchmarks"
 )
+
+# External-tool comparison harness: a fixture target process plus a memseek
+# reference scanner, orchestrated by tools/compare_tools.sh.
+add_executable(scan_fixture tools/scan_fixture.cpp)
+target_compile_options(scan_fixture PRIVATE
+    $<$<CXX_COMPILER_ID:GNU,Clang>:-O2>)
+
+add_executable(memseek_scan tools/memseek_scan.cpp)
+target_link_libraries(memseek_scan PRIVATE memseek_lib)
+target_compile_options(memseek_scan PRIVATE
+    $<$<CXX_COMPILER_ID:GNU,Clang>:-O2>)
+
+add_custom_target(compare_tools
+    COMMAND ${CMAKE_COMMAND} -E env BUILD_DIR=${CMAKE_BINARY_DIR}
+            bash ${CMAKE_CURRENT_SOURCE_DIR}/tools/compare_tools.sh
+    DEPENDS scan_fixture memseek_scan
+    USES_TERMINAL
+    COMMENT "Comparing memseek against external scanners"
+)
