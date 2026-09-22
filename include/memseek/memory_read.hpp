@@ -1,39 +1,29 @@
 #pragma once
 
 #include <cstddef>
+#include <cstdint>
 #include <span>
+#include <utility>
 #include <vector>
 
-#include "memory_region.hpp"
 namespace memseek {
+
 class MemoryRead {
-   private:
-    std::uintptr_t m_address{};
-    std::vector<std::byte> m_buffer;
-
    public:
-    MemoryRead(std::uintptr_t address, std::vector<std::byte> buffer)
-        : m_address(address), m_buffer(std::move(buffer)) {}
+    MemoryRead(std::uintptr_t address, std::size_t logicalSize,
+               std::vector<std::byte> buffer)
+        : m_address(address),
+          m_logicalSize(logicalSize),
+          m_buffer(std::move(buffer)) {}
 
-    MemoryRead(std::uintptr_t address, std::size_t size)
-        : m_address(address), m_buffer(size) {}
-
-    static std::expected<MemoryRead, std::string> readMemory(
-        pid_t pid, const MemoryRegion& region);
+    MemoryRead(std::uintptr_t address, std::size_t logicalSize)
+        : m_address(address),
+          m_logicalSize(logicalSize),
+          m_buffer(logicalSize) {}
 
     [[nodiscard]]
     std::uintptr_t address() const noexcept {
         return m_address;
-    }
-
-    [[nodiscard]]
-    std::span<std::byte> data() noexcept {
-        return m_buffer;
-    }
-
-    [[nodiscard]]
-    std::span<const std::byte> data() const noexcept {
-        return m_buffer;
     }
 
     [[nodiscard]]
@@ -42,8 +32,29 @@ class MemoryRead {
     }
 
     [[nodiscard]]
+    std::size_t logicalSize() const noexcept {
+        return m_logicalSize;
+    }
+
+    [[nodiscard]]
+    std::uintptr_t logicalEnd() const noexcept {
+        return m_address + m_logicalSize;
+    }
+
+    [[nodiscard]]
+    std::span<const std::byte> data() const noexcept {
+        return m_buffer;
+    }
+
+    [[nodiscard]]
     std::vector<std::byte>& buffer() noexcept {
         return m_buffer;
     }
+
+   private:
+    std::uintptr_t m_address{};
+    std::size_t m_logicalSize{};
+    std::vector<std::byte> m_buffer;
 };
+
 }  // namespace memseek

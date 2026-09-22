@@ -59,6 +59,7 @@ struct MemoryScanLevel {
 };
 
 struct MemoryRegion {
+    uint64_t id{0};
     uintptr_t start{};
     std::size_t size{};
     MemoryProtection protection{MemoryProtection::NONE};

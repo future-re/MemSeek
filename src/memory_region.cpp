@@ -18,6 +18,7 @@ std::expected<MemoryRegionList, std::string> readProcess(
     }
 
     std::string line;
+    uint64_t regionId = 0;
 
     while (std::getline(mapsFile, line)) {
         std::istringstream stream(line);
@@ -37,6 +38,7 @@ std::expected<MemoryRegionList, std::string> readProcess(
         // pathname is optional, and may contain spaces, so read the rest of the
         // line as a whole.
         std::getline(stream, pathname);
+        regionId++;
 
         if (!pathname.empty()) {
             const auto first = pathname.find_first_not_of(' ');
@@ -74,6 +76,8 @@ std::expected<MemoryRegionList, std::string> readProcess(
         region.size = static_cast<std::size_t>(end - start);
 
         region.pathname = pathname;
+
+        region.id = regionId;
 
         // -------------------------
         // decode protection: rwx
