@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # 快速扫描性能测试脚本
 #
-# 第一层只运行一个最小的 scanExact benchmark。
+# 第一层只运行一个最小的 scanBuffer benchmark。
 #
 # 用法:
 #   ./benchmarks/quick_perf.sh                                    # 全部基准
@@ -39,7 +39,7 @@ fi
 
 # ---------------------------------------------------------------- 运行 + 打印表格
 echo "==> 运行扫描性能基准 (${FILTER}) ..."
-echo ">>> MemoryScanner::scanExact"
+echo ">>> MemoryScanner::scanBuffer"
 RAW="$(mktemp)"
 "${BINARY}" \
     --benchmark_filter="${FILTER}" \

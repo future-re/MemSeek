@@ -1,9 +1,10 @@
-#include "memseek/scan.hpp"
+#include "memseek/memory_scan.hpp"
 
 #include <gtest/gtest.h>
 
 #include <cstddef>
 #include <cstdint>
+#include <utility>
 #include <vector>
 
 #include "common/test_helper.hpp"
@@ -16,9 +17,9 @@ TEST(ScanTest, valueScan) {
         static_cast<std::byte>(0x12), static_cast<std::byte>(0x34),
         static_cast<std::byte>(0x56), static_cast<std::byte>(0x78),
         static_cast<std::byte>(0x99)};
-    auto test = memseek::MemoryRead(address, data);
+    auto test = memseek::MemoryRead(address, data.size(), std::move(data));
     Value target(static_cast<uint16_t>(0x7856));
-    auto result = MemoryScanner::scanExact(test, target);
+    auto result = MemoryScanner::scanBuffer(test, target);
     ASSERT_EQ(result.size(), 1);
     EXPECT_EQ(result[0].address(), address + 2);
     EXPECT_EQ(result[0].data(), target);
@@ -30,13 +31,13 @@ TEST(ScanTest, mulipleValueScan) {
     data += changeValue(uint32_t(45));
     data += changeValue(uint32_t(36));
     data+= changeValue(uint32_t(45));
-    auto test = memseek::MemoryRead(address, data);
+    auto test = memseek::MemoryRead(address, data.size(), std::move(data));
     Value target(static_cast<uint32_t>(45));
-    auto result = MemoryScanner::scanExact(test, target);
+    auto result = MemoryScanner::scanBuffer(test, target);
     ASSERT_EQ(result.size(), 2);
     EXPECT_EQ(result[0].data(), target);
     EXPECT_EQ(result[1].data(), target);
-    ASSERT_EQ(MemoryScanner::scanExact(test, Value(static_cast<uint32_t>(36))).size(), 1);
+    ASSERT_EQ(MemoryScanner::scanBuffer(test, Value(static_cast<uint32_t>(36))).size(), 1);
 }
 
 TEST(ScanTest, stringScan) {
@@ -48,9 +49,9 @@ TEST(ScanTest, stringScan) {
         static_cast<std::byte>('W'), static_cast<std::byte>('o'),
         static_cast<std::byte>('r'), static_cast<std::byte>('l'),
         static_cast<std::byte>('d')};
-    auto test = memseek::MemoryRead(address, data);
+    auto test = memseek::MemoryRead(address, data.size(), std::move(data));
     Value target(std::string("lo Wo"));
-    auto result = MemoryScanner::scanExact(test, target);
+    auto result = MemoryScanner::scanBuffer(test, target);
     ASSERT_EQ(result.size(), 1);
     EXPECT_EQ(result[0].address(), address + 3);
     EXPECT_EQ(result[0].data(), target);

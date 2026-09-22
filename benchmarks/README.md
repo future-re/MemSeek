@@ -1,14 +1,14 @@
 # Scan benchmark
 
 当前 benchmark 只保留第一层：测量一块固定大小的随机内存上，
-`MemoryScanner::scanExact` 的扫描速度。
+`MemoryScanner::scanBuffer` 的扫描速度。
 
 ## 代码结构
 
 ```text
 scan_benchmark.cpp            程序入口
 scan_benchmark_helpers.*      生成测试数据、报告吞吐量
-scan_exact_benchmark.cpp      一个基础 scanExact benchmark
+scan_exact_benchmark.cpp      一个基础 scanBuffer benchmark
 ```
 
 运行流程只有四步：
@@ -18,7 +18,7 @@ scan_exact_benchmark.cpp      一个基础 scanExact benchmark
     ↓
 包装成 MemoryRead
     ↓
-反复调用 MemoryScanner::scanExact
+反复调用 MemoryScanner::scanBuffer
     ↓
 报告耗时和 bytes/s
 ```
