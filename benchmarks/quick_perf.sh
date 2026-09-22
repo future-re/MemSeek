@@ -14,7 +14,7 @@ BUILD_DIR="${ROOT}/build"
 BENCH_DIR="${BUILD_DIR}/benchmarks"
 BINARY="${BENCH_DIR}/scan_benchmark"
 
-FILTER="BM_ScanExact"
+FILTER="BM_Scan"
 
 # ---------------------------------------------------------------- 参数解析
 while [[ $# -gt 0 ]]; do

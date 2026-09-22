@@ -1,6 +1,5 @@
 #include "scan_benchmark_helpers.hpp"
 
-#include <cstring>
 #include <random>
 #include <string>
 
@@ -14,16 +13,6 @@ std::vector<std::byte> makeRandomBuffer(std::size_t size, std::uint32_t seed) {
         byte = static_cast<std::byte>(dist(rng));
     }
     return buffer;
-}
-
-void* randomInsertValue(std::vector<std::byte>& buffer, std::uint32_t value,
-                        std::uint32_t seed) {
-    std::mt19937 rng(seed);
-    std::uniform_int_distribution<std::size_t> dist(
-        0, buffer.size() - sizeof(value));
-    std::size_t index = dist(rng);
-    std::memcpy(&buffer[index], &value, sizeof(value));
-    return &buffer[index];
 }
 
 void reportThroughput(benchmark::State& state, std::size_t bufferSize) {

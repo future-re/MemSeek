@@ -13,13 +13,17 @@ add_library(memseek_lib STATIC ${MEMSEEK_LIBRARY_SOURCES})
 
 find_package(ICU REQUIRED COMPONENTS uc i18n)
 
+# Boost.Asio's thread_pool (header-only) parallelizes region scans. Keep it
+# PRIVATE so consumers of memseek_lib do not need Boost headers.
+find_package(Boost CONFIG REQUIRED)
+
 target_compile_features(memseek_lib PUBLIC cxx_std_23)
 
 target_include_directories(memseek_lib PUBLIC
     $<BUILD_INTERFACE:${CMAKE_SOURCE_DIR}/include>
     $<INSTALL_INTERFACE:include>)
 
-target_link_libraries(memseek_lib PUBLIC ICU::uc ICU::i18n)
+target_link_libraries(memseek_lib PUBLIC ICU::uc ICU::i18n PRIVATE Boost::headers)
 
 add_executable(memseek main.cpp
     memory_reader.cpp)
