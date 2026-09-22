@@ -1,5 +1,3 @@
-#include "memseek/memory_scan.hpp"
-
 #include <gtest/gtest.h>
 
 #include <cstddef>
@@ -9,6 +7,7 @@
 
 #include "common/test_helper.hpp"
 #include "memseek/memory_read.hpp"
+#include "memseek/memory_scan.hpp"
 
 namespace memseek {
 TEST(ScanTest, valueScan) {
@@ -30,14 +29,16 @@ TEST(ScanTest, mulipleValueScan) {
     std::vector<std::byte> data;
     data += changeValue(uint32_t(45));
     data += changeValue(uint32_t(36));
-    data+= changeValue(uint32_t(45));
+    data += changeValue(uint32_t(45));
     auto test = memseek::MemoryRead(address, data.size(), std::move(data));
     Value target(static_cast<uint32_t>(45));
     auto result = MemoryScanner::scanBuffer(test, target);
     ASSERT_EQ(result.size(), 2);
     EXPECT_EQ(result[0].data(), target);
     EXPECT_EQ(result[1].data(), target);
-    ASSERT_EQ(MemoryScanner::scanBuffer(test, Value(static_cast<uint32_t>(36))).size(), 1);
+    ASSERT_EQ(MemoryScanner::scanBuffer(test, Value(static_cast<uint32_t>(36)))
+                  .size(),
+              1);
 }
 
 TEST(ScanTest, stringScan) {
