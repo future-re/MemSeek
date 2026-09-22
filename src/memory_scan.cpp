@@ -8,13 +8,13 @@ namespace memseek {
 std::vector<ScanResult> MemoryScanner::scanProcess(pid_t pid,
                                                    MemoryScanLevel level,
                                                    const Value& target) {
-    auto regionList = *readProcess(pid, level);
-    if (!regionList.empty()) {
+    auto regionList = readProcess(pid, level);
+    if (!regionList) {
         return {};
     }
 
     std::vector<ScanResult> results;
-    for (const auto& region : regionList.getRegions()) {
+    for (const auto& region : regionList->getRegions()) {
         auto regionResults = scanRegion(pid, region, target);
         if (!regionResults.empty()) {
             results.insert(results.end(), regionResults.begin(),

@@ -4,6 +4,32 @@
 #include <sstream>
 
 namespace memseek {
+
+namespace {
+
+[[nodiscard]]
+auto regionMatchesLevel(const MemoryRegion& region,
+                        const MemoryScanLevel& level) noexcept -> bool {
+    const auto protection = static_cast<std::uint8_t>(region.protection);
+    const auto regionType = static_cast<std::uint8_t>(region.regionType);
+
+    // A region can only be scanned if it is readable, regardless of the
+    // requested protection mask.
+    if ((protection & static_cast<std::uint8_t>(MemoryProtection::READ)) == 0) {
+        return false;
+    }
+
+    // Every requested protection bit must be present.
+    if ((protection & level.memoryProtection) != level.memoryProtection) {
+        return false;
+    }
+
+    // The region type must intersect the requested type mask.
+    return (regionType & level.memoryRegionType) != 0;
+}
+
+}  // namespace
+
 std::expected<MemoryRegionList, std::string> readProcess(
     pid_t pid, MemoryScanLevel level) {
     MemoryRegionList regionList{};
@@ -113,6 +139,10 @@ std::expected<MemoryRegionList, std::string> readProcess(
             region.regionType = MemoryRegionType::MODULE;
         } else {
             region.regionType = MemoryRegionType::UNKNOWN;
+        }
+
+        if (!regionMatchesLevel(region, level)) {
+            continue;
         }
 
         regionList.addRegion(std::move(region));

@@ -29,8 +29,18 @@ while [[ $# -gt 0 ]]; do
 done
 
 # ---------------------------------------------------------------- 构建
+# 扫描实现位于 memseek_lib,其优化级别由 CMAKE_BUILD_TYPE 决定。若现有构建
+# 不是 Release,基准测的是未优化的库,数字会严重偏低,因此这里强制 Release。
+NEED_CONFIGURE=0
 if [[ ! -x "${BINARY}" ]]; then
     echo "==> 基准测试程序不存在,开始配置并构建 (Release)..."
+    NEED_CONFIGURE=1
+elif ! grep -q "CMAKE_BUILD_TYPE:STRING=Release" "${BUILD_DIR}/CMakeCache.txt" 2>/dev/null; then
+    echo "==> 现有构建不是 Release,重新配置并构建 (Release)..."
+    NEED_CONFIGURE=1
+fi
+
+if [[ "${NEED_CONFIGURE}" -eq 1 ]]; then
     cmake -S "${ROOT}" -B "${BUILD_DIR}" \
           -DMEMSEEK_BUILD_BENCHMARKS=ON \
           -DCMAKE_BUILD_TYPE=Release > /dev/null
