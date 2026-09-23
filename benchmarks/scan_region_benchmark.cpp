@@ -1,6 +1,5 @@
-#include <unistd.h>
-
 #include <benchmark/benchmark.h>
+#include <unistd.h>
 
 #include <cstddef>
 #include <cstdint>
@@ -31,8 +30,8 @@ class RegionFixture {
         : m_target(static_cast<std::uint32_t>(K_TARGET_VALUE)) {
         m_storage = benchmark_support::makeRandomBuffer(size, 42);
 
-        const std::size_t plantedOffsets[] = {
-            8 * 1024 * 1024, size / 2, size - (16 * 1024 * 1024)};
+        const std::size_t plantedOffsets[] = {8 * 1024 * 1024, size / 2,
+                                              size - (16 * 1024 * 1024)};
         for (const auto offset : plantedOffsets) {
             std::memcpy(m_storage.data() + offset, &K_TARGET_VALUE,
                         sizeof(K_TARGET_VALUE));
@@ -77,11 +76,13 @@ void runScanRegion(benchmark::State& state, std::size_t size) {
         return;
     }
 
+    MemoryScanner scanner;
+
     for (auto iteration : state) {
         static_cast<void>(iteration);
         try {
-            const auto results = MemoryScanner::scanRegion(
-                getpid(), fixture.region(), fixture.target());
+            const auto results = scanner.scanRegion(getpid(), fixture.region(),
+                                                    fixture.target());
             if (results.size() < fixture.plantedMatches()) {
                 state.SkipWithError("region scan missed a planted match");
                 break;

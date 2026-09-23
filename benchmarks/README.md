@@ -21,7 +21,7 @@ scan_region_benchmark.cpp     scanRegion 基准（256 MiB / 500 MiB / 1 GiB）
     ↓
 找到该 buffer 所属的进程 region
     ↓
-反复调用 MemoryScanner::scanRegion(getpid(), region, target)
+构造 MemoryScanner,反复调用 scanner.scanRegion(getpid(), region, target)
     ↓
 报告耗时和 bytes/s
 ```

@@ -43,8 +43,10 @@ int main(int argc, char** argv) {
     const memseek::Value target(value);
     const memseek::MemoryScanLevel level{};
 
+    memseek::MemoryScanner scanner;
+
     const auto start = std::chrono::steady_clock::now();
-    const auto results = memseek::MemoryScanner::scanProcess(pid, level, target);
+    const auto results = scanner.scanProcess(pid, level, target);
     const auto end = std::chrono::steady_clock::now();
 
     const auto elapsedMs =
