@@ -1,6 +1,5 @@
-#include <unistd.h>
-
 #include <gtest/gtest.h>
+#include <unistd.h>
 
 #include <cstdint>
 
@@ -17,8 +16,8 @@ std::uint8_t protectionBits(const MemoryRegion& region) {
 
 TEST(RegionTest, readProcessFiltersByProtection) {
     MemoryScanLevel level;
-    level.memoryProtection = static_cast<std::uint8_t>(
-        MemoryProtection::READ | MemoryProtection::WRITE);
+    level.memoryProtection = static_cast<std::uint8_t>(MemoryProtection::READ |
+                                                       MemoryProtection::WRITE);
 
     auto regions = readProcess(getpid(), level);
     ASSERT_TRUE(regions.has_value());
@@ -41,6 +40,23 @@ TEST(RegionTest, readProcessFiltersByRegionType) {
     for (const auto& region : regions->getRegions()) {
         EXPECT_EQ(region.regionType, MemoryRegionType::HEAP);
     }
+}
+
+TEST(RegionTest, RejectsInvalidProcess) {
+    const auto regions = readProcess(-1);
+
+    EXPECT_FALSE(regions.has_value());
+}
+
+TEST(RegionTest, UnknownRegionTypeFilterProducesNoMatches) {
+    MemoryScanLevel level;
+    level.memoryRegionType =
+        static_cast<std::uint8_t>(MemoryRegionType::UNKNOWN);
+
+    const auto regions = readProcess(getpid(), level);
+
+    ASSERT_TRUE(regions.has_value());
+    EXPECT_TRUE(regions->empty());
 }
 
 }  // namespace memseek

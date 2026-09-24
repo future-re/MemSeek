@@ -98,15 +98,15 @@ void runScanRegion(benchmark::State& state, std::size_t size) {
 }
 
 void scanRegion256MB(benchmark::State& state) {
-    runScanRegion(state, 256ull * 1024 * 1024);
+    runScanRegion(state, 256ULL * 1024 * 1024);
 }
 
 void scanRegion500MB(benchmark::State& state) {
-    runScanRegion(state, 500ull * 1024 * 1024);
+    runScanRegion(state, 500ULL * 1024 * 1024);
 }
 
 void scanRegion1GB(benchmark::State& state) {
-    runScanRegion(state, 1024ull * 1024 * 1024);
+    runScanRegion(state, 1024ULL * 1024 * 1024);
 }
 
 }  // namespace

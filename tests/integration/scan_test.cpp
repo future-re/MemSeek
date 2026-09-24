@@ -1,11 +1,13 @@
 #include <gtest/gtest.h>
+#include <sys/mman.h>
 #include <unistd.h>
 
+#include <algorithm>
 #include <array>
 #include <cstddef>
 #include <cstdint>
 #include <cstring>
-#include <memory>
+#include <stdexcept>
 #include <string>
 #include <utility>
 #include <vector>
@@ -21,20 +23,45 @@ namespace memseek {
 
 namespace {
 
-MemoryRegion findRegion(std::uintptr_t address) {
-    auto regions = readProcess(getpid());
-
-    if (!regions) {
-        return {};
-    }
-
-    for (const auto& region : regions->getRegions()) {
-        if (address >= region.start && address - region.start < region.size) {
-            return region;
+class AnonymousMapping {
+   public:
+    explicit AnonymousMapping(std::size_t size) : m_size(size) {
+        m_address = ::mmap(nullptr, size, PROT_READ | PROT_WRITE,
+                           MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
+        if (m_address == MAP_FAILED) {
+            throw std::runtime_error("mmap failed");
         }
     }
 
-    return {};
+    ~AnonymousMapping() {
+        if (m_address != MAP_FAILED) {
+            ::munmap(m_address, m_size);
+        }
+    }
+
+    AnonymousMapping(const AnonymousMapping&) = delete;
+    AnonymousMapping& operator=(const AnonymousMapping&) = delete;
+
+    [[nodiscard]] auto address() const noexcept -> std::uintptr_t {
+        return reinterpret_cast<std::uintptr_t>(m_address);
+    }
+
+    [[nodiscard]] auto bytes() noexcept -> std::byte* {
+        return static_cast<std::byte*>(m_address);
+    }
+
+   private:
+    void* m_address{MAP_FAILED};
+    std::size_t m_size{};
+};
+
+auto makeAnonymousRegion(const AnonymousMapping& mapping, std::size_t size,
+                         std::uint64_t id = 1) -> MemoryRegion {
+    return {.id = id,
+            .start = mapping.address(),
+            .size = size,
+            .protection = MemoryProtection::READ | MemoryProtection::WRITE,
+            .regionType = MemoryRegionType::ANONYMOUS};
 }
 
 }  // namespace
@@ -105,20 +132,30 @@ TEST(ScanBufferTest, stringScan) {
     EXPECT_EQ(results[0].data(), target);
 }
 
+TEST(ScanBufferTest, ReturnsNoMatchesForEmptyOrOversizedTargets) {
+    const std::vector<std::byte> data{std::byte{0x01}, std::byte{0x02}};
+    const MemoryRead memory(0x2000, data.size(), data);
+
+    EXPECT_TRUE(
+        MemoryScanner::scanBuffer(memory, Value(std::vector<std::byte>{}))
+            .empty());
+    EXPECT_TRUE(
+        MemoryScanner::scanBuffer(
+            memory, Value(std::vector<std::byte>{
+                        std::byte{0x01}, std::byte{0x02}, std::byte{0x03}}))
+            .empty());
+}
+
 TEST(ScanRegionTest, findsValueSpanningChunkBoundary) {
     constexpr std::uint32_t value = 0x11223344;
 
-    std::vector<std::byte> buffer(2 * DEFAULT_CHUNK_SIZE, std::byte{0});
+    AnonymousMapping mapping(2 * DEFAULT_CHUNK_SIZE);
+    const auto region = makeAnonymousRegion(mapping, 2 * DEFAULT_CHUNK_SIZE);
 
     const std::size_t offset = DEFAULT_CHUNK_SIZE - sizeof(value) / 2;
 
-    std::memcpy(buffer.data() + offset, &value, sizeof(value));
-
-    const auto address = reinterpret_cast<std::uintptr_t>(buffer.data());
-
-    const auto region = findRegion(address);
-
-    ASSERT_NE(region.size, 0);
+    std::memcpy(mapping.bytes() + offset, &value, sizeof(value));
+    const auto address = mapping.address();
 
     MemoryScanner scanner;
 
@@ -139,14 +176,44 @@ TEST(ScanRegionTest, findsValueSpanningChunkBoundary) {
     EXPECT_EQ(hits, 1);
 }
 
+TEST(ScanRegionTest, FindsMatchAtTheEndOfTheRegion) {
+    constexpr std::uint32_t value = 0x55667788;
+    AnonymousMapping mapping(4096);
+    const auto region = makeAnonymousRegion(mapping, 4096);
+
+    const auto offset = region.size - sizeof(value);
+    std::memcpy(mapping.bytes() + offset, &value, sizeof(value));
+
+    MemoryScanner scanner(1);
+    const auto results = scanner.scanRegion(getpid(), region, Value(value));
+
+    ASSERT_EQ(results.size(), 1);
+    EXPECT_EQ(results.front().address(), mapping.address() + offset);
+}
+
+TEST(ScanRegionTest, ReturnsNoMatchForAbsentOrOversizedTarget) {
+    AnonymousMapping mapping(4096);
+    const auto region = makeAnonymousRegion(mapping, 4096);
+    std::memset(mapping.bytes(), 0, region.size);
+
+    MemoryScanner scanner(1);
+
+    EXPECT_TRUE(scanner
+                    .scanRegion(getpid(), region,
+                                Value(std::uint64_t{0x1122334455667788ULL}))
+                    .empty());
+    EXPECT_TRUE(
+        scanner
+            .scanRegion(getpid(), region, Value(std::vector<std::byte>(8192)))
+            .empty());
+}
+
 TEST(ScanProcessTest, findsPlantedValue) {
-    auto buffer = std::make_unique<std::array<std::byte, 32>>();
-
     constexpr std::uint64_t sentinel = 0x1122334455667788ULL;
+    AnonymousMapping mapping(4096);
 
-    std::memcpy(buffer->data(), &sentinel, sizeof(sentinel));
-
-    const auto address = reinterpret_cast<std::uintptr_t>(buffer->data());
+    std::memcpy(mapping.bytes(), &sentinel, sizeof(sentinel));
+    const auto address = mapping.address();
 
     MemoryScanLevel level;
 
@@ -166,6 +233,30 @@ TEST(ScanProcessTest, findsPlantedValue) {
                                    });
 
     EXPECT_TRUE(found);
+}
+
+TEST(ScanProcessTest, ReturnsMatchesInDeterministicOrderWithDifferentWorkers) {
+    constexpr std::uint32_t value = 0xaabbccdd;
+    AnonymousMapping mapping(2 * DEFAULT_CHUNK_SIZE);
+    const auto region = makeAnonymousRegion(mapping, 2 * DEFAULT_CHUNK_SIZE);
+
+    const auto firstOffset = DEFAULT_CHUNK_SIZE - 1;
+    const auto secondOffset = DEFAULT_CHUNK_SIZE + 32;
+    std::memcpy(mapping.bytes() + firstOffset, &value, sizeof(value));
+    std::memcpy(mapping.bytes() + secondOffset, &value, sizeof(value));
+
+    MemoryScanner singleWorker(1);
+    MemoryScanner manyWorkers(4);
+    const auto target = Value(value);
+
+    const auto one = singleWorker.scanRegion(getpid(), region, target);
+    const auto many = manyWorkers.scanRegion(getpid(), region, target);
+
+    ASSERT_EQ(one.size(), 2);
+    ASSERT_EQ(many.size(), one.size());
+    ASSERT_EQ(one[0].address(), mapping.address() + firstOffset);
+    ASSERT_EQ(one[1].address(), mapping.address() + secondOffset);
+    EXPECT_EQ(many, one);
 }
 
 }  // namespace memseek

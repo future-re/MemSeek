@@ -4,6 +4,8 @@
 #include <cstddef>
 #include <cstdint>
 #include <iterator>
+#include <ranges>
+#include <stdexcept>
 
 #include "memory_region.hpp"
 
