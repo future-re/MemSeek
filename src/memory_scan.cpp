@@ -4,13 +4,94 @@
 #include <boost/asio/post.hpp>
 #include <boost/asio/thread_pool.hpp>
 #include <cstddef>
+#include <cstdint>
 #include <cstring>
 #include <iterator>
+#include <stdexcept>
+#include <utility>
 #include <vector>
 
 #include "memseek/memory_reader.hpp"
 
 namespace memseek {
+
+namespace {
+
+template <typename Matcher>
+std::vector<ScanResult> scanWindows(const MemoryRead& memory, std::size_t width,
+                                    Matcher matcher) {
+    const auto memoryData = memory.data();
+    if (width == 0 || memoryData.size() < width) {
+        return {};
+    }
+
+    std::vector<ScanResult> results;
+    const auto lastOffset = memoryData.size() - width;
+
+    for (std::size_t offset = 0; offset <= lastOffset; ++offset) {
+        const auto current = memoryData.subspan(offset, width);
+        if (matcher(current)) {
+            results.emplace_back(memory.address() + offset, current);
+        }
+    }
+
+    return results;
+}
+
+template <ValueNumericType T>
+std::vector<ScanResult> scanNumeric(const MemoryRead& memory,
+                                    const Value& lowerBound,
+                                    const Value* upperBound,
+                                    const ScanType scanType) {
+    if (lowerBound.type() != getValueType<T>() ||
+        lowerBound.size() != sizeof(T)) {
+        return {};
+    }
+
+    const T lower = lowerBound.as<T>();
+
+    if (scanType == ScanType::RANGE) {
+        if (upperBound == nullptr || upperBound->type() != getValueType<T>() ||
+            upperBound->size() != sizeof(T)) {
+            return {};
+        }
+
+        const T upper = upperBound->as<T>();
+        if (!(lower <= upper)) {
+            return {};
+        }
+
+        return scanWindows(
+            memory, sizeof(T),
+            [lower, upper](const std::span<const std::byte> data) {
+                T value{};
+                std::memcpy(&value, data.data(), sizeof(value));
+                return lower <= value && value <= upper;
+            });
+    }
+
+    if (scanType == ScanType::GREATER) {
+        return scanWindows(memory, sizeof(T),
+                           [lower](const std::span<const std::byte> data) {
+                               T value{};
+                               std::memcpy(&value, data.data(), sizeof(value));
+                               return value > lower;
+                           });
+    }
+
+    if (scanType == ScanType::LESS) {
+        return scanWindows(memory, sizeof(T),
+                           [lower](const std::span<const std::byte> data) {
+                               T value{};
+                               std::memcpy(&value, data.data(), sizeof(value));
+                               return value < lower;
+                           });
+    }
+
+    return {};
+}
+
+}  // namespace
 
 MemoryScanner::MemoryScanner(std::size_t workerCount)
     : m_pool(std::max<std::size_t>(1, workerCount == 0 ? 1 : workerCount)) {}
@@ -20,7 +101,29 @@ MemoryScanner::~MemoryScanner() { m_pool.join(); }
 [[nodiscard]]
 std::vector<ScanResult> MemoryScanner::scanProcess(pid_t pid,
                                                    MemoryScanLevel level,
-                                                   const Value& target) {
+                                                   const Value& target,
+                                                   ScanType scanType) {
+    if (scanType == ScanType::RANGE) {
+        throw std::invalid_argument(
+            "RANGE scans require both lower and upper bounds");
+    }
+
+    return scanProcessImpl(pid, level, target, nullptr, scanType);
+}
+
+std::vector<ScanResult> MemoryScanner::scanProcess(pid_t pid,
+                                                   MemoryScanLevel level,
+                                                   const Value& lowerBound,
+                                                   const Value& upperBound) {
+    return scanProcessImpl(pid, level, lowerBound, &upperBound,
+                           ScanType::RANGE);
+}
+
+std::vector<ScanResult> MemoryScanner::scanProcessImpl(pid_t pid,
+                                                       MemoryScanLevel level,
+                                                       const Value& lowerBound,
+                                                       const Value* upperBound,
+                                                       ScanType scanType) {
     auto regionList = readProcess(pid, level);
     if (!regionList) {
         return {};
@@ -28,7 +131,8 @@ std::vector<ScanResult> MemoryScanner::scanProcess(pid_t pid,
 
     std::vector<ScanResult> results;
     for (const auto& region : regionList->getRegions()) {
-        auto regionResults = scanRegion(pid, region, target);
+        auto regionResults =
+            scanRegionImpl(pid, region, lowerBound, upperBound, scanType);
         if (!regionResults.empty()) {
             results.insert(results.end(), regionResults.begin(),
                            regionResults.end());
@@ -38,44 +142,117 @@ std::vector<ScanResult> MemoryScanner::scanProcess(pid_t pid,
 }
 
 std::vector<ScanResult> MemoryScanner::scanBuffer(const MemoryRead& memory,
-                                                  const Value& target) {
-    std::vector<ScanResult> results;
-
-    const auto memoryData = memory.data();
-    const auto targetData = target.data();
-
-    const std::size_t memorySize = memoryData.size();
-    const std::size_t targetSize = targetData.size();
-
-    if (targetSize == 0 || memorySize < targetSize) {
-        return results;
+                                                  const Value& target,
+                                                  ScanType scanType) {
+    if (scanType == ScanType::RANGE) {
+        throw std::invalid_argument(
+            "RANGE scans require both lower and upper bounds");
     }
 
-    const auto* memoryPtr = memoryData.data();
-    const auto* targetPtr = targetData.data();
+    return scanBufferImpl(memory, target, nullptr, scanType);
+}
 
-    const std::size_t lastOffset = memorySize - targetSize;
+std::vector<ScanResult> MemoryScanner::scanBuffer(const MemoryRead& memory,
+                                                  const Value& lowerBound,
+                                                  const Value& upperBound) {
+    return scanBufferImpl(memory, lowerBound, &upperBound, ScanType::RANGE);
+}
 
-    for (std::size_t offset = 0; offset <= lastOffset; ++offset) {
-        const auto* current = memoryPtr + offset;
-
-        if (*current != *targetPtr) {
-            continue;
-        }
-
-        if (std::equal(targetPtr + 1, targetPtr + targetSize, current + 1)) {
-            results.emplace_back(
-                memory.address() + offset,
-                std::span<const std::byte>(current, targetSize));
-        }
+std::vector<ScanResult> MemoryScanner::scanBufferImpl(const MemoryRead& memory,
+                                                      const Value& lowerBound,
+                                                      const Value* upperBound,
+                                                      ScanType scanType) {
+    if (scanType == ScanType::UNKNOWN ||
+        (scanType == ScanType::RANGE && upperBound == nullptr) ||
+        (scanType != ScanType::RANGE && upperBound != nullptr)) {
+        return {};
     }
 
-    return results;
+    if (scanType != ScanType::EXACT && !lowerBound.isNumeric()) {
+        return {};
+    }
+
+    if (scanType == ScanType::RANGE &&
+        (!upperBound->isNumeric() || upperBound->type() != lowerBound.type())) {
+        return {};
+    }
+
+    switch (scanType) {
+        case ScanType::EXACT: {
+            const auto targetData = lowerBound.data();
+            return scanWindows(
+                memory, targetData.size(), [targetData](const auto current) {
+                    return std::equal(targetData.begin(), targetData.end(),
+                                      current.begin(), current.end());
+                });
+        }
+        case ScanType::RANGE:
+        case ScanType::GREATER:
+        case ScanType::LESS:
+            switch (lowerBound.type()) {
+                case ValueType::U_INT8:
+                    return scanNumeric<std::uint8_t>(memory, lowerBound,
+                                                     upperBound, scanType);
+                case ValueType::U_INT16:
+                    return scanNumeric<std::uint16_t>(memory, lowerBound,
+                                                      upperBound, scanType);
+                case ValueType::U_INT32:
+                    return scanNumeric<std::uint32_t>(memory, lowerBound,
+                                                      upperBound, scanType);
+                case ValueType::U_INT64:
+                    return scanNumeric<std::uint64_t>(memory, lowerBound,
+                                                      upperBound, scanType);
+                case ValueType::INT8:
+                    return scanNumeric<std::int8_t>(memory, lowerBound,
+                                                    upperBound, scanType);
+                case ValueType::INT16:
+                    return scanNumeric<std::int16_t>(memory, lowerBound,
+                                                     upperBound, scanType);
+                case ValueType::INT32:
+                    return scanNumeric<std::int32_t>(memory, lowerBound,
+                                                     upperBound, scanType);
+                case ValueType::INT64:
+                    return scanNumeric<std::int64_t>(memory, lowerBound,
+                                                     upperBound, scanType);
+                case ValueType::FLOAT32:
+                    return scanNumeric<float>(memory, lowerBound, upperBound,
+                                              scanType);
+                case ValueType::FLOAT64:
+                    return scanNumeric<double>(memory, lowerBound, upperBound,
+                                               scanType);
+                default:
+                    return {};
+            }
+        case ScanType::UNKNOWN:
+            return {};
+    }
+
+    return {};
 }
 
 std::vector<ScanResult> MemoryScanner::scanRegion(pid_t pid,
                                                   const MemoryRegion& region,
-                                                  const Value& target) {
+                                                  const Value& target,
+                                                  ScanType scanType) {
+    if (scanType == ScanType::RANGE) {
+        throw std::invalid_argument(
+            "RANGE scans require both lower and upper bounds");
+    }
+
+    return scanRegionImpl(pid, region, target, nullptr, scanType);
+}
+
+std::vector<ScanResult> MemoryScanner::scanRegion(pid_t pid,
+                                                  const MemoryRegion& region,
+                                                  const Value& lowerBound,
+                                                  const Value& upperBound) {
+    return scanRegionImpl(pid, region, lowerBound, &upperBound,
+                          ScanType::RANGE);
+}
+
+std::vector<ScanResult> MemoryScanner::scanRegionImpl(
+    pid_t pid, const MemoryRegion& region, const Value& lowerBound,
+    const Value* upperBound, ScanType scanType) {
     if (region.size == 0) {
         return {};
     }
@@ -92,13 +269,15 @@ std::vector<ScanResult> MemoryScanner::scanRegion(pid_t pid,
         const auto range = MemoryChunkRange(region);
         const auto chunk = *range.begin();
 
-        auto memory = reader.read(chunk, region, target);
+        std::size_t overlap = lowerBound.size() > 0 ? lowerBound.size() - 1 : 0;
+
+        auto memory = reader.read(chunk, region, overlap);
 
         if (!memory) {
             return {};
         }
 
-        return scanBuffer(*memory, target);
+        return scanBufferImpl(*memory, lowerBound, upperBound, scanType);
     }
 
     //
@@ -109,15 +288,18 @@ std::vector<ScanResult> MemoryScanner::scanRegion(pid_t pid,
 
     futures.reserve(chunkCount);
 
+    std::size_t overlap = lowerBound.size() > 0 ? lowerBound.size() - 1 : 0;
+
     for (const auto chunk : MemoryChunkRange(region)) {
         futures.emplace_back(submit([&, chunk]() -> std::vector<ScanResult> {
-            auto memory = reader.read(chunk, region, target);
+            auto memory = reader.read(chunk, region, overlap);
 
             if (!memory) {
                 return {};
             }
 
-            auto results = scanBuffer(*memory, target);
+            auto results =
+                scanBufferImpl(*memory, lowerBound, upperBound, scanType);
 
             //
             // Reader may read overlap bytes so that

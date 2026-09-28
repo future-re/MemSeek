@@ -54,6 +54,14 @@ TEST(ValueTest, SupportsStringsAndByteArrays) {
     EXPECT_EQ(byteValue.as<std::vector<std::byte>>(), bytes);
 }
 
+TEST(ValueTest, IdentifiesNumericValueTypes) {
+    EXPECT_TRUE(Value(std::int32_t{-1}).isNumeric());
+    EXPECT_TRUE(Value(1.0F).isNumeric());
+    EXPECT_FALSE(Value(std::string{"hello"}).isNumeric());
+    EXPECT_FALSE(Value(std::vector<std::byte>{std::byte{0x01}}).isNumeric());
+    EXPECT_FALSE(isNumericValueType(ValueType::UNKNOWN));
+}
+
 TEST(ValueTest, HandlesEmptyVariableLengthValues) {
     const Value emptyString(std::string{});
     EXPECT_TRUE(emptyString.empty());

@@ -43,6 +43,14 @@ class ScanResult {
     std::vector<std::byte> m_data;
 };
 
+enum class ScanType : std::uint8_t {
+    UNKNOWN,
+    EXACT,    // Byte-wise match; supports all Value types.
+    RANGE,    // Numeric Value types only; inclusive lower/upper bounds.
+    GREATER,  // Numeric Value types only.
+    LESS,     // Numeric Value types only.
+};
+
 class MemoryScanner {
    public:
     explicit MemoryScanner(
@@ -58,17 +66,54 @@ class MemoryScanner {
 
     [[nodiscard]]
     std::vector<ScanResult> scanProcess(pid_t pid, MemoryScanLevel level,
-                                        const Value& target);
+                                        const Value& target,
+                                        ScanType scanType = ScanType::EXACT);
+
+    [[nodiscard]]
+    std::vector<ScanResult> scanProcess(pid_t pid, MemoryScanLevel level,
+                                        const Value& lowerBound,
+                                        const Value& upperBound);
 
     [[nodiscard]]
     std::vector<ScanResult> scanRegion(pid_t pid, const MemoryRegion& region,
-                                       const Value& target);
+                                       const Value& target,
+                                       ScanType scanType = ScanType::EXACT);
 
     [[nodiscard]]
+    std::vector<ScanResult> scanRegion(pid_t pid, const MemoryRegion& region,
+                                       const Value& lowerBound,
+                                       const Value& upperBound);
+
+    // RANGE, GREATER, and LESS require Value::isNumeric() to be true.
+    // EXACT remains available for numeric values, strings, and byte arrays.
+    [[nodiscard]]
     static std::vector<ScanResult> scanBuffer(const MemoryRead& memory,
-                                              const Value& target);
+                                              const Value& target,
+                                              ScanType = ScanType::EXACT);
+
+    // Range scans use an inclusive [lowerBound, upperBound] interval.
+    [[nodiscard]]
+    static std::vector<ScanResult> scanBuffer(const MemoryRead& memory,
+                                              const Value& lowerBound,
+                                              const Value& upperBound);
 
    private:
+    std::vector<ScanResult> scanProcessImpl(pid_t pid, MemoryScanLevel level,
+                                            const Value& lowerBound,
+                                            const Value* upperBound,
+                                            ScanType scanType);
+
+    std::vector<ScanResult> scanRegionImpl(pid_t pid,
+                                           const MemoryRegion& region,
+                                           const Value& lowerBound,
+                                           const Value* upperBound,
+                                           ScanType scanType);
+
+    static std::vector<ScanResult> scanBufferImpl(const MemoryRead& memory,
+                                                  const Value& lowerBound,
+                                                  const Value* upperBound,
+                                                  ScanType scanType);
+
     template <typename Function>
     auto submit(Function&& function)
         -> std::future<std::invoke_result_t<std::decay_t<Function>&>>;

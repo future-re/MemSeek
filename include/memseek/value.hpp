@@ -1,10 +1,13 @@
 #pragma once
+#include <concepts>
 #include <cstddef>
 #include <cstdint>
 #include <cstring>
+#include <memory>
 #include <span>
 #include <stdexcept>
 #include <string>
+#include <string_view>
 #include <type_traits>
 #include <vector>
 
@@ -43,6 +46,29 @@ enum class ValueType : uint8_t {
     STR = 0x30,        // string
     BIN_ARRAY = 0x31,  // binary data
 };
+
+[[nodiscard]]
+constexpr bool isNumericValueType(ValueType type) noexcept {
+    switch (type) {
+        case ValueType::U_INT8:
+        case ValueType::U_INT16:
+        case ValueType::U_INT32:
+        case ValueType::U_INT64:
+        case ValueType::INT8:
+        case ValueType::INT16:
+        case ValueType::INT32:
+        case ValueType::INT64:
+        case ValueType::FLOAT32:
+        case ValueType::FLOAT64:
+            return true;
+        case ValueType::UNKNOWN:
+        case ValueType::STR:
+        case ValueType::BIN_ARRAY:
+            return false;
+    }
+
+    return false;
+}
 
 template <ValueSupportedType T>
 constexpr ValueType getValueType() {
@@ -128,6 +154,12 @@ class Value {
     [[nodiscard]]
     ValueType type() const noexcept {
         return m_type;
+    }
+
+    // Numeric ordering and range scans are only valid for numeric values.
+    [[nodiscard]]
+    bool isNumeric() const noexcept {
+        return isNumericValueType(m_type);
     }
 
     [[nodiscard]]

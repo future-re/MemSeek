@@ -4,6 +4,7 @@
 #include <sys/uio.h>
 #include <unistd.h>
 
+#include <cstddef>
 #include <cstdint>
 #include <cstring>
 #include <format>
@@ -51,14 +52,8 @@ namespace memseek {
 
 std::expected<MemoryRead, std::string> MemoryReader::read(
     const MemoryChunk& chunk, const MemoryRegion& region,
-    const Value& target) const {
+    std::size_t overlap) const {
 #if defined(__linux__)
-
-    if (target.size() == 0) {
-        return std::unexpected{"target size must be greater than zero"};
-    }
-
-    const auto overlap = target.size() - 1;
 
     if (region.size >
         std::numeric_limits<std::uintptr_t>::max() - region.start) {

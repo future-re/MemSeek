@@ -9,23 +9,27 @@
 #include <cstdint>
 #include <cstring>
 #include <stdexcept>
-#include <vector>
+
+#include "memseek/value.hpp"
 
 namespace memseek {
 namespace {
 
 class AnonymousMapping {
    public:
-    explicit AnonymousMapping(std::size_t size) : m_size(size) {
-        m_address = ::mmap(nullptr, size, PROT_READ | PROT_WRITE,
-                           MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
+    explicit AnonymousMapping(std::size_t size)
+        : m_address(::mmap(nullptr, size, PROT_READ | PROT_WRITE,
+                           MAP_PRIVATE | MAP_ANONYMOUS, -1, 0)),
+          m_size(size) {
         if (m_address == MAP_FAILED) {
             throw std::runtime_error("mmap failed");
         }
     }
 
     ~AnonymousMapping() {
-        if (m_address != MAP_FAILED) ::munmap(m_address, m_size);
+        if (m_address != MAP_FAILED) {
+            ::munmap(m_address, m_size);
+        }
     }
 
     AnonymousMapping(const AnonymousMapping&) = delete;
@@ -44,8 +48,8 @@ class AnonymousMapping {
     std::size_t m_size{};
 };
 
-auto makeRegion(const AnonymousMapping& mapping,
-                std::size_t size) -> MemoryRegion {
+auto makeRegion(const AnonymousMapping& mapping, std::size_t size)
+    -> MemoryRegion {
     return {.id = 1,
             .start = mapping.address(),
             .size = size,
@@ -66,9 +70,13 @@ TEST(MemoryReaderTest, ReadsChunkAndIncludesTargetOverlap) {
                             .parentRegionId = region.id};
     const MemoryReader reader(getpid());
 
-    const auto result = reader.read(chunk, region, Value(value));
+    const std::size_t overlap = sizeof(value) - 1;
 
-    if (!result) FAIL() << result.error();
+    const auto result = reader.read(chunk, region, overlap);
+
+    if (!result) {
+        FAIL() << result.error();
+    }
     EXPECT_EQ(result->address(), chunk.address);
     EXPECT_EQ(result->logicalSize(), chunk.size);
     EXPECT_EQ(result->size(), chunk.size + sizeof(value) - 1);
@@ -87,24 +95,13 @@ TEST(MemoryReaderTest, ClampsOverlapAtRegionEnd) {
                             .parentRegionId = region.id};
     const MemoryReader reader(getpid());
 
-    const auto result = reader.read(chunk, region, Value(value));
+    const std::size_t overlap = sizeof(value) - 1;
+    const auto result = reader.read(chunk, region, overlap);
 
-    if (!result) FAIL() << result.error();
+    if (!result) {
+        FAIL() << result.error();
+    }
     EXPECT_EQ(result->size(), 16);
-}
-
-TEST(MemoryReaderTest, RejectsEmptyTarget) {
-    AnonymousMapping mapping(4096);
-    const auto region = makeRegion(mapping, 4096);
-    const MemoryChunk chunk{
-        .address = mapping.address(), .size = 16, .parentRegionId = region.id};
-    const MemoryReader reader(getpid());
-
-    const auto result =
-        reader.read(chunk, region, Value(std::vector<std::byte>{}));
-
-    ASSERT_FALSE(result.has_value());
-    EXPECT_EQ(result.error(), "target size must be greater than zero");
 }
 
 TEST(MemoryReaderTest, ReportsInvalidProcess) {
@@ -114,7 +111,8 @@ TEST(MemoryReaderTest, ReportsInvalidProcess) {
         .address = mapping.address(), .size = 16, .parentRegionId = region.id};
     const MemoryReader reader(-1);
 
-    const auto result = reader.read(chunk, region, Value(std::uint32_t{1}));
+    const std::size_t overlap = sizeof(std::uint32_t) - 1;
+    const auto result = reader.read(chunk, region, overlap);
 
     EXPECT_FALSE(result.has_value());
 }
@@ -126,8 +124,8 @@ TEST(MemoryReaderTest, RejectsChunkOutsideRegion) {
                             .size = 16,
                             .parentRegionId = region.id};
     const MemoryReader reader(getpid());
-
-    const auto result = reader.read(chunk, region, Value(std::uint32_t{1}));
+    const std::size_t overlap = sizeof(std::uint32_t) - 1;
+    const auto result = reader.read(chunk, region, overlap);
 
     ASSERT_FALSE(result.has_value());
     EXPECT_EQ(result.error(), "memory chunk is outside the region");
