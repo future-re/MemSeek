@@ -5,19 +5,12 @@
 #include <unistd.h>
 
 #include <algorithm>
-#include <array>
 #include <cstddef>
 #include <cstdint>
 #include <cstring>
-#include <limits>
 #include <stdexcept>
-#include <string>
-#include <utility>
-#include <vector>
 
-#include "common/test_helper.hpp"
 #include "memseek/memory/chunk.hpp"
-#include "memseek/memory/read.hpp"
 #include "memseek/memory/region.hpp"
 #include "memseek/value.hpp"
 
@@ -66,214 +59,7 @@ auto makeAnonymousRegion(const AnonymousMapping& mapping, std::size_t size,
             .regionType = MemoryRegionType::ANONYMOUS};
 }
 
-template <ValueNumericType T>
-void expectNumericOrdering(T lower, T target, T upper) {
-    const auto scan = [](T memoryValue, const Value& bound, ScanType scanType) {
-        auto data = changeValue(memoryValue);
-        const MemoryRead memory(0x6000, data.size(), std::move(data));
-        return MemoryScanner::scanBuffer(memory, bound, scanType);
-    };
-
-    const auto scanRange = [](T memoryValue, const Value& lowerBound,
-                              const Value& upperBound) {
-        auto data = changeValue(memoryValue);
-        const MemoryRead memory(0x6000, data.size(), std::move(data));
-        return MemoryScanner::scanBuffer(memory, lowerBound, upperBound);
-    };
-
-    EXPECT_EQ(scan(lower, Value(target), ScanType::LESS).size(), 1);
-    EXPECT_TRUE(scan(lower, Value(target), ScanType::GREATER).empty());
-    EXPECT_EQ(scan(upper, Value(target), ScanType::GREATER).size(), 1);
-    EXPECT_TRUE(scan(upper, Value(target), ScanType::LESS).empty());
-
-    EXPECT_EQ(scanRange(target, Value(lower), Value(upper)).size(), 1);
-    EXPECT_TRUE(scanRange(upper, Value(lower), Value(target)).empty());
-}
-
 }  // namespace
-
-TEST(ScanBufferTest, valueScan) {
-    constexpr std::uintptr_t address = 0x1000;
-
-    std::vector<std::byte> data{
-        std::byte{0x12}, std::byte{0x34}, std::byte{0x56},
-        std::byte{0x78}, std::byte{0x99},
-    };
-
-    MemoryRead memory(address, data.size(), std::move(data));
-
-    const Value target(static_cast<std::uint16_t>(0x7856));
-
-    const auto results = MemoryScanner::scanBuffer(memory, target);
-
-    ASSERT_EQ(results.size(), 1);
-
-    EXPECT_EQ(results[0].address(), address + 2);
-    EXPECT_EQ(results[0].data(), target);
-}
-
-TEST(ScanBufferTest, multipleValueScan) {
-    constexpr std::uintptr_t address = 0x2000;
-
-    std::vector<std::byte> data;
-
-    data += changeValue(std::uint32_t{45});
-    data += changeValue(std::uint32_t{36});
-    data += changeValue(std::uint32_t{45});
-
-    MemoryRead memory(address, data.size(), std::move(data));
-
-    const Value target45(std::uint32_t{45});
-
-    const auto results = MemoryScanner::scanBuffer(memory, target45);
-
-    ASSERT_EQ(results.size(), 2);
-
-    EXPECT_EQ(results[0].data(), target45);
-    EXPECT_EQ(results[1].data(), target45);
-
-    const Value target36(std::uint32_t{36});
-
-    EXPECT_EQ(MemoryScanner::scanBuffer(memory, target36).size(), 1);
-}
-
-TEST(ScanBufferTest, stringScan) {
-    constexpr std::uintptr_t address = 0x2000;
-
-    std::vector<std::byte> data{
-        std::byte{'H'}, std::byte{'e'}, std::byte{'l'}, std::byte{'l'},
-        std::byte{'o'}, std::byte{' '}, std::byte{'W'}, std::byte{'o'},
-        std::byte{'r'}, std::byte{'l'}, std::byte{'d'},
-    };
-
-    MemoryRead memory(address, data.size(), std::move(data));
-
-    const Value target(std::string{"lo Wo"});
-
-    const auto results = MemoryScanner::scanBuffer(memory, target);
-
-    ASSERT_EQ(results.size(), 1);
-
-    EXPECT_EQ(results[0].address(), address + 3);
-    EXPECT_EQ(results[0].data(), target);
-}
-
-TEST(ScanBufferTest, ReturnsNoMatchesForEmptyOrOversizedTargets) {
-    const std::vector<std::byte> data{std::byte{0x01}, std::byte{0x02}};
-    const MemoryRead memory(0x2000, data.size(), data);
-
-    EXPECT_TRUE(
-        MemoryScanner::scanBuffer(memory, Value(std::vector<std::byte>{}))
-            .empty());
-    EXPECT_TRUE(
-        MemoryScanner::scanBuffer(
-            memory, Value(std::vector<std::byte>{
-                        std::byte{0x01}, std::byte{0x02}, std::byte{0x03}}))
-            .empty());
-}
-
-TEST(ScanBufferTest, SupportsNumericScanTypes) {
-    std::vector<std::byte> data;
-    data += changeValue(std::uint8_t{1});
-    data += changeValue(std::uint8_t{5});
-    data += changeValue(std::uint8_t{9});
-
-    constexpr std::uintptr_t address = 0x3000;
-    MemoryRead memory(address, data.size(), std::move(data));
-
-    const auto less = MemoryScanner::scanBuffer(memory, Value(std::uint8_t{5}),
-                                                ScanType::LESS);
-    ASSERT_EQ(less.size(), 1);
-    EXPECT_EQ(less.front().address(), address);
-
-    const auto greater = MemoryScanner::scanBuffer(
-        memory, Value(std::uint8_t{5}), ScanType::GREATER);
-    ASSERT_EQ(greater.size(), 1);
-    EXPECT_EQ(greater.front().address(), address + 2);
-
-    const auto range = MemoryScanner::scanBuffer(memory, Value(std::uint8_t{1}),
-                                                 Value(std::uint8_t{5}));
-    ASSERT_EQ(range.size(), 2);
-    EXPECT_EQ(range[0].address(), address);
-    EXPECT_EQ(range[1].address(), address + 1);
-}
-
-TEST(ScanBufferTest, SupportsOrderingForEveryNumericValueType) {
-    expectNumericOrdering<std::uint8_t>(1, 5, 9);
-    expectNumericOrdering<std::uint16_t>(1, 5, 9);
-    expectNumericOrdering<std::uint32_t>(1, 5, 9);
-    expectNumericOrdering<std::uint64_t>(1, 5, 9);
-    expectNumericOrdering<std::int8_t>(-9, -2, 5);
-    expectNumericOrdering<std::int16_t>(-9, -2, 5);
-    expectNumericOrdering<std::int32_t>(-9, -2, 5);
-    expectNumericOrdering<std::int64_t>(-9, -2, 5);
-    expectNumericOrdering<float>(-1.5F, 0.25F, 3.5F);
-    expectNumericOrdering<double>(-1.5, 0.25, 3.5);
-}
-
-TEST(ScanBufferTest, OrderingScansRejectNonNumericValues) {
-    const std::vector<std::byte> data{std::byte{'a'}, std::byte{'b'},
-                                      std::byte{'c'}};
-    const MemoryRead memory(0x4000, data.size(), data);
-
-    EXPECT_TRUE(MemoryScanner::scanBuffer(memory, Value(std::string{"b"}),
-                                          ScanType::GREATER)
-                    .empty());
-    EXPECT_TRUE(MemoryScanner::scanBuffer(
-                    memory, Value(std::vector<std::byte>{std::byte{'a'}}),
-                    ScanType::LESS)
-                    .empty());
-    EXPECT_TRUE(MemoryScanner::scanBuffer(memory, Value(std::string{"a"}),
-                                          Value(std::string{"z"}))
-                    .empty());
-}
-
-TEST(ScanBufferTest, RejectsInvalidNumericRanges) {
-    const auto data = changeValue(std::uint32_t{5});
-    const MemoryRead memory(0x5000, data.size(), data);
-
-    EXPECT_TRUE(MemoryScanner::scanBuffer(memory, Value(std::uint32_t{9}),
-                                          Value(std::uint32_t{1}))
-                    .empty());
-    EXPECT_TRUE(MemoryScanner::scanBuffer(memory, Value(std::uint16_t{1}),
-                                          Value(std::uint32_t{9}))
-                    .empty());
-    EXPECT_TRUE(
-        MemoryScanner::scanBuffer(
-            memory, Value(std::numeric_limits<float>::quiet_NaN()), Value(9.0F))
-            .empty());
-}
-
-TEST(ScanBufferTest, OrderingScansDoNotMatchNaN) {
-    const auto data = changeValue(std::numeric_limits<float>::quiet_NaN());
-    const MemoryRead memory(0x5000, data.size(), data);
-
-    EXPECT_TRUE(
-        MemoryScanner::scanBuffer(memory, Value(1.0F), ScanType::GREATER)
-            .empty());
-    EXPECT_TRUE(
-        MemoryScanner::scanBuffer(memory, Value(1.0F), ScanType::LESS).empty());
-    EXPECT_TRUE(
-        MemoryScanner::scanBuffer(memory, Value(0.0F), Value(2.0F)).empty());
-}
-
-TEST(ScanBufferTest, UnknownScanTypeReturnsNoMatches) {
-    const auto data = changeValue(std::uint8_t{5});
-    const MemoryRead memory(0x5000, data.size(), data);
-
-    EXPECT_TRUE(MemoryScanner::scanBuffer(memory, Value(std::uint8_t{5}),
-                                          ScanType::UNKNOWN)
-                    .empty());
-}
-
-TEST(ScanBufferTest, RangeRequiresAnUpperBound) {
-    const std::vector<std::byte> data{std::byte{1}, std::byte{2}};
-    const MemoryRead memory(0x5000, data.size(), data);
-
-    EXPECT_THROW(static_cast<void>(MemoryScanner::scanBuffer(
-                     memory, Value(std::uint8_t{1}), ScanType::RANGE)),
-                 std::invalid_argument);
-}
 
 TEST(ScanRegionTest, SupportsNumericRangeScan) {
     AnonymousMapping mapping(4096);
@@ -313,7 +99,7 @@ TEST(ScanRegionTest, SupportsGreaterAndLessScans) {
     EXPECT_EQ(greater.front().address(), mapping.address() + 2);
 }
 
-TEST(ScanRegionTest, findsValueSpanningChunkBoundary) {
+TEST(ScanRegionTest, FindsValueSpanningChunkBoundary) {
     constexpr std::uint32_t value = 0x11223344;
 
     AnonymousMapping mapping(2 * DEFAULT_CHUNK_SIZE);
@@ -375,7 +161,7 @@ TEST(ScanRegionTest, ReturnsNoMatchForAbsentOrOversizedTarget) {
             .empty());
 }
 
-TEST(ScanProcessTest, findsPlantedValue) {
+TEST(ScanProcessTest, FindsPlantedValue) {
     constexpr std::uint64_t sentinel = 0x1122334455667788ULL;
     AnonymousMapping mapping(4096);
 

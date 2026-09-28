@@ -1,9 +1,9 @@
+#include "memseek/memory/region.hpp"
+
 #include <gtest/gtest.h>
 #include <unistd.h>
 
 #include <cstdint>
-
-#include "memseek/memory/region.hpp"
 
 namespace memseek {
 namespace {
@@ -14,7 +14,7 @@ std::uint8_t protectionBits(const MemoryRegion& region) {
 
 }  // namespace
 
-TEST(RegionTest, readProcessFiltersByProtection) {
+TEST(RegionTest, ReadProcessFiltersByProtection) {
     MemoryScanLevel level;
     level.memoryProtection = static_cast<std::uint8_t>(MemoryProtection::READ |
                                                        MemoryProtection::WRITE);
@@ -29,7 +29,7 @@ TEST(RegionTest, readProcessFiltersByProtection) {
     }
 }
 
-TEST(RegionTest, readProcessFiltersByRegionType) {
+TEST(RegionTest, ReadProcessFiltersByRegionType) {
     MemoryScanLevel level;
     level.memoryProtection = static_cast<std::uint8_t>(MemoryProtection::READ);
     level.memoryRegionType = static_cast<std::uint8_t>(MemoryRegionType::HEAP);
