@@ -7,7 +7,7 @@
 #include <ranges>
 #include <stdexcept>
 
-#include "memory_region.hpp"
+#include "memseek/memory/region.hpp"
 
 namespace memseek {
 

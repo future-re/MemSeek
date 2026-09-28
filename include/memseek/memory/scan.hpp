@@ -14,8 +14,8 @@
 #include <utility>
 #include <vector>
 
-#include "memseek/memory_read.hpp"
-#include "memseek/memory_region.hpp"
+#include "memseek/memory/read.hpp"
+#include "memseek/memory/region.hpp"
 #include "memseek/value.hpp"
 
 namespace memseek {

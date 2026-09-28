@@ -1,4 +1,4 @@
-#include "memseek/memory_reader.hpp"
+#include "memseek/memory/reader.hpp"
 
 #include <gtest/gtest.h>
 #include <sys/mman.h>

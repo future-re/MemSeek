@@ -7,8 +7,8 @@
 #include <exception>
 #include <vector>
 
-#include "memseek/memory_region.hpp"
-#include "memseek/memory_scan.hpp"
+#include "memseek/memory/region.hpp"
+#include "memseek/memory/scan.hpp"
 #include "memseek/value.hpp"
 #include "scan_benchmark_helpers.hpp"
 

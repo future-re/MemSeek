@@ -5,8 +5,8 @@
 #include <expected>
 #include <string>
 
-#include "memory_chunk.hpp"
-#include "memory_read.hpp"
+#include "memseek/memory/chunk.hpp"
+#include "memseek/memory/read.hpp"
 
 namespace memseek {
 

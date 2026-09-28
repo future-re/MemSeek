@@ -1,4 +1,4 @@
-#include "memseek/memory_scan.hpp"
+#include "memseek/memory/scan.hpp"
 
 #include <algorithm>
 #include <boost/asio/post.hpp>
@@ -11,7 +11,7 @@
 #include <utility>
 #include <vector>
 
-#include "memseek/memory_reader.hpp"
+#include "memseek/memory/reader.hpp"
 
 namespace memseek {
 

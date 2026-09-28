@@ -11,7 +11,7 @@
 #include <cstdlib>
 #include <cstring>
 
-#include "memseek/memory_scan.hpp"
+#include "memseek/memory/scan.hpp"
 #include "memseek/value.hpp"
 
 namespace {

@@ -3,7 +3,7 @@
 
 #include <cstdint>
 
-#include "memseek/memory_region.hpp"
+#include "memseek/memory/region.hpp"
 
 namespace memseek {
 namespace {

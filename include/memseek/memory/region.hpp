@@ -12,16 +12,16 @@ enum class MemoryProtection : std::uint8_t {
     EXECUTE = 1 << 2,
 };
 
-constexpr auto operator|(MemoryProtection lhs,
-                         MemoryProtection rhs) noexcept -> MemoryProtection {
+constexpr auto operator|(MemoryProtection lhs, MemoryProtection rhs) noexcept
+    -> MemoryProtection {
     using T = std::underlying_type_t<MemoryProtection>;
 
     return static_cast<MemoryProtection>(static_cast<T>(lhs) |
                                          static_cast<T>(rhs));
 }
 
-constexpr auto operator|=(MemoryProtection& lhs,
-                          MemoryProtection rhs) noexcept -> MemoryProtection& {
+constexpr auto operator|=(MemoryProtection& lhs, MemoryProtection rhs) noexcept
+    -> MemoryProtection& {
     lhs = lhs | rhs;
     return lhs;
 }
@@ -34,16 +34,16 @@ enum class MemoryRegionType : std::uint8_t {
     MODULE = 1 << 3,
 };
 
-constexpr auto operator|(MemoryRegionType lhs,
-                         MemoryRegionType rhs) noexcept -> MemoryRegionType {
+constexpr auto operator|(MemoryRegionType lhs, MemoryRegionType rhs) noexcept
+    -> MemoryRegionType {
     using T = std::underlying_type_t<MemoryRegionType>;
 
     return static_cast<MemoryRegionType>(static_cast<T>(lhs) |
                                          static_cast<T>(rhs));
 }
 
-constexpr auto operator|=(MemoryRegionType& lhs,
-                          MemoryRegionType rhs) noexcept -> MemoryRegionType& {
+constexpr auto operator|=(MemoryRegionType& lhs, MemoryRegionType rhs) noexcept
+    -> MemoryRegionType& {
     lhs = lhs | rhs;
     return lhs;
 }

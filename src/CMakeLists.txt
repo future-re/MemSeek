@@ -2,9 +2,9 @@
 # to the executable; putting it in the library makes GoogleTest binaries pick
 # up the application's main() instead of GTest's main().
 set(MEMSEEK_LIBRARY_SOURCES
-    memory_reader.cpp
-    memory_region.cpp
-    memory_scan.cpp
+    memory/reader.cpp
+    memory/region.cpp
+    memory/scan.cpp
     memseek.cpp
     scanmem.cpp
 )
@@ -26,5 +26,5 @@ target_include_directories(memseek_lib PUBLIC
 target_link_libraries(memseek_lib PUBLIC ICU::uc ICU::i18n PRIVATE Boost::headers)
 
 add_executable(memseek main.cpp
-    memory_reader.cpp)
+    memory/reader.cpp)
 target_link_libraries(memseek PRIVATE memseek_lib)

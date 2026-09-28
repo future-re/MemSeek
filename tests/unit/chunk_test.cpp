@@ -5,7 +5,7 @@
 #include <stdexcept>
 #include <vector>
 
-#include "memseek/memory_chunk.hpp"
+#include "memseek/memory/chunk.hpp"
 
 namespace memseek {
 namespace {

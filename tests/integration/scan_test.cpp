@@ -1,3 +1,5 @@
+#include "memseek/memory/scan.hpp"
+
 #include <gtest/gtest.h>
 #include <sys/mman.h>
 #include <unistd.h>
@@ -14,10 +16,9 @@
 #include <vector>
 
 #include "common/test_helper.hpp"
-#include "memseek/memory_chunk.hpp"
-#include "memseek/memory_read.hpp"
-#include "memseek/memory_region.hpp"
-#include "memseek/memory_scan.hpp"
+#include "memseek/memory/chunk.hpp"
+#include "memseek/memory/read.hpp"
+#include "memseek/memory/region.hpp"
 #include "memseek/value.hpp"
 
 namespace memseek {
