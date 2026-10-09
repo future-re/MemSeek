@@ -2,6 +2,7 @@
 # to the executable; putting it in the library makes GoogleTest binaries pick
 # up the application's main() instead of GTest's main().
 set(MEMSEEK_LIBRARY_SOURCES
+    memory/change.cpp
     memory/reader.cpp
     memory/region.cpp
     memory/scan.cpp

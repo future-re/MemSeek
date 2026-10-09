@@ -3,7 +3,6 @@
 #include <sys/types.h>
 
 #include <cstddef>
-#include <cstdint>
 #include <utility>
 #include <vector>
 
@@ -22,8 +21,7 @@ class MemorySnapshot {
     // vector by value lets callers move a large result set into the snapshot;
     // the stored representation is still independent from ScanResult.
     [[nodiscard]]
-    static auto fromScanResults(pid_t pid, Results results)
-        -> MemorySnapshot;
+    static auto fromScanResults(pid_t pid, Results results) -> MemorySnapshot;
 
     [[nodiscard]]
     pid_t pid() const noexcept {
