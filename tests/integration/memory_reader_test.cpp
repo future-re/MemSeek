@@ -1,5 +1,3 @@
-#include "memseek/memory/reader.hpp"
-
 #include <gtest/gtest.h>
 #include <sys/mman.h>
 #include <unistd.h>
@@ -10,6 +8,9 @@
 #include <cstring>
 #include <stdexcept>
 
+#include "memseek/memory/chunk.hpp"
+#include "memseek/memory/reader.hpp"
+#include "memseek/memory/region.hpp"
 #include "memseek/value.hpp"
 
 namespace memseek {
@@ -34,6 +35,8 @@ class AnonymousMapping {
 
     AnonymousMapping(const AnonymousMapping&) = delete;
     AnonymousMapping& operator=(const AnonymousMapping&) = delete;
+    AnonymousMapping(AnonymousMapping&&) = delete;
+    AnonymousMapping& operator=(AnonymousMapping&&) = delete;
 
     [[nodiscard]] auto address() const noexcept -> std::uintptr_t {
         return reinterpret_cast<std::uintptr_t>(m_address);
@@ -41,6 +44,13 @@ class AnonymousMapping {
 
     [[nodiscard]] auto bytes() noexcept -> std::byte* {
         return static_cast<std::byte*>(m_address);
+    }
+
+    void setByte(const std::size_t offset, const std::byte value) {
+        if (offset >= m_size) {
+            throw std::out_of_range("anonymous mapping offset out of range");
+        }
+        *(static_cast<std::byte*>(m_address) + offset) = value;
     }
 
    private:

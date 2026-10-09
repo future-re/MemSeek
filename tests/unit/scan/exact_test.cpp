@@ -22,7 +22,8 @@ void expectExactMatchFor(T&& value, std::string_view typeName) {
     const Value target(std::forward<T>(value));
     auto data =
         std::vector<std::byte>(target.data().begin(), target.data().end());
-    const MemoryRead memory(address, data.size(), std::move(data));
+    const auto dataSize = data.size();
+    const MemoryRead memory(address, dataSize, std::move(data));
 
     SCOPED_TRACE(typeName);
     const auto results = MemoryScanner::scanBuffer(memory, target);
@@ -55,15 +56,16 @@ TEST(ExactScanTest, FindsOverlappingMatchesAtFirstAndLastOffset) {
     constexpr std::uintptr_t address = 0x1100;
     const Value target(std::string{"aba"});
     auto data = test::encodeValue(std::string{"ababa"});
-    const MemoryRead memory(address, data.size(), std::move(data));
+    const auto dataSize = data.size();
+    const MemoryRead memory(address, dataSize, std::move(data));
 
     const auto results = MemoryScanner::scanBuffer(memory, target);
 
     ASSERT_EQ(results.size(), 2);
-    EXPECT_EQ(results[0].address(), address);
-    EXPECT_EQ(results[1].address(), address + 2);
-    EXPECT_TRUE(target == results[0].data());
-    EXPECT_TRUE(target == results[1].data());
+    EXPECT_EQ(results.at(0).address(), address);
+    EXPECT_EQ(results.at(1).address(), address + 2);
+    EXPECT_TRUE(target == results.at(0).data());
+    EXPECT_TRUE(target == results.at(1).data());
 }
 
 TEST(ExactScanTest, FindsUnalignedNumericValue) {
@@ -76,7 +78,8 @@ TEST(ExactScanTest, FindsUnalignedNumericValue) {
     data.insert(data.end(), encodedTarget.begin(), encodedTarget.end());
     data.push_back(std::byte{0xff});
 
-    const MemoryRead memory(address, data.size(), std::move(data));
+    const auto dataSize = data.size();
+    const MemoryRead memory(address, dataSize, std::move(data));
     const auto results = MemoryScanner::scanBuffer(memory, target);
 
     ASSERT_EQ(results.size(), 1);
@@ -102,7 +105,8 @@ TEST(ExactScanTest, RejectsEmptyTargetAndInsufficientInput) {
 TEST(ExactScanTest, ReturnsNoPartialMatches) {
     const Value target(std::string{"abcd"});
     auto data = test::encodeValue(std::string{"abc"});
-    const MemoryRead memory(0x1500, data.size(), std::move(data));
+    const auto dataSize = data.size();
+    const MemoryRead memory(0x1500, dataSize, std::move(data));
 
     EXPECT_TRUE(MemoryScanner::scanBuffer(memory, target).empty());
 }

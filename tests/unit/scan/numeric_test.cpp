@@ -19,14 +19,16 @@ template <ValueNumericType T>
 void expectNumericOrdering(T lower, T target, T upper) {
     const auto scan = [](T memoryValue, const Value& bound, ScanType scanType) {
         auto data = test::encodeValue(memoryValue);
-        const MemoryRead memory(0x6000, data.size(), std::move(data));
+        const auto dataSize = data.size();
+        const MemoryRead memory(0x6000, dataSize, std::move(data));
         return MemoryScanner::scanBuffer(memory, bound, scanType);
     };
 
     const auto scanRange = [](T memoryValue, const Value& lowerBound,
                               const Value& upperBound) {
         auto data = test::encodeValue(memoryValue);
-        const MemoryRead memory(0x6000, data.size(), std::move(data));
+        const auto dataSize = data.size();
+        const MemoryRead memory(0x6000, dataSize, std::move(data));
         return MemoryScanner::scanBuffer(memory, lowerBound, upperBound);
     };
 
@@ -51,7 +53,8 @@ TEST(NumericScanTest, SupportsLessGreaterAndInclusiveRange) {
     data.insert(data.end(), nine.begin(), nine.end());
 
     constexpr std::uintptr_t address = 0x3000;
-    const MemoryRead memory(address, data.size(), std::move(data));
+    const auto dataSize = data.size();
+    const MemoryRead memory(address, dataSize, std::move(data));
 
     const auto less = MemoryScanner::scanBuffer(memory, Value(std::uint8_t{5}),
                                                 ScanType::LESS);
@@ -66,8 +69,8 @@ TEST(NumericScanTest, SupportsLessGreaterAndInclusiveRange) {
     const auto range = MemoryScanner::scanBuffer(memory, Value(std::uint8_t{1}),
                                                  Value(std::uint8_t{5}));
     ASSERT_EQ(range.size(), 2);
-    EXPECT_EQ(range[0].address(), address);
-    EXPECT_EQ(range[1].address(), address + 1);
+    EXPECT_EQ(range.at(0).address(), address);
+    EXPECT_EQ(range.at(1).address(), address + 1);
 }
 
 TEST(NumericScanTest, SupportsOrderingForEveryNumericValueType) {

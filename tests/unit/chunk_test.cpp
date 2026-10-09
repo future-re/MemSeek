@@ -1,17 +1,18 @@
+#include "memseek/memory/chunk.hpp"
+
 #include <gtest/gtest.h>
 
 #include <cstddef>
-#include <cstdint>
 #include <stdexcept>
 #include <vector>
 
-#include "memseek/memory/chunk.hpp"
+#include "memseek/memory/region.hpp"
 
 namespace memseek {
 namespace {
 
-auto collectChunks(const MemoryRegion& region,
-                   const std::size_t chunkSize) -> std::vector<MemoryChunk> {
+auto collectChunks(const MemoryRegion& region, const std::size_t chunkSize)
+    -> std::vector<MemoryChunk> {
     std::vector<MemoryChunk> chunks;
     for (const auto chunk : MemoryChunkRange(region, chunkSize)) {
         chunks.push_back(chunk);
@@ -27,12 +28,12 @@ TEST(MemoryChunkRangeTest, SplitsRegionAndPreservesTotalSize) {
     const auto chunks = collectChunks(region, 4);
 
     ASSERT_EQ(chunks.size(), 3);
-    EXPECT_EQ(chunks[0].address, 0x1000);
-    EXPECT_EQ(chunks[0].size, 4);
-    EXPECT_EQ(chunks[1].address, 0x1004);
-    EXPECT_EQ(chunks[1].size, 4);
-    EXPECT_EQ(chunks[2].address, 0x1008);
-    EXPECT_EQ(chunks[2].size, 2);
+    EXPECT_EQ(chunks.at(0).address, 0x1000);
+    EXPECT_EQ(chunks.at(0).size, 4);
+    EXPECT_EQ(chunks.at(1).address, 0x1004);
+    EXPECT_EQ(chunks.at(1).size, 4);
+    EXPECT_EQ(chunks.at(2).address, 0x1008);
+    EXPECT_EQ(chunks.at(2).size, 2);
 
     std::size_t totalSize = 0;
     for (const auto& chunk : chunks) {
@@ -49,8 +50,8 @@ TEST(MemoryChunkRangeTest, HandlesEmptyAndExactSizeRegions) {
     const MemoryRegion exact{.id = 2, .start = 0x3000, .size = 8};
     const auto chunks = collectChunks(exact, 4);
     ASSERT_EQ(chunks.size(), 2);
-    EXPECT_EQ(chunks[0].size, 4);
-    EXPECT_EQ(chunks[1].size, 4);
+    EXPECT_EQ(chunks.at(0).size, 4);
+    EXPECT_EQ(chunks.at(1).size, 4);
 }
 
 TEST(MemoryChunkRangeTest, RejectsZeroChunkSize) {
