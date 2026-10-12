@@ -5,6 +5,11 @@ name: Publish Docker Image
     branches: [main]
     paths:
       - 'Dockerfile'
+      - '.dockerignore'
+      - '.clang-format'
+      - '.clang-tidy'
+      - 'DOCKER.md'
+      - '.github/workflows/publish-image.yml'
   workflow_dispatch: {}
 
 permissions:
