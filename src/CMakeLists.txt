@@ -22,5 +22,14 @@ target_include_directories(memseek_lib PUBLIC
 
 target_link_libraries(memseek_lib PRIVATE Boost::headers)
 
+add_library(memseek_cli_core STATIC
+    cli/command.cpp
+    cli/interactive.cpp
+    cli/render.cpp
+    cli/value.cpp
+)
+target_compile_features(memseek_cli_core PUBLIC cxx_std_23)
+target_link_libraries(memseek_cli_core PUBLIC memseek_lib)
+
 add_executable(memseek cli/main.cpp)
-target_link_libraries(memseek PRIVATE memseek_lib CLI11::CLI11)
+target_link_libraries(memseek PRIVATE memseek_cli_core CLI11::CLI11)

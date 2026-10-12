@@ -10,8 +10,9 @@ The build consumes the traditional headers under
 - `cli/` contains the command-line entry point, while `app/` contains
   CLI-independent application use cases such as `ScanSession`.
 - The build produces `memseek_lib`, the `memseek` CLI entry point, tests, and
-  optional benchmarks. The CLI currently supports `--help` and `--version`;
-  scanning commands will use `ScanSession`.
+  optional benchmarks. The CLI provides a stateful interactive session for
+  attaching to a process, scanning and filtering values, inspecting mappings,
+  and exporting candidate results as text or JSON.
 - Standalone `utils/endianness` and `utils/logging` remain available as sources.
   `utils/version.hpp` provides the version string directly; there is no
   generated version header or version-generation step.

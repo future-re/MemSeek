@@ -2,7 +2,8 @@ add_library(test_common INTERFACE)
 
 target_link_libraries(test_common 
     INTERFACE 
-        memseek_lib 
+        memseek_lib
+        memseek_cli_core
         GTest::gtest_main
 )
 

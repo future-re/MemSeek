@@ -29,6 +29,11 @@ class ScanSession {
               ByteOrder byteOrder = ByteOrder::NATIVE)
         -> std::expected<void, std::string>;
 
+    [[nodiscard]]
+    auto scan(const Value& lowerBound, const Value& upperBound,
+              MemoryScanLevel level, ByteOrder byteOrder = ByteOrder::NATIVE)
+        -> std::expected<void, std::string>;
+
     // Filter the existing baseline and advance it only on success.
     [[nodiscard]]
     auto filter(ChangeType type) -> std::expected<void, std::string>;

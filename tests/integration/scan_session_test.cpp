@@ -7,6 +7,7 @@
 #include <array>
 #include <cstddef>
 #include <cstdint>
+#include <limits>
 
 #include "memseek/memory/change.hpp"
 #include "memseek/memory/region.hpp"
@@ -98,6 +99,41 @@ TEST(ScanSessionTest, EmptyBaselineRemainsValidUntilReset) {
     session.reset();
     EXPECT_EQ(session.snapshot(), nullptr);
     EXPECT_FALSE(session.filter(ChangeType::UNCHANGED).has_value());
+}
+
+TEST(ScanSessionTest, RangeScanValidatesBoundsWithoutReplacingBaseline) {
+    std::int32_t planted = 71234567;
+    const auto address = reinterpret_cast<std::uintptr_t>(&planted);
+    ScanSession session(getpid(), 1);
+    MemoryScanLevel level;
+    level.memoryProtection = static_cast<std::uint8_t>(MemoryProtection::READ);
+    level.memoryRegionType = static_cast<std::uint8_t>(MemoryRegionType::STACK);
+
+    ASSERT_TRUE(session
+                    .scan(Value(std::int32_t{71234560}),
+                          Value(std::int32_t{71234570}), level)
+                    .has_value());
+    ASSERT_NE(session.snapshot(), nullptr);
+    EXPECT_TRUE(std::ranges::any_of(session.snapshot()->results(),
+                                    [address](const ScanResult& result) {
+                                        return result.address() == address;
+                                    }));
+    const auto baseline = session.snapshot()->results();
+
+    EXPECT_FALSE(
+        session.scan(Value(std::string{"a"}), Value(std::string{"z"}), level)
+            .has_value());
+    EXPECT_FALSE(
+        session.scan(Value(std::uint16_t{1}), Value(std::uint32_t{2}), level)
+            .has_value());
+    EXPECT_FALSE(
+        session.scan(Value(std::int32_t{9}), Value(std::int32_t{1}), level)
+            .has_value());
+    EXPECT_FALSE(session
+                     .scan(Value(std::numeric_limits<double>::quiet_NaN()),
+                           Value(1.0), level)
+                     .has_value());
+    EXPECT_EQ(session.snapshot()->results(), baseline);
 }
 
 }  // namespace memseek
