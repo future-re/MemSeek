@@ -19,7 +19,7 @@ jobs:
     name: Build Linux (${{ matrix.cxx }})
     runs-on: ubuntu-22.04
     container:
-      image: ghcr.io/future-re/memseek:latest
+      image: ghcr.io/future-re/memseek:20261012
 
     strategy:
       fail-fast: false
