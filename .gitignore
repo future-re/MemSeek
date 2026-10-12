@@ -4,6 +4,9 @@
 .codex
 cmake-build-debug-wsl/*
 build/
+compile_commands.json
+coverage-html-temp/
+doxygen-output/
 mkdocs/site/
 cmake-4.2.1*
 mkdocs/docs/doxygen-output/

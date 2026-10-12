@@ -18,8 +18,6 @@ concurrency:
 jobs:
   build-and-deploy:
     runs-on: ubuntu-24.04
-
-
     steps:
       - uses: actions/checkout@v4
 
@@ -49,23 +47,21 @@ jobs:
 
       - name: Build site
         run: |
-          # 清理可能存在的旧覆盖率目录
+          # Remove generated content before rebuilding the site.
           rm -rf mkdocs/docs/coverage
-          
-          # 清理并生成 API 文档（仅在 CI 中生成，不提交到 git）
           rm -rf mkdocs/docs/doxygen-output
           ./generate_api_docs.sh
-          
+
           cd mkdocs
           mkdocs build -d site
-          
+
       - name: Copy coverage HTML to site
         run: |
           # Copy coverage HTML if downloaded
           if [ -d coverage-html-temp ]; then
             echo "Copying coverage report to site/coverage/"
             mkdir -p mkdocs/site/coverage
-            cp -r coverage-html-temp/* mkdocs/site/coverage/
+            cp -a coverage-html-temp/. mkdocs/site/coverage/
           else
             echo "No coverage report found, skipping"
           fi
@@ -75,4 +71,6 @@ jobs:
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: mkdocs/site
-          force_orphan: false
+          # Keep gh-pages as a deployment snapshot instead of accumulating
+          # every generated HTML/image version in the repository history.
+          force_orphan: true
