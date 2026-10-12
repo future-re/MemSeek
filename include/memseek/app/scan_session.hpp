@@ -25,7 +25,8 @@ class ScanSession {
     // Start a new search and replace the baseline on success.
     [[nodiscard]]
     auto scan(const Value& target, MemoryScanLevel level,
-              ScanType type = ScanType::EXACT)
+              ScanType type = ScanType::EXACT,
+              ByteOrder byteOrder = ByteOrder::NATIVE)
         -> std::expected<void, std::string>;
 
     // Filter the existing baseline and advance it only on success.

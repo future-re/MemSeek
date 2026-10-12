@@ -4,6 +4,8 @@
 #include <unistd.h>
 
 #include <algorithm>
+#include <array>
+#include <cstddef>
 #include <cstdint>
 
 #include "memseek/memory/change.hpp"
@@ -13,6 +15,36 @@
 #include "memseek/value.hpp"
 
 namespace memseek {
+
+TEST(ScanSessionTest, ScansBigEndianAndFiltersRawSnapshotBytes) {
+    std::array<std::byte, 4> bytes{
+        std::byte{0x12},
+        std::byte{0x34},
+        std::byte{0x56},
+        std::byte{0x78},
+    };
+    const auto address = reinterpret_cast<std::uintptr_t>(bytes.data());
+    ScanSession session(getpid(), 1);
+    MemoryScanLevel level;
+    level.memoryRegionType = static_cast<std::uint8_t>(MemoryRegionType::STACK);
+    ASSERT_TRUE(session
+                    .scan(Value(std::uint32_t{0x12345678}), level,
+                          ScanType::EXACT, ByteOrder::BIG)
+                    .has_value());
+    ASSERT_NE(session.snapshot(), nullptr);
+    EXPECT_TRUE(std::ranges::any_of(session.snapshot()->results(),
+                                    [address](const ScanResult& result) {
+                                        return result.address() == address;
+                                    }));
+    bytes.at(3) = std::byte{0x79};
+    ASSERT_TRUE(session.filter(ChangeType::CHANGED).has_value());
+    const auto found = std::ranges::find_if(
+        session.snapshot()->results(), [address](const ScanResult& result) {
+            return result.address() == address;
+        });
+    ASSERT_NE(found, session.snapshot()->results().end());
+    EXPECT_TRUE(std::ranges::equal(found->data(), bytes));
+}
 
 TEST(ScanSessionTest, ScansFiltersAndResetsBaseline) {
     std::uint64_t planted = 0x123456789abcdef0ULL;

@@ -20,7 +20,7 @@ ScanSession::ScanSession(const pid_t pid, const std::size_t workerCount)
     : m_pid(pid), m_scanner(workerCount) {}
 
 auto ScanSession::scan(const Value& target, const MemoryScanLevel level,
-                       const ScanType type)
+                       const ScanType type, const ByteOrder byteOrder)
     -> std::expected<void, std::string> {
     if (target.empty()) {
         return std::unexpected("scan target must not be empty");
@@ -40,7 +40,8 @@ auto ScanSession::scan(const Value& target, const MemoryScanLevel level,
     }
     MemorySnapshot::Results results;
     for (const auto& region : regions->getRegions()) {
-        auto matches = m_scanner.scanRegion(m_pid, region, target, type);
+        auto matches =
+            m_scanner.scanRegion(m_pid, region, target, type, byteOrder);
         results.insert(results.end(), std::make_move_iterator(matches.begin()),
                        std::make_move_iterator(matches.end()));
     }

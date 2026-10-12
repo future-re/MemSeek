@@ -51,6 +51,16 @@ enum class ScanType : std::uint8_t {
     LESS,     // Numeric Value types only.
 };
 
+// Byte order of numeric values in the scanned memory. Raw strings and byte
+// arrays are always matched verbatim.
+enum class ByteOrder : std::uint8_t {
+    NATIVE,
+    LITTLE,
+    BIG,
+};
+
+// Numeric Value inputs retain their native representation. byteOrder describes
+// the memory being scanned, not the input Value. Results contain raw bytes.
 class MemoryScanner {
    public:
     explicit MemoryScanner(
@@ -65,54 +75,58 @@ class MemoryScanner {
     MemoryScanner& operator=(MemoryScanner&&) = delete;
 
     [[nodiscard]]
-    std::vector<ScanResult> scanProcess(pid_t pid, MemoryScanLevel level,
-                                        const Value& target,
-                                        ScanType scanType = ScanType::EXACT);
+    std::vector<ScanResult> scanProcess(
+        pid_t pid, MemoryScanLevel level, const Value& target,
+        ScanType scanType = ScanType::EXACT,
+        ByteOrder byteOrder = ByteOrder::NATIVE);
 
     [[nodiscard]]
-    std::vector<ScanResult> scanProcess(pid_t pid, MemoryScanLevel level,
-                                        const Value& lowerBound,
-                                        const Value& upperBound);
+    std::vector<ScanResult> scanProcess(
+        pid_t pid, MemoryScanLevel level, const Value& lowerBound,
+        const Value& upperBound, ByteOrder byteOrder = ByteOrder::NATIVE);
 
     [[nodiscard]]
     std::vector<ScanResult> scanRegion(pid_t pid, const MemoryRegion& region,
                                        const Value& target,
-                                       ScanType scanType = ScanType::EXACT);
+                                       ScanType scanType = ScanType::EXACT,
+                                       ByteOrder byteOrder = ByteOrder::NATIVE);
 
     [[nodiscard]]
     std::vector<ScanResult> scanRegion(pid_t pid, const MemoryRegion& region,
                                        const Value& lowerBound,
-                                       const Value& upperBound);
+                                       const Value& upperBound,
+                                       ByteOrder byteOrder = ByteOrder::NATIVE);
 
     // RANGE, GREATER, and LESS require Value::isNumeric() to be true.
     // EXACT remains available for numeric values, strings, and byte arrays.
     [[nodiscard]]
-    static std::vector<ScanResult> scanBuffer(const MemoryRead& memory,
-                                              const Value& target,
-                                              ScanType = ScanType::EXACT);
+    static std::vector<ScanResult> scanBuffer(
+        const MemoryRead& memory, const Value& target,
+        ScanType scanType = ScanType::EXACT,
+        ByteOrder byteOrder = ByteOrder::NATIVE);
 
     // Range scans use an inclusive [lowerBound, upperBound] interval.
     [[nodiscard]]
-    static std::vector<ScanResult> scanBuffer(const MemoryRead& memory,
-                                              const Value& lowerBound,
-                                              const Value& upperBound);
+    static std::vector<ScanResult> scanBuffer(
+        const MemoryRead& memory, const Value& lowerBound,
+        const Value& upperBound, ByteOrder byteOrder = ByteOrder::NATIVE);
 
    private:
     std::vector<ScanResult> scanProcessImpl(pid_t pid, MemoryScanLevel level,
                                             const Value& lowerBound,
                                             const Value* upperBound,
-                                            ScanType scanType);
+                                            ScanType scanType,
+                                            ByteOrder byteOrder);
 
-    std::vector<ScanResult> scanRegionImpl(pid_t pid,
-                                           const MemoryRegion& region,
-                                           const Value& lowerBound,
-                                           const Value* upperBound,
-                                           ScanType scanType);
+    std::vector<ScanResult> scanRegionImpl(
+        pid_t pid, const MemoryRegion& region, const Value& lowerBound,
+        const Value* upperBound, ScanType scanType, ByteOrder byteOrder);
 
     static std::vector<ScanResult> scanBufferImpl(const MemoryRead& memory,
                                                   const Value& lowerBound,
                                                   const Value* upperBound,
-                                                  ScanType scanType);
+                                                  ScanType scanType,
+                                                  ByteOrder byteOrder);
 
     template <typename Function>
     auto submit(Function&& function)
