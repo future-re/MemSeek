@@ -21,3 +21,6 @@ target_include_directories(memseek_lib PUBLIC
     $<INSTALL_INTERFACE:include>)
 
 target_link_libraries(memseek_lib PRIVATE Boost::headers)
+
+add_executable(memseek cli/main.cpp)
+target_link_libraries(memseek PRIVATE memseek_lib CLI11::CLI11)

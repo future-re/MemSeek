@@ -17,6 +17,23 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake")
 
+# CLI11 is header-only. Keep its target available for the upcoming CLI without
+# introducing a dependency into the memory scanning library.
+find_package(CLI11 2.7.2 CONFIG QUIET)
+if(NOT TARGET CLI11::CLI11)
+  include(FetchContent)
+  set(CLI11_BUILD_TESTS OFF CACHE BOOL "" FORCE)
+  set(CLI11_BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
+  set(CLI11_BUILD_DOCS OFF CACHE BOOL "" FORCE)
+  FetchContent_Declare(
+    cli11
+    URL https://codeload.github.com/CLIUtils/CLI11/tar.gz/refs/tags/v2.7.2
+    URL_HASH SHA256=46eef3101da70852ec7af026e09d485ccee81813331c8c6052d39344443b83da
+    DOWNLOAD_EXTRACT_TIMESTAMP TRUE
+  )
+  FetchContent_MakeAvailable(cli11)
+endif()
+
 include(CodeCoverage)
 add_subdirectory(src)
 
