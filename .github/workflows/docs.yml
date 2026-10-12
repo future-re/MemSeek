@@ -1,15 +1,12 @@
 name: Docs
 
 "on":
-  workflow_run:
-    workflows: ["Code Coverage"]
-    types: [completed]
+  push:
     branches: [main]
   workflow_dispatch: {}
 
 permissions:
   contents: write
-  actions: read
 
 concurrency:
   group: pages
@@ -24,7 +21,7 @@ jobs:
       - name: Setup Python
         uses: actions/setup-python@v5
         with:
-          python-version: '3.x'
+          python-version: '3.12'
 
       - name: Install MkDocs
         run: |
@@ -36,41 +33,16 @@ jobs:
           sudo apt-get update -qq
           sudo apt-get install -y doxygen graphviz
 
-      - name: Try download coverage HTML artifact
-        uses: dawidd6/action-download-artifact@v6
-        with:
-          workflow: coverage.yml
-          name: coverage-report-html
-          path: coverage-html-temp
-          if_no_artifact_found: warn
-        continue-on-error: true
-
       - name: Build site
         run: |
-          # Remove generated content before rebuilding the site.
-          rm -rf mkdocs/docs/coverage
-          rm -rf mkdocs/docs/doxygen-output
           ./generate_api_docs.sh
 
           cd mkdocs
           mkdocs build -d site
 
-      - name: Copy coverage HTML to site
-        run: |
-          # Copy coverage HTML if downloaded
-          if [ -d coverage-html-temp ]; then
-            echo "Copying coverage report to site/coverage/"
-            mkdir -p mkdocs/site/coverage
-            cp -a coverage-html-temp/. mkdocs/site/coverage/
-          else
-            echo "No coverage report found, skipping"
-          fi
-
       - name: Deploy to gh-pages branch
-        uses: peaceiris/actions-gh-pages@v3
+        uses: peaceiris/actions-gh-pages@v4
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: mkdocs/site
-          # Keep gh-pages as a deployment snapshot instead of accumulating
-          # every generated HTML/image version in the repository history.
           force_orphan: true
