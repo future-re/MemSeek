@@ -1,19 +1,14 @@
-# Keep the library source list explicit. In particular, main.cpp belongs only
-# to the executable; putting it in the library makes GoogleTest binaries pick
-# up the application's main() instead of GTest's main().
+# Keep the current scanning library source list explicit.
 set(MEMSEEK_LIBRARY_SOURCES
+    app/scan_session.cpp
     memory/change.cpp
     memory/reader.cpp
     memory/region.cpp
     memory/scan.cpp
     memory/snapshot.cpp
-    memseek.cpp
-    scanmem.cpp
 )
 
 add_library(memseek_lib STATIC ${MEMSEEK_LIBRARY_SOURCES})
-
-find_package(ICU REQUIRED COMPONENTS uc i18n)
 
 # Boost.Asio's thread_pool (header-only) parallelizes region scans. Keep it
 # PRIVATE so consumers of memseek_lib do not need Boost headers.
@@ -25,8 +20,4 @@ target_include_directories(memseek_lib PUBLIC
     $<BUILD_INTERFACE:${CMAKE_SOURCE_DIR}/include>
     $<INSTALL_INTERFACE:include>)
 
-target_link_libraries(memseek_lib PUBLIC ICU::uc ICU::i18n PRIVATE Boost::headers)
-
-add_executable(memseek main.cpp
-    memory/reader.cpp)
-target_link_libraries(memseek PRIVATE memseek_lib)
+target_link_libraries(memseek_lib PRIVATE Boost::headers)
