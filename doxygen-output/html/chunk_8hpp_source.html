@@ -1,0 +1,275 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "https://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="zh">
+<head>
+<meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=11"/>
+<meta name="generator" content="Doxygen 1.9.8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>memseek: include/memseek/memory/chunk.hpp 源文件</title>
+<link href="tabs.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="jquery.js"></script>
+<script type="text/javascript" src="dynsections.js"></script>
+<link href="navtree.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="resize.js"></script>
+<script type="text/javascript" src="navtreedata.js"></script>
+<script type="text/javascript" src="navtree.js"></script>
+<link href="search/search.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="search/searchdata.js"></script>
+<script type="text/javascript" src="search/search.js"></script>
+<link href="doxygen.css" rel="stylesheet" type="text/css" />
+<link href="doxygen-awesome.css" rel="stylesheet" type="text/css"/>
+</head>
+<body>
+<div id="top"><!-- do not remove this div, it is closed by doxygen! -->
+<div id="titlearea">
+<table cellspacing="0" cellpadding="0">
+ <tbody>
+ <tr id="projectrow">
+  <td id="projectalign">
+   <div id="projectname">memseek
+   </div>
+   <div id="projectbrief">Modern C++20 Memory Scanner</div>
+  </td>
+ </tr>
+ </tbody>
+</table>
+</div>
+<!-- end header part -->
+<!-- 制作者 Doxygen 1.9.8 -->
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+var searchBox = new SearchBox("searchBox", "search/",'.html');
+/* @license-end */
+</script>
+<script type="text/javascript" src="menudata.js"></script>
+<script type="text/javascript" src="menu.js"></script>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(function() {
+  initMenu('',true,false,'search.php','搜索');
+  $(document).ready(function() { init_search(); });
+});
+/* @license-end */
+</script>
+<div id="main-nav"></div>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(document).ready(function() { init_codefold(0); });
+/* @license-end */
+</script>
+</div><!-- top -->
+<div id="side-nav" class="ui-resizable side-nav-resizable">
+  <div id="nav-tree">
+    <div id="nav-tree-contents">
+      <div id="nav-sync" class="sync"></div>
+    </div>
+  </div>
+  <div id="splitbar" style="-moz-user-select:none;" 
+       class="ui-resizable-handle">
+  </div>
+</div>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(document).ready(function(){initNavTree('chunk_8hpp_source.html',''); initResizable(); });
+/* @license-end */
+</script>
+<div id="doc-content">
+<!-- window showing the filter options -->
+<div id="MSearchSelectWindow"
+     onmouseover="return searchBox.OnSearchSelectShow()"
+     onmouseout="return searchBox.OnSearchSelectHide()"
+     onkeydown="return searchBox.OnSearchSelectKey(event)">
+</div>
+
+<!-- iframe showing the search results (closed by default) -->
+<div id="MSearchResultsWindow">
+<div id="MSearchResults">
+<div class="SRPage">
+<div id="SRIndex">
+<div id="SRResults"></div>
+<div class="SRStatus" id="Loading">载入中...</div>
+<div class="SRStatus" id="Searching">搜索中...</div>
+<div class="SRStatus" id="NoMatches">未找到</div>
+</div>
+</div>
+</div>
+</div>
+
+<div class="header">
+  <div class="headertitle"><div class="title">chunk.hpp</div></div>
+</div><!--header-->
+<div class="contents">
+<a href="chunk_8hpp.html">浏览该文件的文档.</a><div class="fragment"><div class="line"><a id="l00001" name="l00001"></a><span class="lineno">    1</span><span class="preprocessor">#pragma once</span></div>
+<div class="line"><a id="l00002" name="l00002"></a><span class="lineno">    2</span> </div>
+<div class="line"><a id="l00003" name="l00003"></a><span class="lineno">    3</span><span class="preprocessor">#include &lt;algorithm&gt;</span></div>
+<div class="line"><a id="l00004" name="l00004"></a><span class="lineno">    4</span><span class="preprocessor">#include &lt;cstddef&gt;</span></div>
+<div class="line"><a id="l00005" name="l00005"></a><span class="lineno">    5</span><span class="preprocessor">#include &lt;cstdint&gt;</span></div>
+<div class="line"><a id="l00006" name="l00006"></a><span class="lineno">    6</span><span class="preprocessor">#include &lt;iterator&gt;</span></div>
+<div class="line"><a id="l00007" name="l00007"></a><span class="lineno">    7</span><span class="preprocessor">#include &lt;ranges&gt;</span></div>
+<div class="line"><a id="l00008" name="l00008"></a><span class="lineno">    8</span><span class="preprocessor">#include &lt;stdexcept&gt;</span></div>
+<div class="line"><a id="l00009" name="l00009"></a><span class="lineno">    9</span> </div>
+<div class="line"><a id="l00010" name="l00010"></a><span class="lineno">   10</span><span class="preprocessor">#include &quot;<a class="code" href="region_8hpp.html">memseek/memory/region.hpp</a>&quot;</span></div>
+<div class="line"><a id="l00011" name="l00011"></a><span class="lineno">   11</span> </div>
+<div class="line"><a id="l00012" name="l00012"></a><span class="lineno">   12</span><span class="keyword">namespace </span><a class="code hl_namespace" href="namespacememseek.html">memseek</a> {</div>
+<div class="line"><a id="l00013" name="l00013"></a><span class="lineno">   13</span> </div>
+<div class="foldopen" id="foldopen00014" data-start="{" data-end="};">
+<div class="line"><a id="l00014" name="l00014"></a><span class="lineno"><a class="line" href="structmemseek_1_1MemoryChunk.html">   14</a></span><span class="keyword">struct </span><a class="code hl_struct" href="structmemseek_1_1MemoryChunk.html">MemoryChunk</a> {</div>
+<div class="line"><a id="l00015" name="l00015"></a><span class="lineno"><a class="line" href="structmemseek_1_1MemoryChunk.html#a50755d30c0c6d12b22789dc98538e6b4">   15</a></span>    std::uintptr_t <a class="code hl_variable" href="structmemseek_1_1MemoryChunk.html#a50755d30c0c6d12b22789dc98538e6b4">address</a>{};</div>
+<div class="line"><a id="l00016" name="l00016"></a><span class="lineno"><a class="line" href="structmemseek_1_1MemoryChunk.html#a075bc9486c451795cc42edfac1bf614a">   16</a></span>    std::size_t <a class="code hl_variable" href="structmemseek_1_1MemoryChunk.html#a075bc9486c451795cc42edfac1bf614a">size</a>{};</div>
+<div class="line"><a id="l00017" name="l00017"></a><span class="lineno"><a class="line" href="structmemseek_1_1MemoryChunk.html#a798c8e933e13b0c49dd8d9e3f880d0f0">   17</a></span>    std::uint64_t <a class="code hl_variable" href="structmemseek_1_1MemoryChunk.html#a798c8e933e13b0c49dd8d9e3f880d0f0">parentRegionId</a>{};</div>
+<div class="line"><a id="l00018" name="l00018"></a><span class="lineno">   18</span>};</div>
+</div>
+<div class="line"><a id="l00019" name="l00019"></a><span class="lineno">   19</span> </div>
+<div class="line"><a id="l00020" name="l00020"></a><span class="lineno"><a class="line" href="namespacememseek.html#a2073cf9046d91f917d542c742d7702ca">   20</a></span><span class="keyword">inline</span> <span class="keyword">constexpr</span> std::size_t <a class="code hl_variable" href="namespacememseek.html#a2073cf9046d91f917d542c742d7702ca">DEFAULT_CHUNK_SIZE</a> = 1024 * 1024;</div>
+<div class="line"><a id="l00021" name="l00021"></a><span class="lineno">   21</span> </div>
+<div class="foldopen" id="foldopen00022" data-start="{" data-end="};">
+<div class="line"><a id="l00022" name="l00022"></a><span class="lineno"><a class="line" href="classmemseek_1_1MemoryChunkRange.html">   22</a></span><span class="keyword">class </span><a class="code hl_class" href="classmemseek_1_1MemoryChunkRange.html">MemoryChunkRange</a> {</div>
+<div class="line"><a id="l00023" name="l00023"></a><span class="lineno">   23</span>   <span class="keyword">public</span>:</div>
+<div class="foldopen" id="foldopen00024" data-start="{" data-end="};">
+<div class="line"><a id="l00024" name="l00024"></a><span class="lineno"><a class="line" href="classmemseek_1_1MemoryChunkRange_1_1Iterator.html">   24</a></span>    <span class="keyword">class </span><a class="code hl_class" href="classmemseek_1_1MemoryChunkRange_1_1Iterator.html">Iterator</a> {</div>
+<div class="line"><a id="l00025" name="l00025"></a><span class="lineno">   25</span>       <span class="keyword">public</span>:</div>
+<div class="line"><a id="l00026" name="l00026"></a><span class="lineno"><a class="line" href="classmemseek_1_1MemoryChunkRange_1_1Iterator.html#a1fe09d5ae9b1bf5caa4a4ca33971765a">   26</a></span>        <span class="keyword">using </span><a class="code hl_typedef" href="classmemseek_1_1MemoryChunkRange_1_1Iterator.html#a1fe09d5ae9b1bf5caa4a4ca33971765a">iterator_concept</a> = std::forward_iterator_tag;</div>
+<div class="line"><a id="l00027" name="l00027"></a><span class="lineno">   27</span> </div>
+<div class="line"><a id="l00028" name="l00028"></a><span class="lineno"><a class="line" href="classmemseek_1_1MemoryChunkRange_1_1Iterator.html#a0280fe8776ff323a99c9b46a4cc5f485">   28</a></span>        <span class="keyword">using </span><a class="code hl_typedef" href="classmemseek_1_1MemoryChunkRange_1_1Iterator.html#a0280fe8776ff323a99c9b46a4cc5f485">iterator_category</a> = std::forward_iterator_tag;</div>
+<div class="line"><a id="l00029" name="l00029"></a><span class="lineno">   29</span> </div>
+<div class="line"><a id="l00030" name="l00030"></a><span class="lineno"><a class="line" href="classmemseek_1_1MemoryChunkRange_1_1Iterator.html#a0ee7c8bb9fc7fa7ef0960d51e324deef">   30</a></span>        <span class="keyword">using </span><a class="code hl_struct" href="structmemseek_1_1MemoryChunk.html">value_type</a> = <a class="code hl_struct" href="structmemseek_1_1MemoryChunk.html">MemoryChunk</a>;</div>
+<div class="line"><a id="l00031" name="l00031"></a><span class="lineno"><a class="line" href="classmemseek_1_1MemoryChunkRange_1_1Iterator.html#ad7f20513679de77715d08b45e3c9a909">   31</a></span>        <span class="keyword">using </span><a class="code hl_typedef" href="classmemseek_1_1MemoryChunkRange_1_1Iterator.html#ad7f20513679de77715d08b45e3c9a909">difference_type</a> = std::ptrdiff_t;</div>
+<div class="line"><a id="l00032" name="l00032"></a><span class="lineno">   32</span> </div>
+<div class="line"><a id="l00033" name="l00033"></a><span class="lineno"><a class="line" href="classmemseek_1_1MemoryChunkRange_1_1Iterator.html#a33922f153c0eaaf31058c48ca1aa7d91">   33</a></span>        <a class="code hl_function" href="classmemseek_1_1MemoryChunkRange_1_1Iterator.html#a33922f153c0eaaf31058c48ca1aa7d91">Iterator</a>() = <span class="keywordflow">default</span>;</div>
+<div class="line"><a id="l00034" name="l00034"></a><span class="lineno">   34</span> </div>
+<div class="foldopen" id="foldopen00035" data-start="{" data-end="}">
+<div class="line"><a id="l00035" name="l00035"></a><span class="lineno"><a class="line" href="classmemseek_1_1MemoryChunkRange_1_1Iterator.html#a279728946d14b42f694a9016d5cfb96e">   35</a></span>        <a class="code hl_function" href="classmemseek_1_1MemoryChunkRange_1_1Iterator.html#a279728946d14b42f694a9016d5cfb96e">Iterator</a>(<span class="keyword">const</span> <a class="code hl_struct" href="structmemseek_1_1MemoryRegion.html">MemoryRegion</a>* <a class="code hl_variable" href="command_8cpp.html#a17d4e8a59714345e415b721ff06d994f">region</a>, std::size_t <a class="code hl_function" href="namespacememseek.html#ab577b87dc7dadd822ef978fe05903a83">chunkSize</a>,</div>
+<div class="line"><a id="l00036" name="l00036"></a><span class="lineno">   36</span>                 std::uintptr_t <a class="code hl_function" href="namespacememseek.html#ab577b87dc7dadd822ef978fe05903a83">current</a>)</div>
+<div class="line"><a id="l00037" name="l00037"></a><span class="lineno">   37</span>            : m_region(<a class="code hl_variable" href="command_8cpp.html#a17d4e8a59714345e415b721ff06d994f">region</a>), m_chunkSize(<a class="code hl_function" href="namespacememseek.html#ab577b87dc7dadd822ef978fe05903a83">chunkSize</a>), m_current(<a class="code hl_function" href="namespacememseek.html#ab577b87dc7dadd822ef978fe05903a83">current</a>) {}</div>
+</div>
+<div class="line"><a id="l00038" name="l00038"></a><span class="lineno">   38</span> </div>
+<div class="line"><a id="l00039" name="l00039"></a><span class="lineno">   39</span>        [[<a class="code hl_function" href="namespacememseek.html#ab577b87dc7dadd822ef978fe05903a83">nodiscard</a>]]</div>
+<div class="foldopen" id="foldopen00040" data-start="{" data-end="}">
+<div class="line"><a id="l00040" name="l00040"></a><span class="lineno"><a class="line" href="classmemseek_1_1MemoryChunkRange_1_1Iterator.html#a3280d8426055b50d43525a7824470112">   40</a></span>        <a class="code hl_struct" href="structmemseek_1_1MemoryChunk.html">MemoryChunk</a> <a class="code hl_function" href="classmemseek_1_1MemoryChunkRange_1_1Iterator.html#a3280d8426055b50d43525a7824470112">operator*</a>()<span class="keyword"> const </span>{</div>
+<div class="line"><a id="l00041" name="l00041"></a><span class="lineno">   41</span>            <span class="keyword">const</span> <span class="keyword">auto</span> <a class="code hl_function" href="classmemseek_1_1MemoryChunkRange.html#a67d74c3cea7a07e079bc34eb19e8157e">end</a> = m_region-&gt;<a class="code hl_variable" href="structmemseek_1_1MemoryRegion.html#a4751ebee9daf9bed0d5b4d92f18f4193">start</a> + m_region-&gt;<a class="code hl_variable" href="structmemseek_1_1MemoryRegion.html#a18c56081a204c37a0547e974329c922d">size</a>;</div>
+<div class="line"><a id="l00042" name="l00042"></a><span class="lineno">   42</span> </div>
+<div class="line"><a id="l00043" name="l00043"></a><span class="lineno">   43</span>            <span class="keyword">const</span> <span class="keyword">auto</span> <a class="code hl_function" href="namespacememseek.html#ab577b87dc7dadd822ef978fe05903a83">remaining</a> = <a class="code hl_function" href="classmemseek_1_1MemoryChunkRange.html#a67d74c3cea7a07e079bc34eb19e8157e">end</a> - m_current;</div>
+<div class="line"><a id="l00044" name="l00044"></a><span class="lineno">   44</span> </div>
+<div class="line"><a id="l00045" name="l00045"></a><span class="lineno">   45</span>            <span class="keywordflow">return</span> {.address = m_current,</div>
+<div class="line"><a id="l00046" name="l00046"></a><span class="lineno">   46</span>                    .size = std::min(m_chunkSize, <a class="code hl_function" href="namespacememseek.html#ab577b87dc7dadd822ef978fe05903a83">remaining</a>),</div>
+<div class="line"><a id="l00047" name="l00047"></a><span class="lineno">   47</span>                    .parentRegionId = m_region-&gt;<a class="code hl_variable" href="structmemseek_1_1MemoryRegion.html#af91400f47de20e04339fcc7d024945e6">id</a>};</div>
+<div class="line"><a id="l00048" name="l00048"></a><span class="lineno">   48</span>        }</div>
+</div>
+<div class="line"><a id="l00049" name="l00049"></a><span class="lineno">   49</span> </div>
+<div class="foldopen" id="foldopen00050" data-start="{" data-end="}">
+<div class="line"><a id="l00050" name="l00050"></a><span class="lineno"><a class="line" href="classmemseek_1_1MemoryChunkRange_1_1Iterator.html#a5c1a5010eec5acb12f5a30070076b6f5">   50</a></span>        <a class="code hl_class" href="classmemseek_1_1MemoryChunkRange_1_1Iterator.html">Iterator</a>&amp; <a class="code hl_function" href="classmemseek_1_1MemoryChunkRange_1_1Iterator.html#a5c1a5010eec5acb12f5a30070076b6f5">operator++</a>() {</div>
+<div class="line"><a id="l00051" name="l00051"></a><span class="lineno">   51</span>            <span class="keyword">const</span> <span class="keyword">auto</span> <a class="code hl_function" href="classmemseek_1_1MemoryChunkRange.html#a67d74c3cea7a07e079bc34eb19e8157e">end</a> = m_region-&gt;<a class="code hl_variable" href="structmemseek_1_1MemoryRegion.html#a4751ebee9daf9bed0d5b4d92f18f4193">start</a> + m_region-&gt;<a class="code hl_variable" href="structmemseek_1_1MemoryRegion.html#a18c56081a204c37a0547e974329c922d">size</a>;</div>
+<div class="line"><a id="l00052" name="l00052"></a><span class="lineno">   52</span> </div>
+<div class="line"><a id="l00053" name="l00053"></a><span class="lineno">   53</span>            <span class="keyword">const</span> <span class="keyword">auto</span> <a class="code hl_function" href="namespacememseek.html#ab577b87dc7dadd822ef978fe05903a83">remaining</a> = <a class="code hl_function" href="classmemseek_1_1MemoryChunkRange.html#a67d74c3cea7a07e079bc34eb19e8157e">end</a> - m_current;</div>
+<div class="line"><a id="l00054" name="l00054"></a><span class="lineno">   54</span> </div>
+<div class="line"><a id="l00055" name="l00055"></a><span class="lineno">   55</span>            m_current += std::min(m_chunkSize, <a class="code hl_function" href="namespacememseek.html#ab577b87dc7dadd822ef978fe05903a83">remaining</a>);</div>
+<div class="line"><a id="l00056" name="l00056"></a><span class="lineno">   56</span> </div>
+<div class="line"><a id="l00057" name="l00057"></a><span class="lineno">   57</span>            <span class="keywordflow">return</span> *<span class="keyword">this</span>;</div>
+<div class="line"><a id="l00058" name="l00058"></a><span class="lineno">   58</span>        }</div>
+</div>
+<div class="line"><a id="l00059" name="l00059"></a><span class="lineno">   59</span> </div>
+<div class="foldopen" id="foldopen00060" data-start="{" data-end="}">
+<div class="line"><a id="l00060" name="l00060"></a><span class="lineno"><a class="line" href="classmemseek_1_1MemoryChunkRange_1_1Iterator.html#a0b379a6928d3ca4a97dbe5af5e2fb096">   60</a></span>        <a class="code hl_class" href="classmemseek_1_1MemoryChunkRange_1_1Iterator.html">Iterator</a> <a class="code hl_function" href="classmemseek_1_1MemoryChunkRange_1_1Iterator.html#a0b379a6928d3ca4a97dbe5af5e2fb096">operator++</a>(<span class="keywordtype">int</span>) {</div>
+<div class="line"><a id="l00061" name="l00061"></a><span class="lineno">   61</span>            <span class="keyword">auto</span> <a class="code hl_function" href="namespacememseek.html#ab577b87dc7dadd822ef978fe05903a83">old</a> = *<span class="keyword">this</span>;</div>
+<div class="line"><a id="l00062" name="l00062"></a><span class="lineno">   62</span>            ++(*this);</div>
+<div class="line"><a id="l00063" name="l00063"></a><span class="lineno">   63</span>            <span class="keywordflow">return</span> <a class="code hl_function" href="namespacememseek.html#ab577b87dc7dadd822ef978fe05903a83">old</a>;</div>
+<div class="line"><a id="l00064" name="l00064"></a><span class="lineno">   64</span>        }</div>
+</div>
+<div class="line"><a id="l00065" name="l00065"></a><span class="lineno">   65</span> </div>
+<div class="line"><a id="l00066" name="l00066"></a><span class="lineno">   66</span>        [[<a class="code hl_function" href="namespacememseek.html#ab577b87dc7dadd822ef978fe05903a83">nodiscard</a>]]</div>
+<div class="foldopen" id="foldopen00067" data-start="{" data-end="}">
+<div class="line"><a id="l00067" name="l00067"></a><span class="lineno"><a class="line" href="classmemseek_1_1MemoryChunkRange_1_1Iterator.html#a440caf64884be4693c5089935d362e9b">   67</a></span>        <span class="keywordtype">bool</span> <a class="code hl_function" href="classmemseek_1_1MemoryChunkRange_1_1Iterator.html#a440caf64884be4693c5089935d362e9b">operator==</a>(<span class="keyword">const</span> <a class="code hl_class" href="classmemseek_1_1MemoryChunkRange_1_1Iterator.html">Iterator</a>&amp; <a class="code hl_function" href="namespacememseek.html#ab577b87dc7dadd822ef978fe05903a83">other</a>) <span class="keyword">const</span> <span class="keyword">noexcept</span> {</div>
+<div class="line"><a id="l00068" name="l00068"></a><span class="lineno">   68</span>            <span class="keywordflow">return</span> m_region == <a class="code hl_function" href="namespacememseek.html#ab577b87dc7dadd822ef978fe05903a83">other</a>.m_region &amp;&amp; m_current == <a class="code hl_function" href="namespacememseek.html#ab577b87dc7dadd822ef978fe05903a83">other</a>.m_current;</div>
+<div class="line"><a id="l00069" name="l00069"></a><span class="lineno">   69</span>        }</div>
+</div>
+<div class="line"><a id="l00070" name="l00070"></a><span class="lineno">   70</span> </div>
+<div class="line"><a id="l00071" name="l00071"></a><span class="lineno">   71</span>        [[<a class="code hl_function" href="namespacememseek.html#ab577b87dc7dadd822ef978fe05903a83">nodiscard</a>]]</div>
+<div class="foldopen" id="foldopen00072" data-start="{" data-end="}">
+<div class="line"><a id="l00072" name="l00072"></a><span class="lineno"><a class="line" href="classmemseek_1_1MemoryChunkRange_1_1Iterator.html#ae8927b2646e361facb21d6b37bc08465">   72</a></span>        <span class="keywordtype">bool</span> <a class="code hl_function" href="classmemseek_1_1MemoryChunkRange_1_1Iterator.html#ae8927b2646e361facb21d6b37bc08465">operator==</a>(std::default_sentinel_t <span class="comment">/*unused*/</span>) <span class="keyword">const</span> <span class="keyword">noexcept</span> {</div>
+<div class="line"><a id="l00073" name="l00073"></a><span class="lineno">   73</span>            <span class="keywordflow">return</span> m_region == <span class="keyword">nullptr</span> ||</div>
+<div class="line"><a id="l00074" name="l00074"></a><span class="lineno">   74</span>                   m_current &gt;= m_region-&gt;<a class="code hl_variable" href="structmemseek_1_1MemoryRegion.html#a4751ebee9daf9bed0d5b4d92f18f4193">start</a> + m_region-&gt;<a class="code hl_variable" href="structmemseek_1_1MemoryRegion.html#a18c56081a204c37a0547e974329c922d">size</a>;</div>
+<div class="line"><a id="l00075" name="l00075"></a><span class="lineno">   75</span>        }</div>
+</div>
+<div class="line"><a id="l00076" name="l00076"></a><span class="lineno">   76</span> </div>
+<div class="line"><a id="l00077" name="l00077"></a><span class="lineno">   77</span>       <span class="keyword">private</span>:</div>
+<div class="line"><a id="l00078" name="l00078"></a><span class="lineno">   78</span>        <span class="keyword">const</span> <a class="code hl_struct" href="structmemseek_1_1MemoryRegion.html">MemoryRegion</a>* m_region{};</div>
+<div class="line"><a id="l00079" name="l00079"></a><span class="lineno">   79</span>        std::size_t m_chunkSize{};</div>
+<div class="line"><a id="l00080" name="l00080"></a><span class="lineno">   80</span>        std::uintptr_t m_current{};</div>
+<div class="line"><a id="l00081" name="l00081"></a><span class="lineno">   81</span>    };</div>
+</div>
+<div class="line"><a id="l00082" name="l00082"></a><span class="lineno">   82</span> </div>
+<div class="foldopen" id="foldopen00083" data-start="{" data-end="}">
+<div class="line"><a id="l00083" name="l00083"></a><span class="lineno"><a class="line" href="classmemseek_1_1MemoryChunkRange.html#a43c1c77d34b4dd626a4e0eadfa706116">   83</a></span>    <span class="keyword">explicit</span> <a class="code hl_function" href="classmemseek_1_1MemoryChunkRange.html#a43c1c77d34b4dd626a4e0eadfa706116">MemoryChunkRange</a>(<span class="keyword">const</span> <a class="code hl_struct" href="structmemseek_1_1MemoryRegion.html">MemoryRegion</a>&amp; <a class="code hl_variable" href="command_8cpp.html#a17d4e8a59714345e415b721ff06d994f">region</a>,</div>
+<div class="line"><a id="l00084" name="l00084"></a><span class="lineno">   84</span>                              std::size_t <a class="code hl_function" href="namespacememseek.html#ab577b87dc7dadd822ef978fe05903a83">chunkSize</a> = <a class="code hl_variable" href="namespacememseek.html#a2073cf9046d91f917d542c742d7702ca">DEFAULT_CHUNK_SIZE</a>)</div>
+<div class="line"><a id="l00085" name="l00085"></a><span class="lineno">   85</span>        : m_region(&amp;<a class="code hl_variable" href="command_8cpp.html#a17d4e8a59714345e415b721ff06d994f">region</a>), m_chunkSize(<a class="code hl_function" href="namespacememseek.html#ab577b87dc7dadd822ef978fe05903a83">chunkSize</a>) {</div>
+<div class="line"><a id="l00086" name="l00086"></a><span class="lineno">   86</span>        <span class="keywordflow">if</span> (<a class="code hl_function" href="namespacememseek.html#ab577b87dc7dadd822ef978fe05903a83">chunkSize</a> == 0) {</div>
+<div class="line"><a id="l00087" name="l00087"></a><span class="lineno">   87</span>            <span class="keywordflow">throw</span> std::invalid_argument(<span class="stringliteral">&quot;chunkSize must be greater than zero&quot;</span>);</div>
+<div class="line"><a id="l00088" name="l00088"></a><span class="lineno">   88</span>        }</div>
+<div class="line"><a id="l00089" name="l00089"></a><span class="lineno">   89</span>    }</div>
+</div>
+<div class="line"><a id="l00090" name="l00090"></a><span class="lineno">   90</span> </div>
+<div class="line"><a id="l00091" name="l00091"></a><span class="lineno">   91</span>    [[<a class="code hl_function" href="namespacememseek.html#ab577b87dc7dadd822ef978fe05903a83">nodiscard</a>]]</div>
+<div class="foldopen" id="foldopen00092" data-start="{" data-end="}">
+<div class="line"><a id="l00092" name="l00092"></a><span class="lineno"><a class="line" href="classmemseek_1_1MemoryChunkRange.html#abce6e7f99abd7a9cf0b5540ce0b5ccf4">   92</a></span>    <a class="code hl_class" href="classmemseek_1_1MemoryChunkRange_1_1Iterator.html">Iterator</a> <a class="code hl_function" href="classmemseek_1_1MemoryChunkRange.html#abce6e7f99abd7a9cf0b5540ce0b5ccf4">begin</a>() <a class="code hl_function" href="namespacememseek.html#ab577b87dc7dadd822ef978fe05903a83">const</a> <a class="code hl_function" href="namespacememseek.html#ab577b87dc7dadd822ef978fe05903a83">noexcept</a> {</div>
+<div class="line"><a id="l00093" name="l00093"></a><span class="lineno">   93</span>        <span class="keywordflow">return</span> {m_region, m_chunkSize, m_region-&gt;<a class="code hl_variable" href="structmemseek_1_1MemoryRegion.html#a4751ebee9daf9bed0d5b4d92f18f4193">start</a>};</div>
+<div class="line"><a id="l00094" name="l00094"></a><span class="lineno">   94</span>    }</div>
+</div>
+<div class="line"><a id="l00095" name="l00095"></a><span class="lineno">   95</span> </div>
+<div class="line"><a id="l00096" name="l00096"></a><span class="lineno">   96</span>    [[<a class="code hl_function" href="namespacememseek.html#ab577b87dc7dadd822ef978fe05903a83">nodiscard</a>]]</div>
+<div class="line"><a id="l00097" name="l00097"></a><span class="lineno">   97</span>    <span class="comment">// NOLINTNEXTLINE(readability-convert-member-functions-to-static)</span></div>
+<div class="foldopen" id="foldopen00098" data-start="{" data-end="}">
+<div class="line"><a id="l00098" name="l00098"></a><span class="lineno"><a class="line" href="classmemseek_1_1MemoryChunkRange.html#a67d74c3cea7a07e079bc34eb19e8157e">   98</a></span>    std::default_sentinel_t <a class="code hl_function" href="classmemseek_1_1MemoryChunkRange.html#a67d74c3cea7a07e079bc34eb19e8157e">end</a>() <a class="code hl_function" href="namespacememseek.html#ab577b87dc7dadd822ef978fe05903a83">const</a> <a class="code hl_function" href="namespacememseek.html#ab577b87dc7dadd822ef978fe05903a83">noexcept</a> {</div>
+<div class="line"><a id="l00099" name="l00099"></a><span class="lineno">   99</span>        <span class="keywordflow">return</span> std::default_sentinel;</div>
+<div class="line"><a id="l00100" name="l00100"></a><span class="lineno">  100</span>    }</div>
+</div>
+<div class="line"><a id="l00101" name="l00101"></a><span class="lineno">  101</span> </div>
+<div class="line"><a id="l00102" name="l00102"></a><span class="lineno">  102</span>   <span class="keyword">private</span>:</div>
+<div class="line"><a id="l00103" name="l00103"></a><span class="lineno">  103</span>    <span class="keyword">const</span> <a class="code hl_struct" href="structmemseek_1_1MemoryRegion.html">MemoryRegion</a>* m_region{};</div>
+<div class="line"><a id="l00104" name="l00104"></a><span class="lineno">  104</span>    std::size_t m_chunkSize{};</div>
+<div class="line"><a id="l00105" name="l00105"></a><span class="lineno">  105</span>};</div>
+</div>
+<div class="line"><a id="l00106" name="l00106"></a><span class="lineno">  106</span> </div>
+<div class="line"><a id="l00107" name="l00107"></a><span class="lineno">  107</span><span class="keyword">static_assert</span>(std::forward_iterator&lt;MemoryChunkRange::Iterator&gt;);</div>
+<div class="line"><a id="l00108" name="l00108"></a><span class="lineno">  108</span> </div>
+<div class="line"><a id="l00109" name="l00109"></a><span class="lineno">  109</span><span class="keyword">static_assert</span>(std::ranges::forward_range&lt;MemoryChunkRange&gt;);</div>
+<div class="line"><a id="l00110" name="l00110"></a><span class="lineno">  110</span> </div>
+<div class="line"><a id="l00111" name="l00111"></a><span class="lineno">  111</span>}  <span class="comment">// namespace memseek</span></div>
+<div class="ttc" id="aclassmemseek_1_1MemoryChunkRange_1_1Iterator_html"><div class="ttname"><a href="classmemseek_1_1MemoryChunkRange_1_1Iterator.html">memseek::MemoryChunkRange::Iterator</a></div><div class="ttdef"><b>Definition</b> chunk.hpp:24</div></div>
+<div class="ttc" id="aclassmemseek_1_1MemoryChunkRange_1_1Iterator_html_a0280fe8776ff323a99c9b46a4cc5f485"><div class="ttname"><a href="classmemseek_1_1MemoryChunkRange_1_1Iterator.html#a0280fe8776ff323a99c9b46a4cc5f485">memseek::MemoryChunkRange::Iterator::iterator_category</a></div><div class="ttdeci">std::forward_iterator_tag iterator_category</div><div class="ttdef"><b>Definition</b> chunk.hpp:28</div></div>
+<div class="ttc" id="aclassmemseek_1_1MemoryChunkRange_1_1Iterator_html_a0b379a6928d3ca4a97dbe5af5e2fb096"><div class="ttname"><a href="classmemseek_1_1MemoryChunkRange_1_1Iterator.html#a0b379a6928d3ca4a97dbe5af5e2fb096">memseek::MemoryChunkRange::Iterator::operator++</a></div><div class="ttdeci">Iterator operator++(int)</div><div class="ttdef"><b>Definition</b> chunk.hpp:60</div></div>
+<div class="ttc" id="aclassmemseek_1_1MemoryChunkRange_1_1Iterator_html_a1fe09d5ae9b1bf5caa4a4ca33971765a"><div class="ttname"><a href="classmemseek_1_1MemoryChunkRange_1_1Iterator.html#a1fe09d5ae9b1bf5caa4a4ca33971765a">memseek::MemoryChunkRange::Iterator::iterator_concept</a></div><div class="ttdeci">std::forward_iterator_tag iterator_concept</div><div class="ttdef"><b>Definition</b> chunk.hpp:26</div></div>
+<div class="ttc" id="aclassmemseek_1_1MemoryChunkRange_1_1Iterator_html_a279728946d14b42f694a9016d5cfb96e"><div class="ttname"><a href="classmemseek_1_1MemoryChunkRange_1_1Iterator.html#a279728946d14b42f694a9016d5cfb96e">memseek::MemoryChunkRange::Iterator::Iterator</a></div><div class="ttdeci">Iterator(const MemoryRegion *region, std::size_t chunkSize, std::uintptr_t current)</div><div class="ttdef"><b>Definition</b> chunk.hpp:35</div></div>
+<div class="ttc" id="aclassmemseek_1_1MemoryChunkRange_1_1Iterator_html_a3280d8426055b50d43525a7824470112"><div class="ttname"><a href="classmemseek_1_1MemoryChunkRange_1_1Iterator.html#a3280d8426055b50d43525a7824470112">memseek::MemoryChunkRange::Iterator::operator*</a></div><div class="ttdeci">MemoryChunk operator*() const</div><div class="ttdef"><b>Definition</b> chunk.hpp:40</div></div>
+<div class="ttc" id="aclassmemseek_1_1MemoryChunkRange_1_1Iterator_html_a33922f153c0eaaf31058c48ca1aa7d91"><div class="ttname"><a href="classmemseek_1_1MemoryChunkRange_1_1Iterator.html#a33922f153c0eaaf31058c48ca1aa7d91">memseek::MemoryChunkRange::Iterator::Iterator</a></div><div class="ttdeci">Iterator()=default</div></div>
+<div class="ttc" id="aclassmemseek_1_1MemoryChunkRange_1_1Iterator_html_a440caf64884be4693c5089935d362e9b"><div class="ttname"><a href="classmemseek_1_1MemoryChunkRange_1_1Iterator.html#a440caf64884be4693c5089935d362e9b">memseek::MemoryChunkRange::Iterator::operator==</a></div><div class="ttdeci">bool operator==(const Iterator &amp;other) const noexcept</div><div class="ttdef"><b>Definition</b> chunk.hpp:67</div></div>
+<div class="ttc" id="aclassmemseek_1_1MemoryChunkRange_1_1Iterator_html_a5c1a5010eec5acb12f5a30070076b6f5"><div class="ttname"><a href="classmemseek_1_1MemoryChunkRange_1_1Iterator.html#a5c1a5010eec5acb12f5a30070076b6f5">memseek::MemoryChunkRange::Iterator::operator++</a></div><div class="ttdeci">Iterator &amp; operator++()</div><div class="ttdef"><b>Definition</b> chunk.hpp:50</div></div>
+<div class="ttc" id="aclassmemseek_1_1MemoryChunkRange_1_1Iterator_html_ad7f20513679de77715d08b45e3c9a909"><div class="ttname"><a href="classmemseek_1_1MemoryChunkRange_1_1Iterator.html#ad7f20513679de77715d08b45e3c9a909">memseek::MemoryChunkRange::Iterator::difference_type</a></div><div class="ttdeci">std::ptrdiff_t difference_type</div><div class="ttdef"><b>Definition</b> chunk.hpp:31</div></div>
+<div class="ttc" id="aclassmemseek_1_1MemoryChunkRange_1_1Iterator_html_ae8927b2646e361facb21d6b37bc08465"><div class="ttname"><a href="classmemseek_1_1MemoryChunkRange_1_1Iterator.html#ae8927b2646e361facb21d6b37bc08465">memseek::MemoryChunkRange::Iterator::operator==</a></div><div class="ttdeci">bool operator==(std::default_sentinel_t) const noexcept</div><div class="ttdef"><b>Definition</b> chunk.hpp:72</div></div>
+<div class="ttc" id="aclassmemseek_1_1MemoryChunkRange_html"><div class="ttname"><a href="classmemseek_1_1MemoryChunkRange.html">memseek::MemoryChunkRange</a></div><div class="ttdef"><b>Definition</b> chunk.hpp:22</div></div>
+<div class="ttc" id="aclassmemseek_1_1MemoryChunkRange_html_a43c1c77d34b4dd626a4e0eadfa706116"><div class="ttname"><a href="classmemseek_1_1MemoryChunkRange.html#a43c1c77d34b4dd626a4e0eadfa706116">memseek::MemoryChunkRange::MemoryChunkRange</a></div><div class="ttdeci">MemoryChunkRange(const MemoryRegion &amp;region, std::size_t chunkSize=DEFAULT_CHUNK_SIZE)</div><div class="ttdef"><b>Definition</b> chunk.hpp:83</div></div>
+<div class="ttc" id="aclassmemseek_1_1MemoryChunkRange_html_a67d74c3cea7a07e079bc34eb19e8157e"><div class="ttname"><a href="classmemseek_1_1MemoryChunkRange.html#a67d74c3cea7a07e079bc34eb19e8157e">memseek::MemoryChunkRange::end</a></div><div class="ttdeci">std::default_sentinel_t end() const noexcept</div><div class="ttdef"><b>Definition</b> chunk.hpp:98</div></div>
+<div class="ttc" id="aclassmemseek_1_1MemoryChunkRange_html_abce6e7f99abd7a9cf0b5540ce0b5ccf4"><div class="ttname"><a href="classmemseek_1_1MemoryChunkRange.html#abce6e7f99abd7a9cf0b5540ce0b5ccf4">memseek::MemoryChunkRange::begin</a></div><div class="ttdeci">Iterator begin() const noexcept</div><div class="ttdef"><b>Definition</b> chunk.hpp:92</div></div>
+<div class="ttc" id="acommand_8cpp_html_a17d4e8a59714345e415b721ff06d994f"><div class="ttname"><a href="command_8cpp.html#a17d4e8a59714345e415b721ff06d994f">region</a></div><div class="ttdeci">std::optional&lt; std::string &gt; region</div><div class="ttdef"><b>Definition</b> command.cpp:149</div></div>
+<div class="ttc" id="anamespacememseek_html"><div class="ttname"><a href="namespacememseek.html">memseek</a></div><div class="ttdef"><b>Definition</b> scan_session.hpp:17</div></div>
+<div class="ttc" id="anamespacememseek_html_a2073cf9046d91f917d542c742d7702ca"><div class="ttname"><a href="namespacememseek.html#a2073cf9046d91f917d542c742d7702ca">memseek::DEFAULT_CHUNK_SIZE</a></div><div class="ttdeci">constexpr std::size_t DEFAULT_CHUNK_SIZE</div><div class="ttdef"><b>Definition</b> chunk.hpp:20</div></div>
+<div class="ttc" id="anamespacememseek_html_ab577b87dc7dadd822ef978fe05903a83"><div class="ttname"><a href="namespacememseek.html#ab577b87dc7dadd822ef978fe05903a83">memseek::getValueType</a></div><div class="ttdeci">constexpr ValueType getValueType()</div><div class="ttdef"><b>Definition</b> value.hpp:74</div></div>
+<div class="ttc" id="aregion_8hpp_html"><div class="ttname"><a href="region_8hpp.html">region.hpp</a></div></div>
+<div class="ttc" id="astructmemseek_1_1MemoryChunk_html"><div class="ttname"><a href="structmemseek_1_1MemoryChunk.html">memseek::MemoryChunk</a></div><div class="ttdef"><b>Definition</b> chunk.hpp:14</div></div>
+<div class="ttc" id="astructmemseek_1_1MemoryChunk_html_a075bc9486c451795cc42edfac1bf614a"><div class="ttname"><a href="structmemseek_1_1MemoryChunk.html#a075bc9486c451795cc42edfac1bf614a">memseek::MemoryChunk::size</a></div><div class="ttdeci">std::size_t size</div><div class="ttdef"><b>Definition</b> chunk.hpp:16</div></div>
+<div class="ttc" id="astructmemseek_1_1MemoryChunk_html_a50755d30c0c6d12b22789dc98538e6b4"><div class="ttname"><a href="structmemseek_1_1MemoryChunk.html#a50755d30c0c6d12b22789dc98538e6b4">memseek::MemoryChunk::address</a></div><div class="ttdeci">std::uintptr_t address</div><div class="ttdef"><b>Definition</b> chunk.hpp:15</div></div>
+<div class="ttc" id="astructmemseek_1_1MemoryChunk_html_a798c8e933e13b0c49dd8d9e3f880d0f0"><div class="ttname"><a href="structmemseek_1_1MemoryChunk.html#a798c8e933e13b0c49dd8d9e3f880d0f0">memseek::MemoryChunk::parentRegionId</a></div><div class="ttdeci">std::uint64_t parentRegionId</div><div class="ttdef"><b>Definition</b> chunk.hpp:17</div></div>
+<div class="ttc" id="astructmemseek_1_1MemoryRegion_html"><div class="ttname"><a href="structmemseek_1_1MemoryRegion.html">memseek::MemoryRegion</a></div><div class="ttdef"><b>Definition</b> region.hpp:61</div></div>
+<div class="ttc" id="astructmemseek_1_1MemoryRegion_html_a18c56081a204c37a0547e974329c922d"><div class="ttname"><a href="structmemseek_1_1MemoryRegion.html#a18c56081a204c37a0547e974329c922d">memseek::MemoryRegion::size</a></div><div class="ttdeci">std::size_t size</div><div class="ttdef"><b>Definition</b> region.hpp:64</div></div>
+<div class="ttc" id="astructmemseek_1_1MemoryRegion_html_a4751ebee9daf9bed0d5b4d92f18f4193"><div class="ttname"><a href="structmemseek_1_1MemoryRegion.html#a4751ebee9daf9bed0d5b4d92f18f4193">memseek::MemoryRegion::start</a></div><div class="ttdeci">uintptr_t start</div><div class="ttdef"><b>Definition</b> region.hpp:63</div></div>
+<div class="ttc" id="astructmemseek_1_1MemoryRegion_html_af91400f47de20e04339fcc7d024945e6"><div class="ttname"><a href="structmemseek_1_1MemoryRegion.html#af91400f47de20e04339fcc7d024945e6">memseek::MemoryRegion::id</a></div><div class="ttdeci">uint64_t id</div><div class="ttdef"><b>Definition</b> region.hpp:62</div></div>
+</div><!-- fragment --></div><!-- contents -->
+</div><!-- doc-content -->
+<!-- start footer part -->
+<div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
+  <ul>
+    <li class="navelem"><a class="el" href="dir_d44c64559bbebec7f509842c48db8b23.html">include</a></li><li class="navelem"><a class="el" href="dir_228224e106b34a496deab9a6a7e801a4.html">memseek</a></li><li class="navelem"><a class="el" href="dir_44fe6e3ffaa77101a2ce7f9a864aac3c.html">memory</a></li><li class="navelem"><a class="el" href="chunk_8hpp.html">chunk.hpp</a></li>
+    <li class="footer">制作者 <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
+  </ul>
+</div>
+</body>
+</html>

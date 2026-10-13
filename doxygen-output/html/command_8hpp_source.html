@@ -1,0 +1,233 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "https://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="zh">
+<head>
+<meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=11"/>
+<meta name="generator" content="Doxygen 1.9.8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>memseek: include/memseek/cli/command.hpp 源文件</title>
+<link href="tabs.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="jquery.js"></script>
+<script type="text/javascript" src="dynsections.js"></script>
+<link href="navtree.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="resize.js"></script>
+<script type="text/javascript" src="navtreedata.js"></script>
+<script type="text/javascript" src="navtree.js"></script>
+<link href="search/search.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="search/searchdata.js"></script>
+<script type="text/javascript" src="search/search.js"></script>
+<link href="doxygen.css" rel="stylesheet" type="text/css" />
+<link href="doxygen-awesome.css" rel="stylesheet" type="text/css"/>
+</head>
+<body>
+<div id="top"><!-- do not remove this div, it is closed by doxygen! -->
+<div id="titlearea">
+<table cellspacing="0" cellpadding="0">
+ <tbody>
+ <tr id="projectrow">
+  <td id="projectalign">
+   <div id="projectname">memseek
+   </div>
+   <div id="projectbrief">Modern C++20 Memory Scanner</div>
+  </td>
+ </tr>
+ </tbody>
+</table>
+</div>
+<!-- end header part -->
+<!-- 制作者 Doxygen 1.9.8 -->
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+var searchBox = new SearchBox("searchBox", "search/",'.html');
+/* @license-end */
+</script>
+<script type="text/javascript" src="menudata.js"></script>
+<script type="text/javascript" src="menu.js"></script>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(function() {
+  initMenu('',true,false,'search.php','搜索');
+  $(document).ready(function() { init_search(); });
+});
+/* @license-end */
+</script>
+<div id="main-nav"></div>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(document).ready(function() { init_codefold(0); });
+/* @license-end */
+</script>
+</div><!-- top -->
+<div id="side-nav" class="ui-resizable side-nav-resizable">
+  <div id="nav-tree">
+    <div id="nav-tree-contents">
+      <div id="nav-sync" class="sync"></div>
+    </div>
+  </div>
+  <div id="splitbar" style="-moz-user-select:none;" 
+       class="ui-resizable-handle">
+  </div>
+</div>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(document).ready(function(){initNavTree('command_8hpp_source.html',''); initResizable(); });
+/* @license-end */
+</script>
+<div id="doc-content">
+<!-- window showing the filter options -->
+<div id="MSearchSelectWindow"
+     onmouseover="return searchBox.OnSearchSelectShow()"
+     onmouseout="return searchBox.OnSearchSelectHide()"
+     onkeydown="return searchBox.OnSearchSelectKey(event)">
+</div>
+
+<!-- iframe showing the search results (closed by default) -->
+<div id="MSearchResultsWindow">
+<div id="MSearchResults">
+<div class="SRPage">
+<div id="SRIndex">
+<div id="SRResults"></div>
+<div class="SRStatus" id="Loading">载入中...</div>
+<div class="SRStatus" id="Searching">搜索中...</div>
+<div class="SRStatus" id="NoMatches">未找到</div>
+</div>
+</div>
+</div>
+</div>
+
+<div class="header">
+  <div class="headertitle"><div class="title">command.hpp</div></div>
+</div><!--header-->
+<div class="contents">
+<a href="command_8hpp.html">浏览该文件的文档.</a><div class="fragment"><div class="line"><a id="l00001" name="l00001"></a><span class="lineno">    1</span><span class="preprocessor">#pragma once</span></div>
+<div class="line"><a id="l00002" name="l00002"></a><span class="lineno">    2</span> </div>
+<div class="line"><a id="l00003" name="l00003"></a><span class="lineno">    3</span><span class="preprocessor">#include &lt;sys/types.h&gt;</span></div>
+<div class="line"><a id="l00004" name="l00004"></a><span class="lineno">    4</span> </div>
+<div class="line"><a id="l00005" name="l00005"></a><span class="lineno">    5</span><span class="preprocessor">#include &lt;cstddef&gt;</span></div>
+<div class="line"><a id="l00006" name="l00006"></a><span class="lineno">    6</span><span class="preprocessor">#include &lt;cstdint&gt;</span></div>
+<div class="line"><a id="l00007" name="l00007"></a><span class="lineno">    7</span><span class="preprocessor">#include &lt;expected&gt;</span></div>
+<div class="line"><a id="l00008" name="l00008"></a><span class="lineno">    8</span><span class="preprocessor">#include &lt;optional&gt;</span></div>
+<div class="line"><a id="l00009" name="l00009"></a><span class="lineno">    9</span><span class="preprocessor">#include &lt;string&gt;</span></div>
+<div class="line"><a id="l00010" name="l00010"></a><span class="lineno">   10</span><span class="preprocessor">#include &lt;string_view&gt;</span></div>
+<div class="line"><a id="l00011" name="l00011"></a><span class="lineno">   11</span><span class="preprocessor">#include &lt;variant&gt;</span></div>
+<div class="line"><a id="l00012" name="l00012"></a><span class="lineno">   12</span> </div>
+<div class="line"><a id="l00013" name="l00013"></a><span class="lineno">   13</span><span class="preprocessor">#include &quot;<a class="code" href="change_8hpp.html">memseek/memory/change.hpp</a>&quot;</span></div>
+<div class="line"><a id="l00014" name="l00014"></a><span class="lineno">   14</span><span class="preprocessor">#include &quot;<a class="code" href="region_8hpp.html">memseek/memory/region.hpp</a>&quot;</span></div>
+<div class="line"><a id="l00015" name="l00015"></a><span class="lineno">   15</span><span class="preprocessor">#include &quot;<a class="code" href="scan_8hpp.html">memseek/memory/scan.hpp</a>&quot;</span></div>
+<div class="line"><a id="l00016" name="l00016"></a><span class="lineno">   16</span><span class="preprocessor">#include &quot;<a class="code" href="value_8hpp.html">memseek/value.hpp</a>&quot;</span></div>
+<div class="line"><a id="l00017" name="l00017"></a><span class="lineno">   17</span> </div>
+<div class="foldopen" id="foldopen00018" data-start="{" data-end="}">
+<div class="line"><a id="l00018" name="l00018"></a><span class="lineno"><a class="line" href="namespacememseek_1_1cli.html">   18</a></span><span class="keyword">namespace </span><a class="code hl_namespace" href="namespacememseek_1_1cli.html">memseek::cli</a> {</div>
+<div class="line"><a id="l00019" name="l00019"></a><span class="lineno">   19</span> </div>
+<div class="foldopen" id="foldopen00020" data-start="{" data-end="};">
+<div class="line"><a id="l00020" name="l00020"></a><span class="lineno"><a class="line" href="namespacememseek_1_1cli.html#a292a4ab262869a031d60a0f627f6a816">   20</a></span><span class="keyword">enum class</span> <a class="code hl_enumeration" href="namespacememseek_1_1cli.html#a292a4ab262869a031d60a0f627f6a816">OutputFormat</a> : std::uint8_t {</div>
+<div class="line"><a id="l00021" name="l00021"></a><span class="lineno">   21</span>    <a class="code hl_enumvalue" href="namespacememseek_1_1cli.html#a292a4ab262869a031d60a0f627f6a816a61a96ffcb251bb9bf0abf8fec19d0ea8">TEXT</a>,</div>
+<div class="line"><a id="l00022" name="l00022"></a><span class="lineno">   22</span>    <a class="code hl_enumvalue" href="namespacememseek_1_1cli.html#a292a4ab262869a031d60a0f627f6a816a0ecd11c1d7a287401d148a23bbd7a2f8">JSON</a>,</div>
+<div class="line"><a id="l00023" name="l00023"></a><span class="lineno">   23</span>};</div>
+</div>
+<div class="line"><a id="l00024" name="l00024"></a><span class="lineno">   24</span> </div>
+<div class="foldopen" id="foldopen00025" data-start="{" data-end="};">
+<div class="line"><a id="l00025" name="l00025"></a><span class="lineno"><a class="line" href="structmemseek_1_1cli_1_1AttachCommand.html">   25</a></span><span class="keyword">struct </span><a class="code hl_struct" href="structmemseek_1_1cli_1_1AttachCommand.html">AttachCommand</a> {</div>
+<div class="line"><a id="l00026" name="l00026"></a><span class="lineno"><a class="line" href="structmemseek_1_1cli_1_1AttachCommand.html#ab74e42076910dfbab0fff6e5d17719f5">   26</a></span>    pid_t <a class="code hl_variable" href="structmemseek_1_1cli_1_1AttachCommand.html#ab74e42076910dfbab0fff6e5d17719f5">pid</a>{};</div>
+<div class="line"><a id="l00027" name="l00027"></a><span class="lineno">   27</span>};</div>
+</div>
+<div class="line"><a id="l00028" name="l00028"></a><span class="lineno">   28</span> </div>
+<div class="foldopen" id="foldopen00029" data-start="{" data-end="};">
+<div class="line"><a id="l00029" name="l00029"></a><span class="lineno"><a class="line" href="structmemseek_1_1cli_1_1ScanCommand.html">   29</a></span><span class="keyword">struct </span><a class="code hl_struct" href="structmemseek_1_1cli_1_1ScanCommand.html">ScanCommand</a> {</div>
+<div class="line"><a id="l00030" name="l00030"></a><span class="lineno"><a class="line" href="structmemseek_1_1cli_1_1ScanCommand.html#a08762838ab134fe4dec1b026f2831965">   30</a></span>    <a class="code hl_enumeration" href="namespacememseek.html#a62fc59d52513d15b15466fedb4a09357">ScanType</a> <a class="code hl_variable" href="structmemseek_1_1cli_1_1ScanCommand.html#a08762838ab134fe4dec1b026f2831965">scanType</a>{<a class="code hl_enumvalue" href="namespacememseek.html#a62fc59d52513d15b15466fedb4a09357ac41e056424136b6e8c4e23dd6326efa1">ScanType::EXACT</a>};</div>
+<div class="line"><a id="l00031" name="l00031"></a><span class="lineno"><a class="line" href="structmemseek_1_1cli_1_1ScanCommand.html#ac4e3738dde63557f07c6808e604b0b51">   31</a></span>    <a class="code hl_class" href="classmemseek_1_1Value.html">Value</a> <a class="code hl_variable" href="structmemseek_1_1cli_1_1ScanCommand.html#ac4e3738dde63557f07c6808e604b0b51">lowerBound</a>;</div>
+<div class="line"><a id="l00032" name="l00032"></a><span class="lineno"><a class="line" href="structmemseek_1_1cli_1_1ScanCommand.html#af04ceb6c06597b0a0e74ea014fbc4a57">   32</a></span>    std::optional&lt;Value&gt; <a class="code hl_variable" href="structmemseek_1_1cli_1_1ScanCommand.html#af04ceb6c06597b0a0e74ea014fbc4a57">upperBound</a>;</div>
+<div class="line"><a id="l00033" name="l00033"></a><span class="lineno"><a class="line" href="structmemseek_1_1cli_1_1ScanCommand.html#abcef488ce54267a53c43fec47a6b8d2e">   33</a></span>    <a class="code hl_struct" href="structmemseek_1_1MemoryScanLevel.html">MemoryScanLevel</a> <a class="code hl_variable" href="structmemseek_1_1cli_1_1ScanCommand.html#abcef488ce54267a53c43fec47a6b8d2e">level</a>;</div>
+<div class="line"><a id="l00034" name="l00034"></a><span class="lineno"><a class="line" href="structmemseek_1_1cli_1_1ScanCommand.html#abf646c9e8031eeeee800a693eb9e6744">   34</a></span>    std::string <a class="code hl_variable" href="structmemseek_1_1cli_1_1ScanCommand.html#abf646c9e8031eeeee800a693eb9e6744">description</a>;</div>
+<div class="line"><a id="l00035" name="l00035"></a><span class="lineno">   35</span>};</div>
+</div>
+<div class="line"><a id="l00036" name="l00036"></a><span class="lineno">   36</span> </div>
+<div class="foldopen" id="foldopen00037" data-start="{" data-end="};">
+<div class="line"><a id="l00037" name="l00037"></a><span class="lineno"><a class="line" href="structmemseek_1_1cli_1_1FilterCommand.html">   37</a></span><span class="keyword">struct </span><a class="code hl_struct" href="structmemseek_1_1cli_1_1FilterCommand.html">FilterCommand</a> {</div>
+<div class="line"><a id="l00038" name="l00038"></a><span class="lineno"><a class="line" href="structmemseek_1_1cli_1_1FilterCommand.html#adf73d91a2e709dfc881220c0cfc3da4b">   38</a></span>    <a class="code hl_enumeration" href="namespacememseek.html#ac9991f561eb3f244a026c586dc8f5189">ChangeType</a> <a class="code hl_variable" href="structmemseek_1_1cli_1_1FilterCommand.html#adf73d91a2e709dfc881220c0cfc3da4b">type</a>{<a class="code hl_enumvalue" href="namespacememseek.html#ac9991f561eb3f244a026c586dc8f5189ae6b94e58bfd13b21bc786578d9f8ba4a">ChangeType::CHANGED</a>};</div>
+<div class="line"><a id="l00039" name="l00039"></a><span class="lineno">   39</span>};</div>
+</div>
+<div class="line"><a id="l00040" name="l00040"></a><span class="lineno">   40</span> </div>
+<div class="foldopen" id="foldopen00041" data-start="{" data-end="};">
+<div class="line"><a id="l00041" name="l00041"></a><span class="lineno"><a class="line" href="structmemseek_1_1cli_1_1ResultsCommand.html">   41</a></span><span class="keyword">struct </span><a class="code hl_struct" href="structmemseek_1_1cli_1_1ResultsCommand.html">ResultsCommand</a> {</div>
+<div class="line"><a id="l00042" name="l00042"></a><span class="lineno"><a class="line" href="structmemseek_1_1cli_1_1ResultsCommand.html#adc2b8c89bb872587881fc52784dd67d2">   42</a></span>    std::optional&lt;std::size_t&gt; <a class="code hl_variable" href="structmemseek_1_1cli_1_1ResultsCommand.html#adc2b8c89bb872587881fc52784dd67d2">limit</a>;</div>
+<div class="line"><a id="l00043" name="l00043"></a><span class="lineno"><a class="line" href="structmemseek_1_1cli_1_1ResultsCommand.html#a63dc0e0b6c34ec08aeec511e08ca10c9">   43</a></span>    <a class="code hl_enumeration" href="namespacememseek_1_1cli.html#a292a4ab262869a031d60a0f627f6a816">OutputFormat</a> <a class="code hl_variable" href="structmemseek_1_1cli_1_1ResultsCommand.html#a63dc0e0b6c34ec08aeec511e08ca10c9">format</a>{<a class="code hl_enumvalue" href="namespacememseek_1_1cli.html#a292a4ab262869a031d60a0f627f6a816a61a96ffcb251bb9bf0abf8fec19d0ea8">OutputFormat::TEXT</a>};</div>
+<div class="line"><a id="l00044" name="l00044"></a><span class="lineno">   44</span>};</div>
+</div>
+<div class="line"><a id="l00045" name="l00045"></a><span class="lineno">   45</span> </div>
+<div class="foldopen" id="foldopen00046" data-start="{" data-end="};">
+<div class="line"><a id="l00046" name="l00046"></a><span class="lineno"><a class="line" href="structmemseek_1_1cli_1_1RegionsCommand.html">   46</a></span><span class="keyword">struct </span><a class="code hl_struct" href="structmemseek_1_1cli_1_1RegionsCommand.html">RegionsCommand</a> {</div>
+<div class="line"><a id="l00047" name="l00047"></a><span class="lineno"><a class="line" href="structmemseek_1_1cli_1_1RegionsCommand.html#a1765fdf474f3c430c817f257e64f7e3b">   47</a></span>    <a class="code hl_struct" href="structmemseek_1_1MemoryScanLevel.html">MemoryScanLevel</a> <a class="code hl_variable" href="structmemseek_1_1cli_1_1RegionsCommand.html#a1765fdf474f3c430c817f257e64f7e3b">level</a>;</div>
+<div class="line"><a id="l00048" name="l00048"></a><span class="lineno">   48</span>};</div>
+</div>
+<div class="line"><a id="l00049" name="l00049"></a><span class="lineno">   49</span> </div>
+<div class="line"><a id="l00050" name="l00050"></a><span class="lineno"><a class="line" href="structmemseek_1_1cli_1_1InfoCommand.html">   50</a></span><span class="keyword">struct </span><a class="code hl_struct" href="structmemseek_1_1cli_1_1InfoCommand.html">InfoCommand</a> {};</div>
+<div class="line"><a id="l00051" name="l00051"></a><span class="lineno"><a class="line" href="structmemseek_1_1cli_1_1ResetCommand.html">   51</a></span><span class="keyword">struct </span><a class="code hl_struct" href="structmemseek_1_1cli_1_1ResetCommand.html">ResetCommand</a> {};</div>
+<div class="line"><a id="l00052" name="l00052"></a><span class="lineno"><a class="line" href="structmemseek_1_1cli_1_1HelpCommand.html">   52</a></span><span class="keyword">struct </span><a class="code hl_struct" href="structmemseek_1_1cli_1_1HelpCommand.html">HelpCommand</a> {};</div>
+<div class="line"><a id="l00053" name="l00053"></a><span class="lineno"><a class="line" href="structmemseek_1_1cli_1_1QuitCommand.html">   53</a></span><span class="keyword">struct </span><a class="code hl_struct" href="structmemseek_1_1cli_1_1QuitCommand.html">QuitCommand</a> {};</div>
+<div class="line"><a id="l00054" name="l00054"></a><span class="lineno">   54</span> </div>
+<div class="line"><a id="l00055" name="l00055"></a><span class="lineno"><a class="line" href="namespacememseek_1_1cli.html#a6cf0daab5eb7a29a67c7e6aa56bcfefb">   55</a></span><span class="keyword">using </span><a class="code hl_typedef" href="namespacememseek_1_1cli.html#a6cf0daab5eb7a29a67c7e6aa56bcfefb">Command</a> = std::variant&lt;<a class="code hl_struct" href="structmemseek_1_1cli_1_1AttachCommand.html">AttachCommand</a>, <a class="code hl_struct" href="structmemseek_1_1cli_1_1ScanCommand.html">ScanCommand</a>, <a class="code hl_struct" href="structmemseek_1_1cli_1_1FilterCommand.html">FilterCommand</a>,</div>
+<div class="line"><a id="l00056" name="l00056"></a><span class="lineno">   56</span>                             <a class="code hl_struct" href="structmemseek_1_1cli_1_1ResultsCommand.html">ResultsCommand</a>, <a class="code hl_struct" href="structmemseek_1_1cli_1_1RegionsCommand.html">RegionsCommand</a>, <a class="code hl_struct" href="structmemseek_1_1cli_1_1InfoCommand.html">InfoCommand</a>,</div>
+<div class="line"><a id="l00057" name="l00057"></a><span class="lineno">   57</span>                             <a class="code hl_struct" href="structmemseek_1_1cli_1_1ResetCommand.html">ResetCommand</a>, <a class="code hl_struct" href="structmemseek_1_1cli_1_1HelpCommand.html">HelpCommand</a>, <a class="code hl_struct" href="structmemseek_1_1cli_1_1QuitCommand.html">QuitCommand</a>&gt;;</div>
+<div class="line"><a id="l00058" name="l00058"></a><span class="lineno">   58</span> </div>
+<div class="line"><a id="l00059" name="l00059"></a><span class="lineno">   59</span>[[nodiscard]]</div>
+<div class="line"><a id="l00060" name="l00060"></a><span class="lineno">   60</span><span class="keyword">auto</span> <a class="code hl_function" href="namespacememseek_1_1cli.html#ad3fc38a7e0dffeb58a070928fdd12639">parseCommandLine</a>(std::string_view line)</div>
+<div class="line"><a id="l00061" name="l00061"></a><span class="lineno">   61</span>    -&gt; std::expected&lt;std::optional&lt;Command&gt;, std::string&gt;;</div>
+<div class="line"><a id="l00062" name="l00062"></a><span class="lineno">   62</span> </div>
+<div class="line"><a id="l00063" name="l00063"></a><span class="lineno">   63</span>[[nodiscard]]</div>
+<div class="line"><a id="l00064" name="l00064"></a><span class="lineno">   64</span><span class="keyword">auto</span> <a class="code hl_function" href="namespacememseek_1_1cli.html#a1d8b7538c70b255e51ba9abb97283e3e">parseByteOrder</a>(std::string_view text) -&gt; std::optional&lt;ByteOrder&gt;;</div>
+<div class="line"><a id="l00065" name="l00065"></a><span class="lineno">   65</span> </div>
+<div class="line"><a id="l00066" name="l00066"></a><span class="lineno">   66</span>[[nodiscard]]</div>
+<div class="line"><a id="l00067" name="l00067"></a><span class="lineno">   67</span><span class="keyword">auto</span> <a class="code hl_function" href="namespacememseek_1_1cli.html#a31ea8a0447293c5872945ddb710400ee">byteOrderText</a>(<a class="code hl_enumeration" href="namespacememseek.html#ad0a21e41b3905118505710c83fbcb741">ByteOrder</a> byteOrder) -&gt; std::string_view;</div>
+<div class="line"><a id="l00068" name="l00068"></a><span class="lineno">   68</span> </div>
+<div class="line"><a id="l00069" name="l00069"></a><span class="lineno">   69</span>}  <span class="comment">// namespace memseek::cli</span></div>
+</div>
+<div class="ttc" id="achange_8hpp_html"><div class="ttname"><a href="change_8hpp.html">change.hpp</a></div></div>
+<div class="ttc" id="aclassmemseek_1_1Value_html"><div class="ttname"><a href="classmemseek_1_1Value.html">memseek::Value</a></div><div class="ttdef"><b>Definition</b> value.hpp:105</div></div>
+<div class="ttc" id="anamespacememseek_1_1cli_html"><div class="ttname"><a href="namespacememseek_1_1cli.html">memseek::cli</a></div><div class="ttdef"><b>Definition</b> command.hpp:18</div></div>
+<div class="ttc" id="anamespacememseek_1_1cli_html_a1d8b7538c70b255e51ba9abb97283e3e"><div class="ttname"><a href="namespacememseek_1_1cli.html#a1d8b7538c70b255e51ba9abb97283e3e">memseek::cli::parseByteOrder</a></div><div class="ttdeci">auto parseByteOrder(std::string_view text) -&gt; std::optional&lt; ByteOrder &gt;</div><div class="ttdef"><b>Definition</b> command.cpp:382</div></div>
+<div class="ttc" id="anamespacememseek_1_1cli_html_a292a4ab262869a031d60a0f627f6a816"><div class="ttname"><a href="namespacememseek_1_1cli.html#a292a4ab262869a031d60a0f627f6a816">memseek::cli::OutputFormat</a></div><div class="ttdeci">OutputFormat</div><div class="ttdef"><b>Definition</b> command.hpp:20</div></div>
+<div class="ttc" id="anamespacememseek_1_1cli_html_a292a4ab262869a031d60a0f627f6a816a0ecd11c1d7a287401d148a23bbd7a2f8"><div class="ttname"><a href="namespacememseek_1_1cli.html#a292a4ab262869a031d60a0f627f6a816a0ecd11c1d7a287401d148a23bbd7a2f8">memseek::cli::OutputFormat::JSON</a></div><div class="ttdeci">@ JSON</div></div>
+<div class="ttc" id="anamespacememseek_1_1cli_html_a292a4ab262869a031d60a0f627f6a816a61a96ffcb251bb9bf0abf8fec19d0ea8"><div class="ttname"><a href="namespacememseek_1_1cli.html#a292a4ab262869a031d60a0f627f6a816a61a96ffcb251bb9bf0abf8fec19d0ea8">memseek::cli::OutputFormat::TEXT</a></div><div class="ttdeci">@ TEXT</div></div>
+<div class="ttc" id="anamespacememseek_1_1cli_html_a31ea8a0447293c5872945ddb710400ee"><div class="ttname"><a href="namespacememseek_1_1cli.html#a31ea8a0447293c5872945ddb710400ee">memseek::cli::byteOrderText</a></div><div class="ttdeci">auto byteOrderText(ByteOrder byteOrder) -&gt; std::string_view</div><div class="ttdef"><b>Definition</b> command.cpp:395</div></div>
+<div class="ttc" id="anamespacememseek_1_1cli_html_a6cf0daab5eb7a29a67c7e6aa56bcfefb"><div class="ttname"><a href="namespacememseek_1_1cli.html#a6cf0daab5eb7a29a67c7e6aa56bcfefb">memseek::cli::Command</a></div><div class="ttdeci">std::variant&lt; AttachCommand, ScanCommand, FilterCommand, ResultsCommand, RegionsCommand, InfoCommand, ResetCommand, HelpCommand, QuitCommand &gt; Command</div><div class="ttdef"><b>Definition</b> command.hpp:57</div></div>
+<div class="ttc" id="anamespacememseek_1_1cli_html_ad3fc38a7e0dffeb58a070928fdd12639"><div class="ttname"><a href="namespacememseek_1_1cli.html#ad3fc38a7e0dffeb58a070928fdd12639">memseek::cli::parseCommandLine</a></div><div class="ttdeci">auto parseCommandLine(std::string_view line) -&gt; std::expected&lt; std::optional&lt; Command &gt;, std::string &gt;</div><div class="ttdef"><b>Definition</b> command.cpp:407</div></div>
+<div class="ttc" id="anamespacememseek_html_a62fc59d52513d15b15466fedb4a09357"><div class="ttname"><a href="namespacememseek.html#a62fc59d52513d15b15466fedb4a09357">memseek::ScanType</a></div><div class="ttdeci">ScanType</div><div class="ttdef"><b>Definition</b> scan.hpp:46</div></div>
+<div class="ttc" id="anamespacememseek_html_a62fc59d52513d15b15466fedb4a09357ac41e056424136b6e8c4e23dd6326efa1"><div class="ttname"><a href="namespacememseek.html#a62fc59d52513d15b15466fedb4a09357ac41e056424136b6e8c4e23dd6326efa1">memseek::ScanType::EXACT</a></div><div class="ttdeci">@ EXACT</div></div>
+<div class="ttc" id="anamespacememseek_html_ac9991f561eb3f244a026c586dc8f5189"><div class="ttname"><a href="namespacememseek.html#ac9991f561eb3f244a026c586dc8f5189">memseek::ChangeType</a></div><div class="ttdeci">ChangeType</div><div class="ttdef"><b>Definition</b> change.hpp:13</div></div>
+<div class="ttc" id="anamespacememseek_html_ac9991f561eb3f244a026c586dc8f5189ae6b94e58bfd13b21bc786578d9f8ba4a"><div class="ttname"><a href="namespacememseek.html#ac9991f561eb3f244a026c586dc8f5189ae6b94e58bfd13b21bc786578d9f8ba4a">memseek::ChangeType::CHANGED</a></div><div class="ttdeci">@ CHANGED</div></div>
+<div class="ttc" id="anamespacememseek_html_ad0a21e41b3905118505710c83fbcb741"><div class="ttname"><a href="namespacememseek.html#ad0a21e41b3905118505710c83fbcb741">memseek::ByteOrder</a></div><div class="ttdeci">ByteOrder</div><div class="ttdef"><b>Definition</b> scan.hpp:56</div></div>
+<div class="ttc" id="aregion_8hpp_html"><div class="ttname"><a href="region_8hpp.html">region.hpp</a></div></div>
+<div class="ttc" id="ascan_8hpp_html"><div class="ttname"><a href="scan_8hpp.html">scan.hpp</a></div></div>
+<div class="ttc" id="astructmemseek_1_1MemoryScanLevel_html"><div class="ttname"><a href="structmemseek_1_1MemoryScanLevel.html">memseek::MemoryScanLevel</a></div><div class="ttdef"><b>Definition</b> region.hpp:51</div></div>
+<div class="ttc" id="astructmemseek_1_1cli_1_1AttachCommand_html"><div class="ttname"><a href="structmemseek_1_1cli_1_1AttachCommand.html">memseek::cli::AttachCommand</a></div><div class="ttdef"><b>Definition</b> command.hpp:25</div></div>
+<div class="ttc" id="astructmemseek_1_1cli_1_1AttachCommand_html_ab74e42076910dfbab0fff6e5d17719f5"><div class="ttname"><a href="structmemseek_1_1cli_1_1AttachCommand.html#ab74e42076910dfbab0fff6e5d17719f5">memseek::cli::AttachCommand::pid</a></div><div class="ttdeci">pid_t pid</div><div class="ttdef"><b>Definition</b> command.hpp:26</div></div>
+<div class="ttc" id="astructmemseek_1_1cli_1_1FilterCommand_html"><div class="ttname"><a href="structmemseek_1_1cli_1_1FilterCommand.html">memseek::cli::FilterCommand</a></div><div class="ttdef"><b>Definition</b> command.hpp:37</div></div>
+<div class="ttc" id="astructmemseek_1_1cli_1_1FilterCommand_html_adf73d91a2e709dfc881220c0cfc3da4b"><div class="ttname"><a href="structmemseek_1_1cli_1_1FilterCommand.html#adf73d91a2e709dfc881220c0cfc3da4b">memseek::cli::FilterCommand::type</a></div><div class="ttdeci">ChangeType type</div><div class="ttdef"><b>Definition</b> command.hpp:38</div></div>
+<div class="ttc" id="astructmemseek_1_1cli_1_1HelpCommand_html"><div class="ttname"><a href="structmemseek_1_1cli_1_1HelpCommand.html">memseek::cli::HelpCommand</a></div><div class="ttdef"><b>Definition</b> command.hpp:52</div></div>
+<div class="ttc" id="astructmemseek_1_1cli_1_1InfoCommand_html"><div class="ttname"><a href="structmemseek_1_1cli_1_1InfoCommand.html">memseek::cli::InfoCommand</a></div><div class="ttdef"><b>Definition</b> command.hpp:50</div></div>
+<div class="ttc" id="astructmemseek_1_1cli_1_1QuitCommand_html"><div class="ttname"><a href="structmemseek_1_1cli_1_1QuitCommand.html">memseek::cli::QuitCommand</a></div><div class="ttdef"><b>Definition</b> command.hpp:53</div></div>
+<div class="ttc" id="astructmemseek_1_1cli_1_1RegionsCommand_html"><div class="ttname"><a href="structmemseek_1_1cli_1_1RegionsCommand.html">memseek::cli::RegionsCommand</a></div><div class="ttdef"><b>Definition</b> command.hpp:46</div></div>
+<div class="ttc" id="astructmemseek_1_1cli_1_1RegionsCommand_html_a1765fdf474f3c430c817f257e64f7e3b"><div class="ttname"><a href="structmemseek_1_1cli_1_1RegionsCommand.html#a1765fdf474f3c430c817f257e64f7e3b">memseek::cli::RegionsCommand::level</a></div><div class="ttdeci">MemoryScanLevel level</div><div class="ttdef"><b>Definition</b> command.hpp:47</div></div>
+<div class="ttc" id="astructmemseek_1_1cli_1_1ResetCommand_html"><div class="ttname"><a href="structmemseek_1_1cli_1_1ResetCommand.html">memseek::cli::ResetCommand</a></div><div class="ttdef"><b>Definition</b> command.hpp:51</div></div>
+<div class="ttc" id="astructmemseek_1_1cli_1_1ResultsCommand_html"><div class="ttname"><a href="structmemseek_1_1cli_1_1ResultsCommand.html">memseek::cli::ResultsCommand</a></div><div class="ttdef"><b>Definition</b> command.hpp:41</div></div>
+<div class="ttc" id="astructmemseek_1_1cli_1_1ResultsCommand_html_a63dc0e0b6c34ec08aeec511e08ca10c9"><div class="ttname"><a href="structmemseek_1_1cli_1_1ResultsCommand.html#a63dc0e0b6c34ec08aeec511e08ca10c9">memseek::cli::ResultsCommand::format</a></div><div class="ttdeci">OutputFormat format</div><div class="ttdef"><b>Definition</b> command.hpp:43</div></div>
+<div class="ttc" id="astructmemseek_1_1cli_1_1ResultsCommand_html_adc2b8c89bb872587881fc52784dd67d2"><div class="ttname"><a href="structmemseek_1_1cli_1_1ResultsCommand.html#adc2b8c89bb872587881fc52784dd67d2">memseek::cli::ResultsCommand::limit</a></div><div class="ttdeci">std::optional&lt; std::size_t &gt; limit</div><div class="ttdef"><b>Definition</b> command.hpp:42</div></div>
+<div class="ttc" id="astructmemseek_1_1cli_1_1ScanCommand_html"><div class="ttname"><a href="structmemseek_1_1cli_1_1ScanCommand.html">memseek::cli::ScanCommand</a></div><div class="ttdef"><b>Definition</b> command.hpp:29</div></div>
+<div class="ttc" id="astructmemseek_1_1cli_1_1ScanCommand_html_a08762838ab134fe4dec1b026f2831965"><div class="ttname"><a href="structmemseek_1_1cli_1_1ScanCommand.html#a08762838ab134fe4dec1b026f2831965">memseek::cli::ScanCommand::scanType</a></div><div class="ttdeci">ScanType scanType</div><div class="ttdef"><b>Definition</b> command.hpp:30</div></div>
+<div class="ttc" id="astructmemseek_1_1cli_1_1ScanCommand_html_abcef488ce54267a53c43fec47a6b8d2e"><div class="ttname"><a href="structmemseek_1_1cli_1_1ScanCommand.html#abcef488ce54267a53c43fec47a6b8d2e">memseek::cli::ScanCommand::level</a></div><div class="ttdeci">MemoryScanLevel level</div><div class="ttdef"><b>Definition</b> command.hpp:33</div></div>
+<div class="ttc" id="astructmemseek_1_1cli_1_1ScanCommand_html_abf646c9e8031eeeee800a693eb9e6744"><div class="ttname"><a href="structmemseek_1_1cli_1_1ScanCommand.html#abf646c9e8031eeeee800a693eb9e6744">memseek::cli::ScanCommand::description</a></div><div class="ttdeci">std::string description</div><div class="ttdef"><b>Definition</b> command.hpp:34</div></div>
+<div class="ttc" id="astructmemseek_1_1cli_1_1ScanCommand_html_ac4e3738dde63557f07c6808e604b0b51"><div class="ttname"><a href="structmemseek_1_1cli_1_1ScanCommand.html#ac4e3738dde63557f07c6808e604b0b51">memseek::cli::ScanCommand::lowerBound</a></div><div class="ttdeci">Value lowerBound</div><div class="ttdef"><b>Definition</b> command.hpp:31</div></div>
+<div class="ttc" id="astructmemseek_1_1cli_1_1ScanCommand_html_af04ceb6c06597b0a0e74ea014fbc4a57"><div class="ttname"><a href="structmemseek_1_1cli_1_1ScanCommand.html#af04ceb6c06597b0a0e74ea014fbc4a57">memseek::cli::ScanCommand::upperBound</a></div><div class="ttdeci">std::optional&lt; Value &gt; upperBound</div><div class="ttdef"><b>Definition</b> command.hpp:32</div></div>
+<div class="ttc" id="avalue_8hpp_html"><div class="ttname"><a href="value_8hpp.html">value.hpp</a></div></div>
+</div><!-- fragment --></div><!-- contents -->
+</div><!-- doc-content -->
+<!-- start footer part -->
+<div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
+  <ul>
+    <li class="navelem"><a class="el" href="dir_d44c64559bbebec7f509842c48db8b23.html">include</a></li><li class="navelem"><a class="el" href="dir_228224e106b34a496deab9a6a7e801a4.html">memseek</a></li><li class="navelem"><a class="el" href="dir_54d080fe6dd0025fa5912bb5560a7539.html">cli</a></li><li class="navelem"><a class="el" href="command_8hpp.html">command.hpp</a></li>
+    <li class="footer">制作者 <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
+  </ul>
+</div>
+</body>
+</html>
