@@ -34,7 +34,7 @@ std::expected<MemoryRegionList, std::string> readProcess(
     pid_t pid, MemoryScanLevel level) {
     MemoryRegionList regionList{};
 
-#if defined(__linux__)
+#ifdef __linux__
 
     const std::string mapsPath = "/proc/" + std::to_string(pid) + "/maps";
 
@@ -112,15 +112,15 @@ std::expected<MemoryRegionList, std::string> readProcess(
         region.protection = MemoryProtection::NONE;
 
         if (permissions.size() >= 3) {
-            if (permissions[0] == 'r') {
+            if (permissions.at(0) == 'r') {
                 region.protection |= MemoryProtection::READ;
             }
 
-            if (permissions[1] == 'w') {
+            if (permissions.at(1) == 'w') {
                 region.protection |= MemoryProtection::WRITE;
             }
 
-            if (permissions[2] == 'x') {
+            if (permissions.at(2) == 'x') {
                 region.protection |= MemoryProtection::EXECUTE;
             }
         }

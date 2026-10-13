@@ -11,7 +11,7 @@ MemSeek interactive CLI 0.1.0
 Type 'help' for commands.
 memseek> attach 1234
 Attached to process 1234
-memseek[1234]> scan u32 100
+memseek[1234]> scan --type u32 --value 100
 Found 1842 candidates
 memseek[1234]> filter changed
 1842 -> 37 candidates
@@ -46,26 +46,20 @@ memseek[1234]>
 
 ### `scan`：创建候选基线
 
-支持简短位置参数和等价的长选项语法。
-
 ```text
-scan <type> <value> [--region TYPE] [--protection PERM]
-scan <type> greater|less <value> [--region TYPE] [--protection PERM]
-scan <type> range <min> <max> [--region TYPE] [--protection PERM]
-
-scan --type <type> [--mode exact] --value <value> [过滤选项]
-scan --type <type> --mode greater|less --value <value> [过滤选项]
-scan --type <type> --mode range --min <min> --max <max> [过滤选项]
+scan --type TYPE [--mode exact] --value VALUE [过滤选项]
+scan --type TYPE --mode greater|less --value VALUE [过滤选项]
+scan --type TYPE --mode range --min MIN --max MAX [过滤选项]
 ```
 
 示例：
 
 ```text
-scan u32 100
-scan string "hello world"
-scan bytes "48 8B 05"
-scan i64 greater -10 --region heap --protection write
-scan u16 range 10 20
+scan --type u32 --value 100
+scan --type string --value "hello world"
+scan --type bytes --value "48 8B 05"
+scan --type i64 --mode greater --value -10 --region heap --protection write
+scan --type u16 --mode range --min 10 --max 20
 scan --type double --mode range --min 1.5 --max 2.5 --region anonymous
 ```
 
@@ -82,8 +76,6 @@ scan --type double --mode range --min 1.5 --max 2.5 --region anonymous
 
 - `--region heap|stack|anonymous|module`：省略时扫描全部已知区域类型。
 - `--protection read|write|execute`：省略时扫描可读区域。扫描始终要求区域可读，因此 `write` 表示可读且可写，`execute` 表示可读且可执行。
-
-位置参数核心语法不能和 `--type`、`--mode`、`--value`、`--min`、`--max` 混用，但可以追加区域和权限过滤器。
 
 ### `filter changed|unchanged`
 
@@ -164,7 +156,7 @@ regions --region heap
 
 ```text
 memseek> attach 1234
-memseek[1234]> scan u32 100 --region heap
+memseek[1234]> scan --type u32 --value 100 --region heap
 memseek[1234]> filter changed
 memseek[1234]> filter unchanged
 memseek[1234]> results --limit 20

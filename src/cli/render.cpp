@@ -53,12 +53,14 @@ auto hexAddress(const std::uintptr_t address) -> std::string {
 
 auto bytesText(const std::span<const std::byte> bytes) -> std::string {
     std::ostringstream stream;
-    for (std::size_t index = 0; index < bytes.size(); ++index) {
-        if (index != 0) {
+    bool first = true;
+    for (const auto byte : bytes) {
+        if (!first) {
             stream << ' ';
         }
+        first = false;
         stream << std::hex << std::setw(2) << std::setfill('0')
-               << std::to_integer<unsigned int>(bytes[index]);
+               << std::to_integer<unsigned int>(byte);
     }
     return stream.str();
 }
@@ -141,12 +143,13 @@ auto renderResultsJson(const pid_t pid, const std::size_t candidateCount,
            << ",\n  \"candidate_count\": " << candidateCount
            << ",\n  \"returned_count\": " << entries.size()
            << ",\n  \"results\": [";
-    for (std::size_t index = 0; index < entries.size(); ++index) {
-        const auto& entry = entries[index];
-        output << (index == 0 ? "\n" : ",\n") << "    {\n"
-               << "      \"address\": \"" << hexAddress(entry.address)
+    bool first = true;
+    for (const auto& entry : entries) {
+        output << (first ? "\n" : ",\n") << "    {\n";
+        first = false;
+        output << R"(      "address": ")" << hexAddress(entry.address)
                << "\",\n"
-               << "      \"current_bytes\": \"" << bytesText(entry.currentBytes)
+               << R"(      "current_bytes": ")" << bytesText(entry.currentBytes)
                << "\",\n"
                << "      \"previous_bytes\": ";
         if (entry.previousBytes) {
@@ -157,17 +160,17 @@ auto renderResultsJson(const pid_t pid, const std::size_t candidateCount,
         output << ",\n      \"region\": ";
         if (entry.region) {
             output << "{\n"
-                   << "        \"start\": \"" << hexAddress(entry.region->start)
+                   << R"(        "start": ")" << hexAddress(entry.region->start)
                    << "\",\n"
-                   << "        \"end\": \""
+                   << R"(        "end": ")"
                    << hexAddress(entry.region->start + entry.region->size)
                    << "\",\n"
                    << "        \"size\": " << entry.region->size << ",\n"
-                   << "        \"protection\": \""
+                   << R"(        "protection": ")"
                    << protectionText(*entry.region) << "\",\n"
-                   << "        \"type\": \"" << regionTypeText(*entry.region)
+                   << R"(        "type": ")" << regionTypeText(*entry.region)
                    << "\",\n"
-                   << "        \"path\": \""
+                   << R"(        "path": ")"
                    << jsonEscape(entry.region->pathname) << "\"\n"
                    << "      }\n";
         } else {
@@ -200,9 +203,6 @@ auto renderRegionsText(const std::span<const MemoryRegion> regions)
 auto renderHelpText() -> std::string_view {
     return R"(Commands:
   attach <PID>
-  scan <type> <value> [--region TYPE] [--protection PERM]
-  scan <type> greater|less <value> [--region TYPE] [--protection PERM]
-  scan <type> range <min> <max> [--region TYPE] [--protection PERM]
   scan --type TYPE [--mode exact] --value VALUE [filters]
   scan --type TYPE --mode greater|less --value VALUE [filters]
   scan --type TYPE --mode range --min MIN --max MAX [filters]

@@ -39,18 +39,18 @@ TEST(CliParserTest, IgnoresWhitespaceAndRejectsUnterminatedQuotes) {
 
 TEST(CliParserTest, ParsesEveryExactValueType) {
     const std::vector<std::pair<std::string, ValueType>> cases{
-        {"scan u8 255", ValueType::U_INT8},
-        {"scan u16 65535", ValueType::U_INT16},
-        {"scan u32 4294967295", ValueType::U_INT32},
-        {"scan u64 18446744073709551615", ValueType::U_INT64},
-        {"scan i8 -128", ValueType::INT8},
-        {"scan i16 -32768", ValueType::INT16},
-        {"scan i32 -2147483648", ValueType::INT32},
-        {"scan i64 -9223372036854775808", ValueType::INT64},
-        {"scan float 1.25", ValueType::FLOAT32},
-        {"scan double -2.5", ValueType::FLOAT64},
-        {"scan string \"hello world\"", ValueType::STR},
-        {"scan bytes \"48 8B:05\"", ValueType::BIN_ARRAY},
+        {"scan --type u8 --value 255", ValueType::U_INT8},
+        {"scan --type u16 --value 65535", ValueType::U_INT16},
+        {"scan --type u32 --value 4294967295", ValueType::U_INT32},
+        {"scan --type u64 --value 18446744073709551615", ValueType::U_INT64},
+        {"scan --type i8 --value -128", ValueType::INT8},
+        {"scan --type i16 --value -32768", ValueType::INT16},
+        {"scan --type i32 --value -2147483648", ValueType::INT32},
+        {"scan --type i64 --value -9223372036854775808", ValueType::INT64},
+        {"scan --type float --value 1.25", ValueType::FLOAT32},
+        {"scan --type double --value -2.5", ValueType::FLOAT64},
+        {"scan --type string --value \"hello world\"", ValueType::STR},
+        {"scan --type bytes --value \"48 8B:05\"", ValueType::BIN_ARRAY},
     };
 
     for (const auto& [line, expectedType] : cases) {
@@ -62,9 +62,10 @@ TEST(CliParserTest, ParsesEveryExactValueType) {
     }
 }
 
-TEST(CliParserTest, ParsesPositionalScanFilters) {
-    const auto command =
-        parse("scan u32 greater 100 --region heap --protection write");
+TEST(CliParserTest, ParsesNamedScanFilters) {
+    const auto command = parse(
+        "scan --type u32 --mode greater --value 100 "
+        "--region heap --protection write");
     const auto* scan = std::get_if<ScanCommand>(&command);
     ASSERT_NE(scan, nullptr);
     EXPECT_EQ(scan->scanType, ScanType::GREATER);
@@ -92,7 +93,7 @@ TEST(CliParserTest, ParsesNamedRangeOptionsInAnyOrder) {
 }
 
 TEST(CliParserTest, UsesReadableKnownRegionsByDefault) {
-    const auto command = parse("scan u16 42");
+    const auto command = parse("scan --type u16 --value 42");
     const auto* scan = std::get_if<ScanCommand>(&command);
     ASSERT_NE(scan, nullptr);
     EXPECT_EQ(scan->level.memoryProtection,
@@ -107,14 +108,14 @@ TEST(CliParserTest, UsesReadableKnownRegionsByDefault) {
 
 TEST(CliParserTest, RejectsInvalidScanCombinationsAndValues) {
     const std::vector<std::string> invalid{
-        "scan u32 1 --type u32",
-        "scan string greater hello",
-        "scan bytes range 01 02",
-        "scan u32 range 9 1",
-        "scan float nan",
-        "scan double inf",
-        "scan u8 256",
-        "scan bytes 123",
+        "scan u32 1",
+        "scan --type string --mode greater --value hello",
+        "scan --type bytes --mode range --min 01 --max 02",
+        "scan --type u32 --mode range --min 9 --max 1",
+        "scan --type float --value nan",
+        "scan --type double --value inf",
+        "scan --type u8 --value 256",
+        "scan --type bytes --value 123",
         "scan --type u32 --mode range --value 2 --min 1 --max 3",
         "scan --type u32 --mode exact --min 1 --max 3",
         "scan --type u32 --value 1 --region heap --region stack",

@@ -41,8 +41,8 @@ TEST(CliIntegrationTest, ScansFiltersRendersAndResetsSelfProcess) {
                        input, output, errors};
 
     ASSERT_TRUE(cli.executeLine("attach " + std::to_string(getpid())));
-    ASSERT_TRUE(cli.executeLine("scan u64 " + std::to_string(planted) +
-                                " --region stack"));
+    ASSERT_TRUE(cli.executeLine("scan --type u64 --value " +
+                                std::to_string(planted) + " --region stack"));
     ++planted;
     ASSERT_TRUE(cli.executeLine("filter changed"));
     ASSERT_TRUE(cli.executeLine("filter unchanged"));

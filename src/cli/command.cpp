@@ -114,7 +114,7 @@ auto parseRegion(const std::optional<std::string>& name, MemoryScanLevel& level)
 auto parseProtection(const std::optional<std::string>& name,
                      MemoryScanLevel& level)
     -> std::expected<std::string, std::string> {
-    const auto protection = name.value_or("read");
+    auto protection = name.value_or("read");
     if (protection == "read") {
         level.memoryProtection =
             static_cast<std::uint8_t>(MemoryProtection::READ);
@@ -153,11 +153,11 @@ struct ScanArguments {
 auto readScanOption(const std::vector<std::string>& tokens, std::size_t& index,
                     ScanArguments& arguments)
     -> std::expected<void, std::string> {
-    const auto& option = tokens[index];
+    const auto& option = tokens.at(index);
     if (index + 1 >= tokens.size()) {
         return std::unexpected("missing value for option: " + option);
     }
-    const auto& value = tokens[++index];
+    const auto& value = tokens.at(++index);
     if (option == "--type") {
         return setOnce(arguments.type, value, option);
     }
@@ -276,62 +276,14 @@ auto makeScanCommand(ScanArguments arguments)
 auto parseScan(const std::vector<std::string>& tokens)
     -> std::expected<Command, std::string> {
     if (tokens.size() < 2) {
-        return std::unexpected("usage: scan <type> <value> [options]");
+        return std::unexpected("usage: scan --type TYPE [options]");
     }
 
     ScanArguments arguments;
-    if (tokens[1].starts_with("--")) {
-        for (std::size_t index = 1; index < tokens.size(); ++index) {
-            if (!tokens[index].starts_with("--")) {
-                return std::unexpected(
-                    "positional scan arguments cannot be mixed with --type");
-            }
-            const auto result = readScanOption(tokens, index, arguments);
-            if (!result) {
-                return std::unexpected(result.error());
-            }
-        }
-        return makeScanCommand(std::move(arguments));
-    }
-
-    arguments.type = tokens[1];
-    if (tokens.size() < 3 || tokens[2].starts_with("--")) {
-        return std::unexpected("usage: scan <type> <value> [options]");
-    }
-
-    std::size_t index = 2;
-    if (tokens[index] == "range") {
-        arguments.mode = "range";
-        if (index + 2 >= tokens.size() || tokens[index + 1].starts_with("--") ||
-            tokens[index + 2].starts_with("--")) {
+    for (std::size_t index = 1; index < tokens.size(); ++index) {
+        if (!tokens.at(index).starts_with("--")) {
             return std::unexpected(
-                "usage: scan <type> range <min> <max> [options]");
-        }
-        arguments.minimum = tokens[index + 1];
-        arguments.maximum = tokens[index + 2];
-        index += 3;
-    } else if (tokens[index] == "greater" || tokens[index] == "less") {
-        arguments.mode = tokens[index];
-        if (index + 1 >= tokens.size() || tokens[index + 1].starts_with("--")) {
-            return std::unexpected(
-                "usage: scan <type> greater|less <value> [options]");
-        }
-        arguments.value = tokens[index + 1];
-        index += 2;
-    } else {
-        arguments.mode = "exact";
-        arguments.value = tokens[index++];
-    }
-
-    for (; index < tokens.size(); ++index) {
-        if (tokens[index] != "--region" && tokens[index] != "--protection") {
-            if (tokens[index].starts_with("--")) {
-                return std::unexpected(
-                    "positional scan syntax only accepts --region and "
-                    "--protection");
-            }
-            return std::unexpected("unexpected scan argument: " +
-                                   tokens[index]);
+                "scan arguments must use --option value syntax");
         }
         const auto result = readScanOption(tokens, index, arguments);
         if (!result) {
@@ -348,7 +300,7 @@ auto parseResults(const std::vector<std::string>& tokens)
     std::optional<OutputFormat> format;
 
     for (std::size_t index = 1; index < tokens.size(); ++index) {
-        const auto& token = tokens[index];
+        const auto& token = tokens.at(index);
         if (token == "--limit") {
             if (optionLimit) {
                 return std::unexpected("duplicate option: --limit");
@@ -356,11 +308,11 @@ auto parseResults(const std::vector<std::string>& tokens)
             if (index + 1 >= tokens.size()) {
                 return std::unexpected("missing value for option: --limit");
             }
-            const auto parsed = parseInteger<std::size_t>(tokens[++index]);
+            const auto parsed = parseInteger<std::size_t>(tokens.at(++index));
             if (!parsed) {
                 return std::unexpected("invalid result limit");
             }
-            optionLimit = *parsed;
+            optionLimit = parsed;
         } else if (token == "--format") {
             if (format) {
                 return std::unexpected("duplicate option: --format");
@@ -368,7 +320,7 @@ auto parseResults(const std::vector<std::string>& tokens)
             if (index + 1 >= tokens.size()) {
                 return std::unexpected("missing value for option: --format");
             }
-            const auto& name = tokens[++index];
+            const auto& name = tokens.at(++index);
             if (name == "text") {
                 format = OutputFormat::TEXT;
             } else if (name == "json") {
@@ -386,7 +338,7 @@ auto parseResults(const std::vector<std::string>& tokens)
             if (!parsed) {
                 return std::unexpected("invalid result limit");
             }
-            positionalLimit = *parsed;
+            positionalLimit = parsed;
         }
     }
 
@@ -404,13 +356,14 @@ auto parseRegions(const std::vector<std::string>& tokens)
     -> std::expected<Command, std::string> {
     std::optional<std::string> region;
     for (std::size_t index = 1; index < tokens.size(); ++index) {
-        if (tokens[index] != "--region") {
-            return std::unexpected("unknown regions option: " + tokens[index]);
+        if (tokens.at(index) != "--region") {
+            return std::unexpected("unknown regions option: " +
+                                   tokens.at(index));
         }
         if (index + 1 >= tokens.size()) {
             return std::unexpected("missing value for option: --region");
         }
-        const auto result = setOnce(region, tokens[++index], "--region");
+        const auto result = setOnce(region, tokens.at(++index), "--region");
         if (!result) {
             return std::unexpected(result.error());
         }
@@ -466,14 +419,14 @@ auto parseCommandLine(const std::string_view line)
         if (tokens->size() != 2) {
             return std::unexpected("usage: attach <PID>");
         }
-        const auto pid = parseInteger<pid_t>((*tokens)[1]);
+        const auto pid = parseInteger<pid_t>((*tokens).at(1));
         if (!pid || *pid <= 0) {
             return std::unexpected("invalid PID");
         }
         return std::optional<Command>{Command{AttachCommand{.pid = *pid}}};
     }
     if (name == "scan") {
-        const auto command = parseScan(*tokens);
+        auto command = parseScan(*tokens);
         if (!command) {
             return std::unexpected(command.error());
         }
@@ -481,23 +434,23 @@ auto parseCommandLine(const std::string_view line)
     }
     if (name == "filter") {
         if (tokens->size() != 2 ||
-            ((*tokens)[1] != "changed" && (*tokens)[1] != "unchanged")) {
+            ((*tokens).at(1) != "changed" && (*tokens).at(1) != "unchanged")) {
             return std::unexpected("usage: filter changed|unchanged");
         }
         return std::optional<Command>{Command{FilterCommand{
-            .type = (*tokens)[1] == "changed" ? ChangeType::CHANGED
-                                              : ChangeType::UNCHANGED,
+            .type = (*tokens).at(1) == "changed" ? ChangeType::CHANGED
+                                                 : ChangeType::UNCHANGED,
         }}};
     }
     if (name == "results") {
-        const auto command = parseResults(*tokens);
+        auto command = parseResults(*tokens);
         if (!command) {
             return std::unexpected(command.error());
         }
         return std::optional<Command>{std::move(*command)};
     }
     if (name == "regions") {
-        const auto command = parseRegions(*tokens);
+        auto command = parseRegions(*tokens);
         if (!command) {
             return std::unexpected(command.error());
         }
@@ -534,6 +487,7 @@ auto parseCommandLine(const std::string_view line)
         }
         return std::optional<Command>{Command{QuitCommand{}}};
     }
+
     return std::unexpected("unknown command; type 'help' for commands");
 }
 
