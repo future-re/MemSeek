@@ -30,8 +30,8 @@ enum class RangeValidity : std::uint8_t {
 };
 
 template <typename T>
-auto validateRangeValues(const Value& lowerBound,
-                         const Value& upperBound) -> RangeValidity {
+auto validateRangeValues(const Value& lowerBound, const Value& upperBound)
+    -> RangeValidity {
     const auto lower = lowerBound.as<T>();
     const auto upper = upperBound.as<T>();
     if constexpr (std::is_floating_point_v<T>) {
@@ -42,8 +42,8 @@ auto validateRangeValues(const Value& lowerBound,
     return lower <= upper ? RangeValidity::VALID : RangeValidity::REVERSED;
 }
 
-auto validateRangeValues(const Value& lowerBound,
-                         const Value& upperBound) -> RangeValidity {
+auto validateRangeValues(const Value& lowerBound, const Value& upperBound)
+    -> RangeValidity {
     switch (lowerBound.type()) {
         case ValueType::U_INT8:
             return validateRangeValues<std::uint8_t>(lowerBound, upperBound);
@@ -133,8 +133,11 @@ auto ScanSession::scan(const Value& target, const MemoryScanLevel level,
     for (const auto& region : regions->getRegions()) {
         auto matches =
             m_scanner.scanRegion(m_pid, region, target, type, byteOrder);
-        results.insert(results.end(), std::make_move_iterator(matches.begin()),
-                       std::make_move_iterator(matches.end()));
+        if (!matches) {
+            return std::unexpected(matches.error());
+        }
+        results.insert(results.end(), std::make_move_iterator(matches->begin()),
+                       std::make_move_iterator(matches->end()));
     }
     m_snapshot = MemorySnapshot::fromScanResults(m_pid, std::move(results));
     return {};
@@ -172,8 +175,11 @@ auto ScanSession::scan(const Value& lowerBound, const Value& upperBound,
     for (const auto& region : regions->getRegions()) {
         auto matches = m_scanner.scanRegion(m_pid, region, lowerBound,
                                             upperBound, byteOrder);
-        results.insert(results.end(), std::make_move_iterator(matches.begin()),
-                       std::make_move_iterator(matches.end()));
+        if (!matches) {
+            return std::unexpected(matches.error());
+        }
+        results.insert(results.end(), std::make_move_iterator(matches->begin()),
+                       std::make_move_iterator(matches->end()));
     }
     m_snapshot = MemorySnapshot::fromScanResults(m_pid, std::move(results));
     return {};

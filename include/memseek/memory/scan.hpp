@@ -6,9 +6,11 @@
 #include <boost/asio/thread_pool.hpp>
 #include <cstddef>
 #include <cstdint>
+#include <expected>
 #include <future>
 #include <memory>
 #include <span>
+#include <string>
 #include <thread>
 #include <type_traits>
 #include <utility>
@@ -72,6 +74,9 @@ enum class ByteOrder : std::uint8_t {
 // the memory being scanned, not the input Value. Results contain raw bytes.
 class MemoryScanner {
    public:
+    using ScanResults = std::vector<ScanResult>;
+    using ScanOutcome = std::expected<ScanResults, std::string>;
+
     explicit MemoryScanner(
         std::size_t workerCount = std::thread::hardware_concurrency());
 
@@ -84,27 +89,26 @@ class MemoryScanner {
     MemoryScanner& operator=(MemoryScanner&&) = delete;
 
     [[nodiscard]]
-    std::vector<ScanResult> scanProcess(
-        pid_t pid, MemoryScanLevel level, const Value& target,
-        ScanType scanType = ScanType::EXACT,
-        ByteOrder byteOrder = ByteOrder::NATIVE);
+    ScanOutcome scanProcess(pid_t pid, MemoryScanLevel level,
+                            const Value& target,
+                            ScanType scanType = ScanType::EXACT,
+                            ByteOrder byteOrder = ByteOrder::NATIVE);
 
     [[nodiscard]]
-    std::vector<ScanResult> scanProcess(
-        pid_t pid, MemoryScanLevel level, const Value& lowerBound,
-        const Value& upperBound, ByteOrder byteOrder = ByteOrder::NATIVE);
+    ScanOutcome scanProcess(pid_t pid, MemoryScanLevel level,
+                            const Value& lowerBound, const Value& upperBound,
+                            ByteOrder byteOrder = ByteOrder::NATIVE);
 
     [[nodiscard]]
-    std::vector<ScanResult> scanRegion(pid_t pid, const MemoryRegion& region,
-                                       const Value& target,
-                                       ScanType scanType = ScanType::EXACT,
-                                       ByteOrder byteOrder = ByteOrder::NATIVE);
+    ScanOutcome scanRegion(pid_t pid, const MemoryRegion& region,
+                           const Value& target,
+                           ScanType scanType = ScanType::EXACT,
+                           ByteOrder byteOrder = ByteOrder::NATIVE);
 
     [[nodiscard]]
-    std::vector<ScanResult> scanRegion(pid_t pid, const MemoryRegion& region,
-                                       const Value& lowerBound,
-                                       const Value& upperBound,
-                                       ByteOrder byteOrder = ByteOrder::NATIVE);
+    ScanOutcome scanRegion(pid_t pid, const MemoryRegion& region,
+                           const Value& lowerBound, const Value& upperBound,
+                           ByteOrder byteOrder = ByteOrder::NATIVE);
 
     // RANGE, GREATER, and LESS require Value::isNumeric() to be true.
     // EXACT remains available for numeric values, strings, and byte arrays.
@@ -121,15 +125,14 @@ class MemoryScanner {
         const Value& upperBound, ByteOrder byteOrder = ByteOrder::NATIVE);
 
    private:
-    std::vector<ScanResult> scanProcessImpl(pid_t pid, MemoryScanLevel level,
-                                            const Value& lowerBound,
-                                            const Value* upperBound,
-                                            ScanType scanType,
-                                            ByteOrder byteOrder);
+    ScanOutcome scanProcessImpl(pid_t pid, MemoryScanLevel level,
+                                const Value& lowerBound,
+                                const Value* upperBound, ScanType scanType,
+                                ByteOrder byteOrder);
 
-    std::vector<ScanResult> scanRegionImpl(
-        pid_t pid, const MemoryRegion& region, const Value& lowerBound,
-        const Value* upperBound, ScanType scanType, ByteOrder byteOrder);
+    ScanOutcome scanRegionImpl(pid_t pid, const MemoryRegion& region,
+                               const Value& lowerBound, const Value* upperBound,
+                               ScanType scanType, ByteOrder byteOrder);
 
     static std::vector<ScanResult> scanBufferImpl(const MemoryRead& memory,
                                                   const Value& lowerBound,

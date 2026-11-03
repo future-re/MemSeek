@@ -49,9 +49,14 @@ int main(int argc, char** argv) {
     const auto results = scanner.scanProcess(pid, level, target);
     const auto end = std::chrono::steady_clock::now();
 
+    if (!results) {
+        std::fprintf(stderr, "scan failed: %s\n", results.error().c_str());
+        return 1;
+    }
+
     const auto elapsedMs =
         std::chrono::duration<double, std::milli>(end - start).count();
 
-    std::printf("matches=%zu elapsed_ms=%.3f\n", results.size(), elapsedMs);
+    std::printf("matches=%zu elapsed_ms=%.3f\n", results->size(), elapsedMs);
     return 0;
 }

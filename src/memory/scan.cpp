@@ -8,6 +8,8 @@
 #include <cstddef>
 #include <cstdint>
 #include <cstring>
+#include <exception>
+#include <format>
 #include <future>
 #include <iterator>
 #include <span>
@@ -77,6 +79,20 @@ std::vector<ScanResult> scanWindows(const MemoryRead& memory, std::size_t width,
     return results;
 }
 
+auto expectedReadSize(const MemoryChunk& chunk, const MemoryRegion& region,
+                      const std::size_t overlap) -> std::size_t {
+    const auto offset = chunk.address - region.start;
+    const auto remaining = region.size - offset;
+    const auto extra = std::min(overlap, remaining - chunk.size);
+    return chunk.size + extra;
+}
+
+auto readError(const MemoryChunk& chunk, const std::string& message)
+    -> std::string {
+    return std::format("failed to read memory range [{:#x}, {:#x}): {}",
+                       chunk.address, chunk.address + chunk.size, message);
+}
+
 template <ValueNumericType T>
 std::vector<ScanResult> scanNumeric(const MemoryRead& memory,
                                     const Value& lowerBound,
@@ -139,11 +155,11 @@ MemoryScanner::MemoryScanner(std::size_t workerCount)
 MemoryScanner::~MemoryScanner() { m_pool.join(); }
 
 [[nodiscard]]
-std::vector<ScanResult> MemoryScanner::scanProcess(pid_t pid,
-                                                   MemoryScanLevel level,
-                                                   const Value& target,
-                                                   ScanType scanType,
-                                                   ByteOrder byteOrder) {
+MemoryScanner::ScanOutcome MemoryScanner::scanProcess(pid_t pid,
+                                                      MemoryScanLevel level,
+                                                      const Value& target,
+                                                      ScanType scanType,
+                                                      ByteOrder byteOrder) {
     if (scanType == ScanType::RANGE) {
         throw std::invalid_argument(
             "RANGE scans require both lower and upper bounds");
@@ -152,31 +168,34 @@ std::vector<ScanResult> MemoryScanner::scanProcess(pid_t pid,
     return scanProcessImpl(pid, level, target, nullptr, scanType, byteOrder);
 }
 
-std::vector<ScanResult> MemoryScanner::scanProcess(pid_t pid,
-                                                   MemoryScanLevel level,
-                                                   const Value& lowerBound,
-                                                   const Value& upperBound,
-                                                   ByteOrder byteOrder) {
+MemoryScanner::ScanOutcome MemoryScanner::scanProcess(pid_t pid,
+                                                      MemoryScanLevel level,
+                                                      const Value& lowerBound,
+                                                      const Value& upperBound,
+                                                      ByteOrder byteOrder) {
     return scanProcessImpl(pid, level, lowerBound, &upperBound, ScanType::RANGE,
                            byteOrder);
 }
 
-std::vector<ScanResult> MemoryScanner::scanProcessImpl(
+MemoryScanner::ScanOutcome MemoryScanner::scanProcessImpl(
     pid_t pid, MemoryScanLevel level, const Value& lowerBound,
     const Value* upperBound, ScanType scanType, ByteOrder byteOrder) {
     auto regionList = readProcess(pid, level);
     if (!regionList) {
-        return {};
+        return std::unexpected("failed to enumerate process mappings: " +
+                               regionList.error());
     }
 
     std::vector<ScanResult> results;
     for (const auto& region : regionList->getRegions()) {
         auto regionResults = scanRegionImpl(pid, region, lowerBound, upperBound,
                                             scanType, byteOrder);
-        if (!regionResults.empty()) {
-            results.insert(results.end(), regionResults.begin(),
-                           regionResults.end());
+        if (!regionResults) {
+            return std::unexpected(regionResults.error());
         }
+        results.insert(results.end(),
+                       std::make_move_iterator(regionResults->begin()),
+                       std::make_move_iterator(regionResults->end()));
     }
     return results;
 }
@@ -280,11 +299,11 @@ std::vector<ScanResult> MemoryScanner::scanBufferImpl(const MemoryRead& memory,
     return {};
 }
 
-std::vector<ScanResult> MemoryScanner::scanRegion(pid_t pid,
-                                                  const MemoryRegion& region,
-                                                  const Value& target,
-                                                  ScanType scanType,
-                                                  ByteOrder byteOrder) {
+MemoryScanner::ScanOutcome MemoryScanner::scanRegion(pid_t pid,
+                                                     const MemoryRegion& region,
+                                                     const Value& target,
+                                                     ScanType scanType,
+                                                     ByteOrder byteOrder) {
     if (scanType == ScanType::RANGE) {
         throw std::invalid_argument(
             "RANGE scans require both lower and upper bounds");
@@ -293,16 +312,16 @@ std::vector<ScanResult> MemoryScanner::scanRegion(pid_t pid,
     return scanRegionImpl(pid, region, target, nullptr, scanType, byteOrder);
 }
 
-std::vector<ScanResult> MemoryScanner::scanRegion(pid_t pid,
-                                                  const MemoryRegion& region,
-                                                  const Value& lowerBound,
-                                                  const Value& upperBound,
-                                                  ByteOrder byteOrder) {
+MemoryScanner::ScanOutcome MemoryScanner::scanRegion(pid_t pid,
+                                                     const MemoryRegion& region,
+                                                     const Value& lowerBound,
+                                                     const Value& upperBound,
+                                                     ByteOrder byteOrder) {
     return scanRegionImpl(pid, region, lowerBound, &upperBound, ScanType::RANGE,
                           byteOrder);
 }
 
-std::vector<ScanResult> MemoryScanner::scanRegionImpl(
+MemoryScanner::ScanOutcome MemoryScanner::scanRegionImpl(
     pid_t pid, const MemoryRegion& region, const Value& lowerBound,
     const Value* upperBound, ScanType scanType, ByteOrder byteOrder) {
     if (region.size == 0) {
@@ -311,8 +330,7 @@ std::vector<ScanResult> MemoryScanner::scanRegionImpl(
 
     MemoryReader reader(pid);
 
-    const std::size_t chunkCount =
-        (region.size + DEFAULT_CHUNK_SIZE - 1) / DEFAULT_CHUNK_SIZE;
+    const std::size_t chunkCount = ((region.size - 1) / DEFAULT_CHUNK_SIZE) + 1;
 
     //
     // Small region: avoid thread-pool scheduling overhead.
@@ -326,7 +344,13 @@ std::vector<ScanResult> MemoryScanner::scanRegionImpl(
         auto memory = reader.read(chunk, region, overlap);
 
         if (!memory) {
-            return {};
+            return std::unexpected(readError(chunk, memory.error()));
+        }
+        const auto requiredSize = expectedReadSize(chunk, region, overlap);
+        if (memory->size() != requiredSize) {
+            return std::unexpected(readError(
+                chunk, std::format("short read: expected {} bytes, received {}",
+                                   requiredSize, memory->size())));
         }
 
         return scanBufferImpl(*memory, lowerBound, upperBound, scanType,
@@ -337,38 +361,53 @@ std::vector<ScanResult> MemoryScanner::scanRegionImpl(
     // One future per chunk.
     // The chunks themselves are still generated lazily.
     //
-    std::vector<std::future<std::vector<ScanResult>>> futures;
+    using ChunkOutcome = std::expected<std::vector<ScanResult>, std::string>;
+    std::vector<std::future<ChunkOutcome>> futures;
+    std::vector<MemoryChunk> chunks;
 
     futures.reserve(chunkCount);
+    chunks.reserve(chunkCount);
 
     std::size_t overlap = !lowerBound.empty() ? lowerBound.size() - 1 : 0;
 
     for (const auto chunk : MemoryChunkRange(region)) {
-        futures.emplace_back(submit([&, chunk]() -> std::vector<ScanResult> {
-            auto memory = reader.read(chunk, region, overlap);
+        chunks.push_back(chunk);
+        futures.emplace_back(submit([&, chunk]() -> ChunkOutcome {
+            try {
+                auto memory = reader.read(chunk, region, overlap);
 
-            if (!memory) {
-                return {};
+                if (!memory) {
+                    return std::unexpected(readError(chunk, memory.error()));
+                }
+                const auto requiredSize =
+                    expectedReadSize(chunk, region, overlap);
+                if (memory->size() != requiredSize) {
+                    return std::unexpected(readError(
+                        chunk, std::format(
+                                   "short read: expected {} bytes, received {}",
+                                   requiredSize, memory->size())));
+                }
+
+                auto results = scanBufferImpl(*memory, lowerBound, upperBound,
+                                              scanType, byteOrder);
+
+                // Overlap finds boundary-spanning matches; each chunk owns
+                // matches whose start lies in its logical range.
+                const auto logicalEnd = chunk.address + chunk.size;
+
+                std::erase_if(results, [logicalEnd](const ScanResult& result) {
+                    return result.address() >= logicalEnd;
+                });
+
+                return results;
+            } catch (const std::exception& error) {
+                return std::unexpected(readError(
+                    chunk,
+                    std::format("scan worker failed: {}", error.what())));
+            } catch (...) {
+                return std::unexpected(
+                    readError(chunk, "scan worker failed with unknown error"));
             }
-
-            auto results = scanBufferImpl(*memory, lowerBound, upperBound,
-                                          scanType, byteOrder);
-
-            //
-            // Reader may read overlap bytes so that
-            // matches spanning chunk boundaries are
-            // detectable.
-            //
-            // A chunk only owns matches whose starting
-            // address lies inside its logical range.
-            //
-            const auto logicalEnd = chunk.address + chunk.size;
-
-            std::erase_if(results, [logicalEnd](const ScanResult& result) {
-                return result.address() >= logicalEnd;
-            });
-
-            return results;
         }));
     }
 
@@ -380,13 +419,39 @@ std::vector<ScanResult> MemoryScanner::scanRegionImpl(
     chunkResults.reserve(futures.size());
 
     std::size_t totalMatches = 0;
+    std::string firstError;
 
-    for (auto& future : futures) {
-        auto result = future.get();
+    for (std::size_t index = 0; index < futures.size(); ++index) {
+        auto& future = futures[index];  // NOLINT
+        ChunkOutcome outcome = std::unexpected("scan worker failed");
+        try {
+            outcome = future.get();
+        } catch (const std::exception& error) {
+            outcome = std::unexpected(
+                readError(chunks[index],  // NOLINT
+                          std::format("scan worker failed: {}", error.what())));
+        } catch (...) {
+            outcome = std::unexpected(
+                readError(chunks[index],  // NOLINT
+                          "scan worker failed with unknown error"));
+        }
+        if (!outcome) {
+            if (firstError.empty()) {
+                firstError = outcome.error();
+            }
+            chunkResults.emplace_back();
+            continue;
+        }
+
+        auto result = std::move(*outcome);
 
         totalMatches += result.size();
 
         chunkResults.emplace_back(std::move(result));
+    }
+
+    if (!firstError.empty()) {
+        return std::unexpected(std::move(firstError));
     }
 
     //
