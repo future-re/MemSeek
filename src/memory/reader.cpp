@@ -53,7 +53,7 @@ namespace memseek {
 std::expected<MemoryRead, std::string> MemoryReader::read(
     const MemoryChunk& chunk, const MemoryRegion& region,
     std::size_t overlap) const {
-#if defined(__linux__)
+#ifdef __linux__
 
     if (region.size >
         std::numeric_limits<std::uintptr_t>::max() - region.start) {
@@ -75,7 +75,7 @@ std::expected<MemoryRead, std::string> MemoryReader::read(
     const auto readSize = std::min(requestedSize, maxReadable);
 
     MemoryRead result{chunk.address, chunk.size,
-                      std::vector<std::byte>(readSize)};
+                      std::vector<std::byte>(readSize), chunk.parentRegionId};
 
     iovec local{
         .iov_base = result.buffer().data(),

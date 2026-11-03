@@ -23,8 +23,11 @@ namespace memseek {
 class ScanResult {
    public:
     explicit ScanResult(std::uintptr_t address = 0,
-                        std::span<const std::byte> data = {})
-        : m_address(address), m_data(data.begin(), data.end()) {}
+                        std::span<const std::byte> data = {},
+                        std::uint64_t parentRegionId = 0)
+        : m_address(address),
+          m_parentRegionId(parentRegionId),
+          m_data(data.begin(), data.end()) {}
 
     [[nodiscard]]
     std::uintptr_t address() const noexcept {
@@ -36,9 +39,15 @@ class ScanResult {
         return m_data;
     }
 
+    [[nodiscard]]
+    std::uint64_t parentRegionId() const noexcept {
+        return m_parentRegionId;
+    }
+
     bool operator==(const ScanResult&) const = default;
 
    private:
+    std::uint64_t m_parentRegionId{};
     std::uintptr_t m_address{};
     std::vector<std::byte> m_data;
 };

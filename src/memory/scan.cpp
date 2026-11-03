@@ -69,7 +69,8 @@ std::vector<ScanResult> scanWindows(const MemoryRead& memory, std::size_t width,
     for (std::size_t offset = 0; offset <= lastOffset; ++offset) {
         const auto current = memoryData.subspan(offset, width);
         if (matcher(current)) {
-            results.emplace_back(memory.address() + offset, current);
+            results.emplace_back(memory.address() + offset, current,
+                                 memory.parentRegionId());
         }
     }
 
