@@ -2,10 +2,10 @@
 
 #include <cstddef>
 #include <cstdint>
-#include <expected>
 #include <span>
 #include <string>
 
+#include "memseek/error.hpp"
 #include "memseek/memory/snapshot.hpp"
 
 namespace memseek {
@@ -25,6 +25,6 @@ auto matchesChange(std::span<const std::byte> previous,
 // the process mappings is reported as an error. The input remains unchanged.
 [[nodiscard]]
 auto captureChanges(const MemorySnapshot& previous, ChangeType type)
-    -> std::expected<MemorySnapshot, std::string>;
+    -> Result<MemorySnapshot>;
 
 }  // namespace memseek

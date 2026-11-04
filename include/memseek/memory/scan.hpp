@@ -6,7 +6,6 @@
 #include <boost/asio/thread_pool.hpp>
 #include <cstddef>
 #include <cstdint>
-#include <expected>
 #include <future>
 #include <memory>
 #include <span>
@@ -16,6 +15,7 @@
 #include <utility>
 #include <vector>
 
+#include "memseek/error.hpp"
 #include "memseek/memory/read.hpp"
 #include "memseek/memory/region.hpp"
 #include "memseek/value.hpp"
@@ -75,7 +75,7 @@ enum class ByteOrder : std::uint8_t {
 class MemoryScanner {
    public:
     using ScanResults = std::vector<ScanResult>;
-    using ScanOutcome = std::expected<ScanResults, std::string>;
+    using ScanOutcome = Result<ScanResults>;
 
     explicit MemoryScanner(
         std::size_t workerCount = std::thread::hardware_concurrency());

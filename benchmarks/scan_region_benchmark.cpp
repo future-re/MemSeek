@@ -84,7 +84,8 @@ void runScanRegion(benchmark::State& state, std::size_t size) {
             const auto results = scanner.scanRegion(getpid(), fixture.region(),
                                                     fixture.target());
             if (!results) {
-                state.SkipWithError(results.error().c_str());
+                const auto error = formatError(results.error());
+                state.SkipWithError(error.c_str());
                 break;
             }
             if (results->size() < fixture.plantedMatches()) {

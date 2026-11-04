@@ -50,7 +50,8 @@ int main(int argc, char** argv) {
     const auto end = std::chrono::steady_clock::now();
 
     if (!results) {
-        std::fprintf(stderr, "scan failed: %s\n", results.error().c_str());
+        const auto error = memseek::formatError(results.error());
+        std::fprintf(stderr, "scan failed: %s\n", error.c_str());
         return 1;
     }
 

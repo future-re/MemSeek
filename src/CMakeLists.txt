@@ -7,6 +7,7 @@ set(MEMSEEK_LIBRARY_SOURCES
     memory/scan.cpp
     memory/snapshot.cpp
     memory/writer.cpp
+    utils/error.cpp
 )
 
 add_library(memseek_lib STATIC ${MEMSEEK_LIBRARY_SOURCES})

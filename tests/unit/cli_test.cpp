@@ -17,7 +17,7 @@ namespace {
 auto parse(const std::string& line) -> Command {
     auto parsed = parseCommandLine(line);
     if (!parsed) {
-        throw std::runtime_error(parsed.error());
+        throw std::runtime_error(formatError(parsed.error()));
     }
     if (!*parsed) {
         throw std::runtime_error("expected a command");
@@ -34,7 +34,7 @@ TEST(CliParserTest, IgnoresWhitespaceAndRejectsUnterminatedQuotes) {
 
     const auto quoted = parseCommandLine("scan string \"unterminated");
     ASSERT_FALSE(quoted.has_value());
-    EXPECT_EQ(quoted.error(), "unterminated quote or escape");
+    EXPECT_EQ(quoted.error().message, "unterminated quote or escape");
 }
 
 TEST(CliParserTest, ParsesEveryExactValueType) {

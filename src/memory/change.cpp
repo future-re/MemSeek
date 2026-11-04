@@ -33,9 +33,10 @@ auto matchesChange(const std::span<const std::byte> previous,
 }
 
 auto captureChanges(const MemorySnapshot& previous, const ChangeType type)
-    -> std::expected<MemorySnapshot, std::string> {
+    -> Result<MemorySnapshot> {
     if (type != ChangeType::CHANGED && type != ChangeType::UNCHANGED) {
-        return std::unexpected("invalid change type");
+        return std::unexpected(
+            makeError(ErrorCode::INVALID_ARGUMENT, "invalid change type"));
     }
     // Follow the saved addresses, even if their mappings are now read-only.
     MemoryScanLevel level;

@@ -52,7 +52,8 @@ TEST(CliIntegrationTest, ScansFiltersRendersAndResetsSelfProcess) {
     ASSERT_TRUE(cli.executeLine("results"));
     EXPECT_FALSE(cli.executeLine("quit"));
 
-    EXPECT_EQ(errors.str(), "Error: no baseline available; run scan first\n");
+    EXPECT_EQ(errors.str(),
+              "Error: [no_baseline] no baseline available; run scan first\n");
     EXPECT_NE(output.str().find("Found "), std::string::npos);
     EXPECT_NE(output.str().find(" candidates\n"), std::string::npos);
     EXPECT_NE(output.str().find("\"candidate_count\":"), std::string::npos);

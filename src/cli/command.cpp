@@ -30,8 +30,7 @@ auto readableLevel() -> MemoryScanLevel {
     };
 }
 
-auto tokenize(const std::string_view line)
-    -> std::expected<std::vector<std::string>, std::string> {
+auto tokenize(const std::string_view line) -> Result<std::vector<std::string>> {
     std::vector<std::string> tokens;
     std::string token;
     char quote = '\0';
@@ -88,7 +87,7 @@ auto parseInteger(const std::string_view text) -> std::optional<T> {
 }
 
 auto parseRegion(const std::optional<std::string>& name, MemoryScanLevel& level)
-    -> std::expected<std::string, std::string> {
+    -> Result<std::string> {
     if (!name) {
         level.memoryRegionType = allRegionTypes();
         return "all";
@@ -112,8 +111,7 @@ auto parseRegion(const std::optional<std::string>& name, MemoryScanLevel& level)
 }
 
 auto parseProtection(const std::optional<std::string>& name,
-                     MemoryScanLevel& level)
-    -> std::expected<std::string, std::string> {
+                     MemoryScanLevel& level) -> Result<std::string> {
     auto protection = name.value_or("read");
     if (protection == "read") {
         level.memoryProtection =
@@ -131,8 +129,7 @@ auto parseProtection(const std::optional<std::string>& name,
 }
 
 auto setOnce(std::optional<std::string>& destination, const std::string& value,
-             const std::string_view option)
-    -> std::expected<void, std::string> {
+             const std::string_view option) -> Result<void> {
     if (destination) {
         return std::unexpected("duplicate option: " + std::string{option});
     }
@@ -151,8 +148,7 @@ struct ScanArguments {
 };
 
 auto readScanOption(const std::vector<std::string>& tokens, std::size_t& index,
-                    ScanArguments& arguments)
-    -> std::expected<void, std::string> {
+                    ScanArguments& arguments) -> Result<void> {
     const auto& option = tokens.at(index);
     if (index + 1 >= tokens.size()) {
         return std::unexpected("missing value for option: " + option);
@@ -182,8 +178,7 @@ auto readScanOption(const std::vector<std::string>& tokens, std::size_t& index,
     return std::unexpected("unknown scan option: " + option);
 }
 
-auto makeScanCommand(ScanArguments arguments)
-    -> std::expected<Command, std::string> {
+auto makeScanCommand(ScanArguments arguments) -> Result<Command> {
     if (!arguments.type) {
         return std::unexpected("scan requires --type");
     }
@@ -273,8 +268,7 @@ auto makeScanCommand(ScanArguments arguments)
     }};
 }
 
-auto parseScan(const std::vector<std::string>& tokens)
-    -> std::expected<Command, std::string> {
+auto parseScan(const std::vector<std::string>& tokens) -> Result<Command> {
     if (tokens.size() < 2) {
         return std::unexpected("usage: scan --type TYPE [options]");
     }
@@ -293,8 +287,7 @@ auto parseScan(const std::vector<std::string>& tokens)
     return makeScanCommand(std::move(arguments));
 }
 
-auto parseResults(const std::vector<std::string>& tokens)
-    -> std::expected<Command, std::string> {
+auto parseResults(const std::vector<std::string>& tokens) -> Result<Command> {
     std::optional<std::size_t> positionalLimit;
     std::optional<std::size_t> optionLimit;
     std::optional<OutputFormat> format;
@@ -352,8 +345,7 @@ auto parseResults(const std::vector<std::string>& tokens)
     }};
 }
 
-auto parseRegions(const std::vector<std::string>& tokens)
-    -> std::expected<Command, std::string> {
+auto parseRegions(const std::vector<std::string>& tokens) -> Result<Command> {
     std::optional<std::string> region;
     for (std::size_t index = 1; index < tokens.size(); ++index) {
         if (tokens.at(index) != "--region") {
@@ -405,7 +397,7 @@ auto byteOrderText(const ByteOrder byteOrder) -> std::string_view {
 }
 
 auto parseCommandLine(const std::string_view line)
-    -> std::expected<std::optional<Command>, std::string> {
+    -> Result<std::optional<Command>> {
     const auto tokens = tokenize(line);
     if (!tokens) {
         return std::unexpected(tokens.error());
@@ -457,7 +449,7 @@ auto parseCommandLine(const std::string_view line)
         return std::optional<Command>{std::move(*command)};
     }
 
-    const auto noArguments = [&]() -> std::expected<void, std::string> {
+    const auto noArguments = [&]() -> Result<void> {
         if (tokens->size() != 1) {
             return std::unexpected(name + " does not accept arguments");
         }

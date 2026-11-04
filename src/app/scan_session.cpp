@@ -12,8 +12,6 @@
 #include <utility>
 
 #include "memseek/memory/change.hpp"
-#include "memseek/memory/chunk.hpp"
-#include "memseek/memory/reader.hpp"
 #include "memseek/memory/region.hpp"
 #include "memseek/memory/scan.hpp"
 #include "memseek/memory/snapshot.hpp"
@@ -73,35 +71,6 @@ auto validateRangeValues(const Value& lowerBound, const Value& upperBound)
     return RangeValidity::REVERSED;
 }
 
-auto validateMemoryAccess(const pid_t pid, const MemoryRegionList& regions)
-    -> std::expected<void, std::string> {
-    const MemoryReader reader(pid);
-    std::string firstError;
-    for (const auto& region : regions.getRegions()) {
-        if (region.size == 0) {
-            continue;
-        }
-        const MemoryChunk probe{
-            .address = region.start,
-            .size = 1,
-            .parentRegionId = region.id,
-        };
-        const auto memory = reader.read(probe, region, 0);
-        if (memory && memory->size() == 1) {
-            return {};
-        }
-        if (firstError.empty()) {
-            firstError = memory ? "process memory probe returned no data"
-                                : memory.error();
-        }
-    }
-    if (!regions.empty()) {
-        return std::unexpected("failed to read selected process memory: " +
-                               firstError);
-    }
-    return {};
-}
-
 }  // namespace
 
 ScanSession::ScanSession(const pid_t pid, const std::size_t workerCount)
@@ -109,25 +78,25 @@ ScanSession::ScanSession(const pid_t pid, const std::size_t workerCount)
 
 auto ScanSession::scan(const Value& target, const MemoryScanLevel level,
                        const ScanType type, const ByteOrder byteOrder)
-    -> std::expected<void, std::string> {
+    -> Result<void> {
     if (target.empty()) {
-        return std::unexpected("scan target must not be empty");
+        return std::unexpected(makeError(ErrorCode::INVALID_ARGUMENT,
+                                         "scan target must not be empty"));
     }
     if (type != ScanType::EXACT && type != ScanType::GREATER &&
         type != ScanType::LESS) {
-        return std::unexpected("unsupported scan type for a single target");
+        return std::unexpected(
+            makeError(ErrorCode::UNSUPPORTED_OPERATION,
+                      "unsupported scan type for a single target"));
     }
     if (type != ScanType::EXACT && !target.isNumeric()) {
-        return std::unexpected("ordering scans require a numeric target");
+        return std::unexpected(
+            makeError(ErrorCode::INVALID_VALUE,
+                      "ordering scans require a numeric target"));
     }
-    // Read maps here so process errors are not mistaken for zero matches by
-    // MemoryScanner::scanProcess().
     const auto regions = readProcess(m_pid, level);
     if (!regions) {
         return std::unexpected(regions.error());
-    }
-    if (const auto access = validateMemoryAccess(m_pid, *regions); !access) {
-        return std::unexpected(access.error());
     }
     MemorySnapshot::Results results;
     for (const auto& region : regions->getRegions()) {
@@ -145,32 +114,34 @@ auto ScanSession::scan(const Value& target, const MemoryScanLevel level,
 
 auto ScanSession::scan(const Value& lowerBound, const Value& upperBound,
                        const MemoryScanLevel level, const ByteOrder byteOrder)
-    -> std::expected<void, std::string> {
+    -> Result<void> {
     if (lowerBound.empty() || upperBound.empty()) {
-        return std::unexpected("scan bounds must not be empty");
+        return std::unexpected(makeError(ErrorCode::INVALID_ARGUMENT,
+                                         "scan bounds must not be empty"));
     }
     if (!lowerBound.isNumeric() || !upperBound.isNumeric()) {
-        return std::unexpected("range scans require numeric bounds");
+        return std::unexpected(makeError(ErrorCode::INVALID_VALUE,
+                                         "range scans require numeric bounds"));
     }
     if (lowerBound.type() != upperBound.type()) {
-        return std::unexpected("range bounds must have the same type");
+        return std::unexpected(makeError(
+            ErrorCode::INVALID_VALUE, "range bounds must have the same type"));
     }
     const auto validity = validateRangeValues(lowerBound, upperBound);
     if (validity == RangeValidity::NON_FINITE) {
-        return std::unexpected("range bounds must be finite");
+        return std::unexpected(
+            makeError(ErrorCode::INVALID_VALUE, "range bounds must be finite"));
     }
     if (validity == RangeValidity::REVERSED) {
-        return std::unexpected("range lower bound must not exceed upper bound");
+        return std::unexpected(
+            makeError(ErrorCode::INVALID_VALUE,
+                      "range lower bound must not exceed upper bound"));
     }
 
     const auto regions = readProcess(m_pid, level);
     if (!regions) {
         return std::unexpected(regions.error());
     }
-    if (const auto access = validateMemoryAccess(m_pid, *regions); !access) {
-        return std::unexpected(access.error());
-    }
-
     MemorySnapshot::Results results;
     for (const auto& region : regions->getRegions()) {
         auto matches = m_scanner.scanRegion(m_pid, region, lowerBound,
@@ -185,10 +156,10 @@ auto ScanSession::scan(const Value& lowerBound, const Value& upperBound,
     return {};
 }
 
-auto ScanSession::filter(const ChangeType type)
-    -> std::expected<void, std::string> {
+auto ScanSession::filter(const ChangeType type) -> Result<void> {
     if (!m_snapshot) {
-        return std::unexpected("no baseline available; run scan first");
+        return std::unexpected(makeError(
+            ErrorCode::NO_BASELINE, "no baseline available; run scan first"));
     }
     auto next = captureChanges(*m_snapshot, type);
     if (!next) {

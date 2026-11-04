@@ -4,12 +4,12 @@
 
 #include <cstddef>
 #include <cstdint>
-#include <expected>
 #include <optional>
 #include <string>
 #include <string_view>
 #include <variant>
 
+#include "memseek/error.hpp"
 #include "memseek/memory/change.hpp"
 #include "memseek/memory/region.hpp"
 #include "memseek/memory/scan.hpp"
@@ -57,8 +57,7 @@ using Command = std::variant<AttachCommand, ScanCommand, FilterCommand,
                              ResetCommand, HelpCommand, QuitCommand>;
 
 [[nodiscard]]
-auto parseCommandLine(std::string_view line)
-    -> std::expected<std::optional<Command>, std::string>;
+auto parseCommandLine(std::string_view line) -> Result<std::optional<Command>>;
 
 [[nodiscard]]
 auto parseByteOrder(std::string_view text) -> std::optional<ByteOrder>;

@@ -84,7 +84,8 @@ TEST(ScanRegionTest, SupportsNumericRangeScan) {
     const auto results = scanner.scanRegion(
         getpid(), region, Value(std::uint8_t{1}), Value(std::uint8_t{5}));
 
-    ASSERT_TRUE(results.has_value()) << (results ? "" : results.error());
+    ASSERT_TRUE(results.has_value())
+        << (results ? "" : formatError(results.error()));
     ASSERT_EQ(results->size(), 2);
     EXPECT_EQ(results->at(0).address(), mapping.address());
     EXPECT_EQ(results->at(1).address(), mapping.address() + 1);
@@ -102,13 +103,14 @@ TEST(ScanRegionTest, SupportsGreaterAndLessScans) {
 
     const auto less = scanner.scanRegion(
         getpid(), region, Value(std::uint8_t{5}), ScanType::LESS);
-    ASSERT_TRUE(less.has_value()) << (less ? "" : less.error());
+    ASSERT_TRUE(less.has_value()) << (less ? "" : formatError(less.error()));
     ASSERT_EQ(less->size(), 1);
     EXPECT_EQ(less->front().address(), mapping.address());
 
     const auto greater = scanner.scanRegion(
         getpid(), region, Value(std::uint8_t{5}), ScanType::GREATER);
-    ASSERT_TRUE(greater.has_value()) << (greater ? "" : greater.error());
+    ASSERT_TRUE(greater.has_value())
+        << (greater ? "" : formatError(greater.error()));
     ASSERT_EQ(greater->size(), 1);
     EXPECT_EQ(greater->front().address(), mapping.address() + 2);
 }
@@ -127,7 +129,8 @@ TEST(ScanRegionTest, FindsValueSpanningChunkBoundary) {
     MemoryScanner scanner;
 
     const auto results = scanner.scanRegion(getpid(), region, Value(value));
-    ASSERT_TRUE(results.has_value()) << (results ? "" : results.error());
+    ASSERT_TRUE(results.has_value())
+        << (results ? "" : formatError(results.error()));
 
     std::size_t hits = 0;
 
@@ -155,7 +158,8 @@ TEST(ScanRegionTest, FindsMatchAtTheEndOfTheRegion) {
     MemoryScanner scanner(1);
     const auto results = scanner.scanRegion(getpid(), region, Value(value));
 
-    ASSERT_TRUE(results.has_value()) << (results ? "" : results.error());
+    ASSERT_TRUE(results.has_value())
+        << (results ? "" : formatError(results.error()));
     ASSERT_EQ(results->size(), 1);
     EXPECT_EQ(results->front().address(), mapping.address() + offset);
 }
@@ -169,11 +173,13 @@ TEST(ScanRegionTest, ReturnsNoMatchForAbsentOrOversizedTarget) {
 
     const auto absent = scanner.scanRegion(
         getpid(), region, Value(std::uint64_t{0x1122334455667788ULL}));
-    ASSERT_TRUE(absent.has_value()) << (absent ? "" : absent.error());
+    ASSERT_TRUE(absent.has_value())
+        << (absent ? "" : formatError(absent.error()));
     EXPECT_TRUE(absent->empty());
     const auto oversized = scanner.scanRegion(
         getpid(), region, Value(std::vector<std::byte>(8192)));
-    ASSERT_TRUE(oversized.has_value()) << (oversized ? "" : oversized.error());
+    ASSERT_TRUE(oversized.has_value())
+        << (oversized ? "" : formatError(oversized.error()));
     EXPECT_TRUE(oversized->empty());
 }
 
@@ -191,8 +197,8 @@ TEST(ScanRegionTest, ReportsMemoryReadFailure) {
         scanner.scanRegion(getpid(), region, Value(std::uint8_t{1}));
 
     ASSERT_FALSE(result.has_value());
-    EXPECT_NE(result.error().find("failed to read memory range"),
-              std::string::npos);
+    EXPECT_EQ(result.error().code, ErrorCode::MEMORY_READ_FAILED);
+    EXPECT_TRUE(result.error().address.has_value());
 }
 
 TEST(ScanRegionTest, ReportsShortReadInsteadOfReturningPartialMatches) {
@@ -206,8 +212,9 @@ TEST(ScanRegionTest, ReportsShortReadInsteadOfReturningPartialMatches) {
         scanner.scanRegion(getpid(), region, Value(std::uint8_t{1}));
 
     ASSERT_FALSE(result.has_value());
-    EXPECT_NE(result.error().find("short read"), std::string::npos);
-    EXPECT_NE(result.error().find("[0x"), std::string::npos);
+    EXPECT_EQ(result.error().code, ErrorCode::SHORT_TRANSFER);
+    EXPECT_EQ(result.error().address, region.start);
+    EXPECT_TRUE(result.error().bytesTransferred.has_value());
 }
 
 TEST(ScanProcessTest, FindsPlantedValue) {
@@ -228,7 +235,8 @@ TEST(ScanProcessTest, FindsPlantedValue) {
     MemoryScanner scanner;
 
     const auto results = scanner.scanProcess(getpid(), level, Value(sentinel));
-    ASSERT_TRUE(results.has_value()) << (results ? "" : results.error());
+    ASSERT_TRUE(results.has_value())
+        << (results ? "" : formatError(results.error()));
 
     const bool found =
         std::ranges::any_of(*results, [address](const ScanResult& result) {
@@ -243,8 +251,7 @@ TEST(ScanProcessTest, ReportsMappingEnumerationFailure) {
     const auto result =
         scanner.scanProcess(-1, MemoryScanLevel{}, Value(std::uint8_t{1}));
     ASSERT_FALSE(result.has_value());
-    EXPECT_NE(result.error().find("failed to enumerate process mappings"),
-              std::string::npos);
+    EXPECT_EQ(result.error().code, ErrorCode::MAPPING_QUERY_FAILED);
 }
 
 TEST(ScanProcessTest, FindsPlantedValueWithRange) {
@@ -261,7 +268,8 @@ TEST(ScanProcessTest, FindsPlantedValueWithRange) {
     MemoryScanner scanner;
     const auto results = scanner.scanProcess(
         getpid(), level, Value(std::uint8_t{8}), Value(std::uint8_t{10}));
-    ASSERT_TRUE(results.has_value()) << (results ? "" : results.error());
+    ASSERT_TRUE(results.has_value())
+        << (results ? "" : formatError(results.error()));
 
     EXPECT_TRUE(
         std::ranges::any_of(*results, [address](const ScanResult& result) {
@@ -286,13 +294,13 @@ TEST(ScanProcessTest, ReturnsMatchesInDeterministicOrderWithDifferentWorkers) {
     const auto one = singleWorker.scanRegion(getpid(), region, target);
     const auto many = manyWorkers.scanRegion(getpid(), region, target);
 
-    ASSERT_TRUE(one.has_value()) << (one ? "" : one.error());
-    ASSERT_TRUE(many.has_value()) << (many ? "" : many.error());
+    ASSERT_TRUE(one.has_value()) << (one ? "" : formatError(one.error()));
+    ASSERT_TRUE(many.has_value()) << (many ? "" : formatError(many.error()));
     ASSERT_EQ(one->size(), 2);
     ASSERT_EQ(many->size(), one->size());
     ASSERT_EQ(one->at(0).address(), mapping.address() + firstOffset);
     ASSERT_EQ(one->at(1).address(), mapping.address() + secondOffset);
-    EXPECT_EQ(many, one);
+    EXPECT_EQ(*many, *one);
 }
 
 TEST(ScanRegionTest, ParallelScanFailsWhenAnyChunkIsShortRead) {
@@ -307,9 +315,8 @@ TEST(ScanRegionTest, ParallelScanFailsWhenAnyChunkIsShortRead) {
         scanner.scanRegion(getpid(), region, Value(std::uint8_t{1}));
 
     ASSERT_FALSE(result.has_value());
-    EXPECT_NE(result.error().find("short read"), std::string::npos);
-    EXPECT_NE(result.error().find("failed to read memory range"),
-              std::string::npos);
+    EXPECT_EQ(result.error().code, ErrorCode::SHORT_TRANSFER);
+    EXPECT_TRUE(result.error().address.has_value());
 }
 
 }  // namespace memseek

@@ -1,7 +1,10 @@
 #include "memseek/memory/region.hpp"
 
+#include <cerrno>
+#include <format>
 #include <fstream>
 #include <sstream>
+#include <utility>
 
 namespace memseek {
 
@@ -9,13 +12,13 @@ namespace {
 
 [[nodiscard]]
 auto regionMatchesLevel(const MemoryRegion& region,
-                        const MemoryScanLevel& level) noexcept -> bool {
+                        const MemoryScanLevel& level,
+                        const bool requireReadable) noexcept -> bool {
     const auto protection = static_cast<std::uint8_t>(region.protection);
     const auto regionType = static_cast<std::uint8_t>(region.regionType);
 
-    // A region can only be scanned if it is readable, regardless of the
-    // requested protection mask.
-    if ((protection & static_cast<std::uint8_t>(MemoryProtection::READ)) == 0) {
+    if (requireReadable &&
+        (protection & static_cast<std::uint8_t>(MemoryProtection::READ)) == 0) {
         return false;
     }
 
@@ -30,8 +33,12 @@ auto regionMatchesLevel(const MemoryRegion& region,
 
 }  // namespace
 
-std::expected<MemoryRegionList, std::string> readProcess(
-    pid_t pid, MemoryScanLevel level) {
+Result<MemoryRegionList> readProcess(pid_t pid, MemoryScanLevel level) {
+    return readProcess(pid, level, true);
+}
+
+Result<MemoryRegionList> readProcess(pid_t pid, MemoryScanLevel level,
+                                     const bool requireReadable) {
     MemoryRegionList regionList{};
 
 #ifdef __linux__
@@ -40,7 +47,11 @@ std::expected<MemoryRegionList, std::string> readProcess(
 
     std::ifstream mapsFile(mapsPath);
     if (!mapsFile.is_open()) {
-        return std::unexpected("failed to open: " + mapsPath);
+        auto error = makeError(ErrorCode::MAPPING_QUERY_FAILED,
+                               std::format("failed to open {}", mapsPath));
+        error.pid = pid;
+        error.systemError = {errno, std::generic_category()};
+        return std::unexpected(std::move(error));
     }
 
     std::string line;
@@ -141,7 +152,7 @@ std::expected<MemoryRegionList, std::string> readProcess(
             region.regionType = MemoryRegionType::UNKNOWN;
         }
 
-        if (!regionMatchesLevel(region, level)) {
+        if (!regionMatchesLevel(region, level, requireReadable)) {
             continue;
         }
 
@@ -150,7 +161,8 @@ std::expected<MemoryRegionList, std::string> readProcess(
 
 #else
 
-    return std::unexpected("unsupported platform");
+    return std::unexpected(makeError(ErrorCode::UNSUPPORTED_PLATFORM,
+                                     "process mappings require Linux"));
 
 #endif
 

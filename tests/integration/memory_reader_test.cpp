@@ -85,7 +85,7 @@ TEST(MemoryReaderTest, ReadsChunkAndIncludesTargetOverlap) {
     const auto result = reader.read(chunk, region, overlap);
 
     if (!result) {
-        FAIL() << result.error();
+        FAIL() << formatError(result.error());
     }
     EXPECT_EQ(result->address(), chunk.address);
     EXPECT_EQ(result->logicalSize(), chunk.size);
@@ -109,7 +109,7 @@ TEST(MemoryReaderTest, ClampsOverlapAtRegionEnd) {
     const auto result = reader.read(chunk, region, overlap);
 
     if (!result) {
-        FAIL() << result.error();
+        FAIL() << formatError(result.error());
     }
     EXPECT_EQ(result->size(), 16);
 }
@@ -138,7 +138,7 @@ TEST(MemoryReaderTest, RejectsChunkOutsideRegion) {
     const auto result = reader.read(chunk, region, overlap);
 
     ASSERT_FALSE(result.has_value());
-    EXPECT_EQ(result.error(), "memory chunk is outside the region");
+    EXPECT_EQ(result.error().code, ErrorCode::ADDRESS_OUT_OF_RANGE);
 }
 
 }  // namespace memseek

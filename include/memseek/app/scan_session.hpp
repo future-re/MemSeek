@@ -3,11 +3,10 @@
 #include <sys/types.h>
 
 #include <cstddef>
-#include <expected>
 #include <optional>
-#include <string>
 #include <thread>
 
+#include "memseek/error.hpp"
 #include "memseek/memory/change.hpp"
 #include "memseek/memory/region.hpp"
 #include "memseek/memory/scan.hpp"
@@ -26,17 +25,16 @@ class ScanSession {
     [[nodiscard]]
     auto scan(const Value& target, MemoryScanLevel level,
               ScanType type = ScanType::EXACT,
-              ByteOrder byteOrder = ByteOrder::NATIVE)
-        -> std::expected<void, std::string>;
+              ByteOrder byteOrder = ByteOrder::NATIVE) -> Result<void>;
 
     [[nodiscard]]
     auto scan(const Value& lowerBound, const Value& upperBound,
               MemoryScanLevel level, ByteOrder byteOrder = ByteOrder::NATIVE)
-        -> std::expected<void, std::string>;
+        -> Result<void>;
 
     // Filter the existing baseline and advance it only on success.
     [[nodiscard]]
-    auto filter(ChangeType type) -> std::expected<void, std::string>;
+    auto filter(ChangeType type) -> Result<void>;
 
     void setPid(pid_t pid) noexcept;
     void reset() noexcept;

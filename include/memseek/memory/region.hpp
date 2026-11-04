@@ -1,9 +1,10 @@
 #pragma once
 
 #include <cstdint>
-#include <expected>
 #include <string>
 #include <vector>
+
+#include "memseek/error.hpp"
 namespace memseek {
 enum class MemoryProtection : std::uint8_t {
     NONE = 0,
@@ -95,6 +96,10 @@ class MemoryRegionList {
 };
 
 auto readProcess(pid_t pid, MemoryScanLevel level = MemoryScanLevel{})
-    -> std::expected<MemoryRegionList, std::string>;
+    -> Result<MemoryRegionList>;
+
+// Set requireReadable to false when selecting mappings for writes only.
+auto readProcess(pid_t pid, MemoryScanLevel level, bool requireReadable)
+    -> Result<MemoryRegionList>;
 
 }  // namespace memseek

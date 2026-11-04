@@ -85,8 +85,8 @@ auto compareBounds(const Value& lower, const Value& upper) -> bool {
 
 }  // namespace
 
-auto parseValue(const std::string& type,
-                const std::string& text) -> std::expected<Value, std::string> {
+auto parseValue(const std::string& type, const std::string& text)
+    -> Result<Value> {
     if (type == "u8") {
         if (const auto value = parseInteger<std::uint8_t>(text)) {
             return Value{*value};
@@ -136,9 +136,11 @@ auto parseValue(const std::string& type,
             return Value{*value};
         }
     } else {
-        return std::unexpected("unsupported value type: " + type);
+        return std::unexpected(makeError(ErrorCode::INVALID_VALUE,
+                                         "unsupported value type: " + type));
     }
-    return std::unexpected("invalid " + type + " value: " + text);
+    return std::unexpected(makeError(ErrorCode::INVALID_VALUE,
+                                     "invalid " + type + " value: " + text));
 }
 
 auto orderedBounds(const Value& lower, const Value& upper) -> bool {

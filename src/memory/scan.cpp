@@ -12,6 +12,7 @@
 #include <format>
 #include <future>
 #include <iterator>
+#include <optional>
 #include <span>
 #include <stdexcept>
 #include <type_traits>
@@ -87,10 +88,29 @@ auto expectedReadSize(const MemoryChunk& chunk, const MemoryRegion& region,
     return chunk.size + extra;
 }
 
-auto readError(const MemoryChunk& chunk, const std::string& message)
-    -> std::string {
-    return std::format("failed to read memory range [{:#x}, {:#x}): {}",
-                       chunk.address, chunk.address + chunk.size, message);
+auto withChunkContext(MemSeekError error, const pid_t pid,
+                      const MemoryChunk& chunk) -> MemSeekError {
+    error.message =
+        std::format("memory range [{:#x}, {:#x}): {}", chunk.address,
+                    chunk.address + chunk.size, error.message);
+    error.pid = pid;
+    error.address = chunk.address;
+    error.size = chunk.size;
+    return error;
+}
+
+auto shortReadError(const pid_t pid, const MemoryChunk& chunk,
+                    const std::size_t expected, const std::size_t actual)
+    -> MemSeekError {
+    auto error =
+        makeError(ErrorCode::SHORT_TRANSFER,
+                  std::format("short read: expected {} bytes, received {}",
+                              expected, actual));
+    error.pid = pid;
+    error.address = chunk.address;
+    error.size = expected;
+    error.bytesTransferred = actual;
+    return error;
 }
 
 template <ValueNumericType T>
@@ -182,8 +202,11 @@ MemoryScanner::ScanOutcome MemoryScanner::scanProcessImpl(
     const Value* upperBound, ScanType scanType, ByteOrder byteOrder) {
     auto regionList = readProcess(pid, level);
     if (!regionList) {
-        return std::unexpected("failed to enumerate process mappings: " +
-                               regionList.error());
+        auto error = regionList.error();
+        error.message =
+            "failed to enumerate process mappings: " + error.message;
+        error.pid = pid;
+        return std::unexpected(std::move(error));
     }
 
     std::vector<ScanResult> results;
@@ -344,13 +367,13 @@ MemoryScanner::ScanOutcome MemoryScanner::scanRegionImpl(
         auto memory = reader.read(chunk, region, overlap);
 
         if (!memory) {
-            return std::unexpected(readError(chunk, memory.error()));
+            return std::unexpected(
+                withChunkContext(memory.error(), pid, chunk));
         }
         const auto requiredSize = expectedReadSize(chunk, region, overlap);
         if (memory->size() != requiredSize) {
-            return std::unexpected(readError(
-                chunk, std::format("short read: expected {} bytes, received {}",
-                                   requiredSize, memory->size())));
+            return std::unexpected(
+                shortReadError(pid, chunk, requiredSize, memory->size()));
         }
 
         return scanBufferImpl(*memory, lowerBound, upperBound, scanType,
@@ -361,7 +384,7 @@ MemoryScanner::ScanOutcome MemoryScanner::scanRegionImpl(
     // One future per chunk.
     // The chunks themselves are still generated lazily.
     //
-    using ChunkOutcome = std::expected<std::vector<ScanResult>, std::string>;
+    using ChunkOutcome = Result<std::vector<ScanResult>>;
     std::vector<std::future<ChunkOutcome>> futures;
     std::vector<MemoryChunk> chunks;
 
@@ -377,15 +400,14 @@ MemoryScanner::ScanOutcome MemoryScanner::scanRegionImpl(
                 auto memory = reader.read(chunk, region, overlap);
 
                 if (!memory) {
-                    return std::unexpected(readError(chunk, memory.error()));
+                    return std::unexpected(
+                        withChunkContext(memory.error(), pid, chunk));
                 }
                 const auto requiredSize =
                     expectedReadSize(chunk, region, overlap);
                 if (memory->size() != requiredSize) {
-                    return std::unexpected(readError(
-                        chunk, std::format(
-                                   "short read: expected {} bytes, received {}",
-                                   requiredSize, memory->size())));
+                    return std::unexpected(shortReadError(
+                        pid, chunk, requiredSize, memory->size()));
                 }
 
                 auto results = scanBufferImpl(*memory, lowerBound, upperBound,
@@ -401,12 +423,17 @@ MemoryScanner::ScanOutcome MemoryScanner::scanRegionImpl(
 
                 return results;
             } catch (const std::exception& error) {
-                return std::unexpected(readError(
-                    chunk,
-                    std::format("scan worker failed: {}", error.what())));
-            } catch (...) {
+                auto failure = makeError(
+                    ErrorCode::MEMORY_READ_FAILED,
+                    std::format("scan worker failed: {}", error.what()));
                 return std::unexpected(
-                    readError(chunk, "scan worker failed with unknown error"));
+                    withChunkContext(std::move(failure), pid, chunk));
+            } catch (...) {
+                auto failure =
+                    makeError(ErrorCode::MEMORY_READ_FAILED,
+                              "scan worker failed with unknown error");
+                return std::unexpected(
+                    withChunkContext(std::move(failure), pid, chunk));
             }
         }));
     }
@@ -419,24 +446,28 @@ MemoryScanner::ScanOutcome MemoryScanner::scanRegionImpl(
     chunkResults.reserve(futures.size());
 
     std::size_t totalMatches = 0;
-    std::string firstError;
+    std::optional<MemSeekError> firstError;
 
     for (std::size_t index = 0; index < futures.size(); ++index) {
         auto& future = futures[index];  // NOLINT
-        ChunkOutcome outcome = std::unexpected("scan worker failed");
+        ChunkOutcome outcome = std::unexpected(
+            makeError(ErrorCode::MEMORY_READ_FAILED, "scan worker failed"));
         try {
             outcome = future.get();
         } catch (const std::exception& error) {
+            auto failure =
+                makeError(ErrorCode::MEMORY_READ_FAILED,
+                          std::format("scan worker failed: {}", error.what()));
             outcome = std::unexpected(
-                readError(chunks[index],  // NOLINT
-                          std::format("scan worker failed: {}", error.what())));
+                withChunkContext(std::move(failure), pid, chunks[index]));
         } catch (...) {
+            auto failure = makeError(ErrorCode::MEMORY_READ_FAILED,
+                                     "scan worker failed with unknown error");
             outcome = std::unexpected(
-                readError(chunks[index],  // NOLINT
-                          "scan worker failed with unknown error"));
+                withChunkContext(std::move(failure), pid, chunks[index]));
         }
         if (!outcome) {
-            if (firstError.empty()) {
+            if (!firstError) {
                 firstError = outcome.error();
             }
             chunkResults.emplace_back();
@@ -450,8 +481,8 @@ MemoryScanner::ScanOutcome MemoryScanner::scanRegionImpl(
         chunkResults.emplace_back(std::move(result));
     }
 
-    if (!firstError.empty()) {
-        return std::unexpected(std::move(firstError));
+    if (firstError) {
+        return std::unexpected(std::move(*firstError));
     }
 
     //

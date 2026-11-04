@@ -4,15 +4,16 @@
 
 #include <cstddef>
 #include <cstdint>
-#include <expected>
 #include <span>
-#include <string>
+
+#include "memseek/error.hpp"
 
 namespace memseek {
 
 struct MemoryWriteTarget {
     std::uintptr_t address{};
     std::size_t size{};
+    // Zero skips the identity check; nonzero must match the current mapping.
     std::uint64_t parentRegionId{};
 };
 
@@ -22,7 +23,7 @@ class MemoryWriter {
 
     [[nodiscard]]
     auto write(const MemoryWriteTarget& target, std::span<const std::byte> data)
-        -> std::expected<std::size_t, std::string>;
+        -> Result<std::size_t>;
 
    private:
     pid_t m_pid{};

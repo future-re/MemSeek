@@ -16,6 +16,7 @@
 
 #include "memseek/cli/command.hpp"
 #include "memseek/cli/render.hpp"
+#include "memseek/error.hpp"
 #include "memseek/memory/change.hpp"
 #include "memseek/memory/region.hpp"
 #include "memseek/memory/scan.hpp"
@@ -41,8 +42,8 @@ auto readableLevel() -> MemoryScanLevel {
 }
 
 auto findRegion(const std::vector<MemoryRegion>& regions,
-                const std::uintptr_t address,
-                const std::size_t width) -> std::optional<MemoryRegion> {
+                const std::uintptr_t address, const std::size_t width)
+    -> std::optional<MemoryRegion> {
     auto iterator =
         std::ranges::upper_bound(regions, address, {}, &MemoryRegion::start);
     if (iterator == regions.begin()) {
@@ -89,7 +90,7 @@ auto InteractiveCli::executeLine(const std::string_view line) -> bool {
     try {
         auto parsed = parseCommandLine(line);
         if (!parsed) {
-            throw std::runtime_error(parsed.error());
+            throw std::runtime_error(formatError(parsed.error()));
         }
         if (!*parsed) {
             return true;
@@ -127,7 +128,7 @@ auto InteractiveCli::execute(const Command& command) -> bool {
 auto InteractiveCli::executeAttach(const AttachCommand& command) -> void {
     const auto regions = readProcess(command.pid, readableLevel());
     if (!regions) {
-        throw std::runtime_error(regions.error());
+        throw std::runtime_error(formatError(regions.error()));
     }
 
     auto nextSession =
@@ -140,10 +141,12 @@ auto InteractiveCli::executeAttach(const AttachCommand& command) -> void {
 
 auto InteractiveCli::executeScan(const ScanCommand& command) -> void {
     auto& session = requireSession();
-    std::expected<void, std::string> result;
+    Result<void> result;
     if (command.scanType == ScanType::RANGE) {
         if (!command.upperBound) {
-            throw std::runtime_error("range scan requires an upper bound");
+            throw std::runtime_error(
+                formatError(makeError(ErrorCode::INVALID_ARGUMENT,
+                                      "range scan requires an upper bound")));
         }
         result = session.scan(command.lowerBound, *command.upperBound,
                               command.level, m_settings.byteOrder);
@@ -152,7 +155,7 @@ auto InteractiveCli::executeScan(const ScanCommand& command) -> void {
                               command.scanType, m_settings.byteOrder);
     }
     if (!result) {
-        throw std::runtime_error(result.error());
+        throw std::runtime_error(formatError(result.error()));
     }
 
     m_previousBytes.clear();
@@ -165,13 +168,14 @@ auto InteractiveCli::executeFilter(const FilterCommand& command) -> void {
     auto& session = requireSession();
     const auto* baseline = session.snapshot();
     if (baseline == nullptr) {
-        throw std::runtime_error("no baseline available; run scan first");
+        throw std::runtime_error(formatError(makeError(
+            ErrorCode::NO_BASELINE, "no baseline available; run scan first")));
     }
     const auto previousResults = baseline->results();
     const auto before = previousResults.size();
     const auto result = session.filter(command.type);
     if (!result) {
-        throw std::runtime_error(result.error());
+        throw std::runtime_error(formatError(result.error()));
     }
 
     const auto& currentResults = session.snapshot()->results();
@@ -199,12 +203,13 @@ auto InteractiveCli::executeResults(const ResultsCommand& command) -> void {
     auto& session = requireSession();
     const auto* snapshot = session.snapshot();
     if (snapshot == nullptr) {
-        throw std::runtime_error("no baseline available; run scan first");
+        throw std::runtime_error(formatError(makeError(
+            ErrorCode::NO_BASELINE, "no baseline available; run scan first")));
     }
 
     const auto regions = readProcess(m_pid, readableLevel());
     if (!regions) {
-        throw std::runtime_error(regions.error());
+        throw std::runtime_error(formatError(regions.error()));
     }
     const auto defaultLimit = command.format == OutputFormat::TEXT
                                   ? std::size_t{20}
@@ -240,7 +245,7 @@ auto InteractiveCli::executeRegions(const RegionsCommand& command) -> void {
     static_cast<void>(requireSession());
     const auto regions = readProcess(m_pid, command.level);
     if (!regions) {
-        throw std::runtime_error(regions.error());
+        throw std::runtime_error(formatError(regions.error()));
     }
     m_output << renderRegionsText(regions->getRegions());
 }
@@ -267,7 +272,8 @@ auto InteractiveCli::executeReset() -> void {
 
 auto InteractiveCli::requireSession() const -> ScanSession& {
     if (!m_session) {
-        throw std::runtime_error("attach to a process first");
+        throw std::runtime_error(formatError(
+            makeError(ErrorCode::NO_BASELINE, "attach to a process first")));
     }
     return *m_session;
 }
