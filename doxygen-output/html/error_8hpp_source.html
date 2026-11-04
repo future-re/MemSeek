@@ -1,0 +1,218 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "https://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="zh">
+<head>
+<meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=11"/>
+<meta name="generator" content="Doxygen 1.9.8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>memseek: include/memseek/error.hpp 源文件</title>
+<link href="tabs.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="jquery.js"></script>
+<script type="text/javascript" src="dynsections.js"></script>
+<link href="navtree.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="resize.js"></script>
+<script type="text/javascript" src="navtreedata.js"></script>
+<script type="text/javascript" src="navtree.js"></script>
+<link href="search/search.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="search/searchdata.js"></script>
+<script type="text/javascript" src="search/search.js"></script>
+<link href="doxygen.css" rel="stylesheet" type="text/css" />
+<link href="doxygen-awesome.css" rel="stylesheet" type="text/css"/>
+</head>
+<body>
+<div id="top"><!-- do not remove this div, it is closed by doxygen! -->
+<div id="titlearea">
+<table cellspacing="0" cellpadding="0">
+ <tbody>
+ <tr id="projectrow">
+  <td id="projectalign">
+   <div id="projectname">memseek
+   </div>
+   <div id="projectbrief">Modern C++20 Memory Scanner</div>
+  </td>
+ </tr>
+ </tbody>
+</table>
+</div>
+<!-- end header part -->
+<!-- 制作者 Doxygen 1.9.8 -->
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+var searchBox = new SearchBox("searchBox", "search/",'.html');
+/* @license-end */
+</script>
+<script type="text/javascript" src="menudata.js"></script>
+<script type="text/javascript" src="menu.js"></script>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(function() {
+  initMenu('',true,false,'search.php','搜索');
+  $(document).ready(function() { init_search(); });
+});
+/* @license-end */
+</script>
+<div id="main-nav"></div>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(document).ready(function() { init_codefold(0); });
+/* @license-end */
+</script>
+</div><!-- top -->
+<div id="side-nav" class="ui-resizable side-nav-resizable">
+  <div id="nav-tree">
+    <div id="nav-tree-contents">
+      <div id="nav-sync" class="sync"></div>
+    </div>
+  </div>
+  <div id="splitbar" style="-moz-user-select:none;" 
+       class="ui-resizable-handle">
+  </div>
+</div>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(document).ready(function(){initNavTree('error_8hpp_source.html',''); initResizable(); });
+/* @license-end */
+</script>
+<div id="doc-content">
+<!-- window showing the filter options -->
+<div id="MSearchSelectWindow"
+     onmouseover="return searchBox.OnSearchSelectShow()"
+     onmouseout="return searchBox.OnSearchSelectHide()"
+     onkeydown="return searchBox.OnSearchSelectKey(event)">
+</div>
+
+<!-- iframe showing the search results (closed by default) -->
+<div id="MSearchResultsWindow">
+<div id="MSearchResults">
+<div class="SRPage">
+<div id="SRIndex">
+<div id="SRResults"></div>
+<div class="SRStatus" id="Loading">载入中...</div>
+<div class="SRStatus" id="Searching">搜索中...</div>
+<div class="SRStatus" id="NoMatches">未找到</div>
+</div>
+</div>
+</div>
+</div>
+
+<div class="header">
+  <div class="headertitle"><div class="title">error.hpp</div></div>
+</div><!--header-->
+<div class="contents">
+<a href="error_8hpp.html">浏览该文件的文档.</a><div class="fragment"><div class="line"><a id="l00001" name="l00001"></a><span class="lineno">    1</span><span class="preprocessor">#pragma once</span></div>
+<div class="line"><a id="l00002" name="l00002"></a><span class="lineno">    2</span> </div>
+<div class="line"><a id="l00003" name="l00003"></a><span class="lineno">    3</span><span class="preprocessor">#include &lt;sys/types.h&gt;</span></div>
+<div class="line"><a id="l00004" name="l00004"></a><span class="lineno">    4</span> </div>
+<div class="line"><a id="l00005" name="l00005"></a><span class="lineno">    5</span><span class="preprocessor">#include &lt;cstddef&gt;</span></div>
+<div class="line"><a id="l00006" name="l00006"></a><span class="lineno">    6</span><span class="preprocessor">#include &lt;cstdint&gt;</span></div>
+<div class="line"><a id="l00007" name="l00007"></a><span class="lineno">    7</span><span class="preprocessor">#include &lt;expected&gt;</span></div>
+<div class="line"><a id="l00008" name="l00008"></a><span class="lineno">    8</span><span class="preprocessor">#include &lt;optional&gt;</span></div>
+<div class="line"><a id="l00009" name="l00009"></a><span class="lineno">    9</span><span class="preprocessor">#include &lt;string&gt;</span></div>
+<div class="line"><a id="l00010" name="l00010"></a><span class="lineno">   10</span><span class="preprocessor">#include &lt;system_error&gt;</span></div>
+<div class="line"><a id="l00011" name="l00011"></a><span class="lineno">   11</span><span class="preprocessor">#include &lt;utility&gt;</span></div>
+<div class="line"><a id="l00012" name="l00012"></a><span class="lineno">   12</span> </div>
+<div class="line"><a id="l00013" name="l00013"></a><span class="lineno">   13</span><span class="keyword">namespace </span><a class="code hl_namespace" href="namespacememseek.html">memseek</a> {</div>
+<div class="line"><a id="l00014" name="l00014"></a><span class="lineno">   14</span> </div>
+<div class="line"><a id="l00015" name="l00015"></a><span class="lineno">   15</span><span class="comment">// Numeric values are stable for logs and future machine-facing interfaces.</span></div>
+<div class="foldopen" id="foldopen00016" data-start="{" data-end="};">
+<div class="line"><a id="l00016" name="l00016"></a><span class="lineno"><a class="line" href="namespacememseek.html#a4946032421c302524685b740208c4e08">   16</a></span><span class="keyword">enum class</span> <a class="code hl_enumeration" href="namespacememseek.html#a4946032421c302524685b740208c4e08">ErrorCode</a> : std::uint8_t {</div>
+<div class="line"><a id="l00017" name="l00017"></a><span class="lineno">   17</span>    <a class="code hl_enumvalue" href="namespacememseek.html#a4946032421c302524685b740208c4e08af295a0c3e37c94f078e1c5476479132d">INVALID_ARGUMENT</a> =</div>
+<div class="line"><a id="l00018" name="l00018"></a><span class="lineno">   18</span>        1,  <span class="comment">// Invalid argument (e.g., null pointer, empty value, etc.)</span></div>
+<div class="line"><a id="l00019" name="l00019"></a><span class="lineno">   19</span>    <a class="code hl_enumvalue" href="namespacememseek.html#a4946032421c302524685b740208c4e08ad8f24f388e990b9ccf8905b7993b99ae">INVALID_VALUE</a> =</div>
+<div class="line"><a id="l00020" name="l00020"></a><span class="lineno">   20</span>        2,  <span class="comment">// Invalid value (e.g., out-of-range, unsupported type, etc.)</span></div>
+<div class="line"><a id="l00021" name="l00021"></a><span class="lineno">   21</span>    <a class="code hl_enumvalue" href="namespacememseek.html#a4946032421c302524685b740208c4e08a5a2ff7a2f2c3b40268e57995408f8e9d">UNSUPPORTED_OPERATION</a> =</div>
+<div class="line"><a id="l00022" name="l00022"></a><span class="lineno">   22</span>        3,  <span class="comment">// Unsupported operation (e.g., write to read-only memory, etc.)</span></div>
+<div class="line"><a id="l00023" name="l00023"></a><span class="lineno">   23</span>    <a class="code hl_enumvalue" href="namespacememseek.html#a4946032421c302524685b740208c4e08a3cfc468f5825854d2661952214f89dc0">UNSUPPORTED_PLATFORM</a> = 4,  <span class="comment">// Unsupported platform (e.g., non-Linux, etc.)</span></div>
+<div class="line"><a id="l00024" name="l00024"></a><span class="lineno">   24</span>    <a class="code hl_enumvalue" href="namespacememseek.html#a4946032421c302524685b740208c4e08ab957aa10f1244583a8eb443ca8330409">MAPPING_QUERY_FAILED</a> =</div>
+<div class="line"><a id="l00025" name="l00025"></a><span class="lineno">   25</span>        5,  <span class="comment">// Failed to query process memory mappings (e.g., /proc read error)</span></div>
+<div class="line"><a id="l00026" name="l00026"></a><span class="lineno">   26</span>    <a class="code hl_enumvalue" href="namespacememseek.html#a4946032421c302524685b740208c4e08a77cdef16b3182b83e017a72a9a07151a">PROCESS_ACCESS_FAILED</a> =</div>
+<div class="line"><a id="l00027" name="l00027"></a><span class="lineno">   27</span>        6,  <span class="comment">// Failed to access process memory (e.g., ptrace attach failed)</span></div>
+<div class="line"><a id="l00028" name="l00028"></a><span class="lineno">   28</span>    <a class="code hl_enumvalue" href="namespacememseek.html#a4946032421c302524685b740208c4e08a12821497c2947762acaa03ea482b1103">ADDRESS_OUT_OF_RANGE</a> =</div>
+<div class="line"><a id="l00029" name="l00029"></a><span class="lineno">   29</span>        7,  <span class="comment">// Address range is outside of process memory mappings (e.g.,</span></div>
+<div class="line"><a id="l00030" name="l00030"></a><span class="lineno">   30</span>            <span class="comment">// overflow, unmapped region, chunk, etc.)</span></div>
+<div class="line"><a id="l00031" name="l00031"></a><span class="lineno">   31</span>    <a class="code hl_enumvalue" href="namespacememseek.html#a4946032421c302524685b740208c4e08adbe0cc579cb3efa261ae1617a0205635">MEMORY_READ_FAILED</a> =</div>
+<div class="line"><a id="l00032" name="l00032"></a><span class="lineno">   32</span>        8,  <span class="comment">// Failed to read process memory (e.g., process_vm_readv failed)</span></div>
+<div class="line"><a id="l00033" name="l00033"></a><span class="lineno">   33</span>    <a class="code hl_enumvalue" href="namespacememseek.html#a4946032421c302524685b740208c4e08a92baa693d6fc18e588c8015dd987ecb8">MEMORY_WRITE_FAILED</a> =</div>
+<div class="line"><a id="l00034" name="l00034"></a><span class="lineno">   34</span>        9,  <span class="comment">// Failed to write process memory (e.g., process_vm_writev failed)</span></div>
+<div class="line"><a id="l00035" name="l00035"></a><span class="lineno">   35</span>    <a class="code hl_enumvalue" href="namespacememseek.html#a4946032421c302524685b740208c4e08ad87d76d94e12aed12dc2acf63d5b1ac6">MAPPING_NOT_WRITABLE</a> = 10,  <span class="comment">// Memory mapping is not writable</span></div>
+<div class="line"><a id="l00036" name="l00036"></a><span class="lineno">   36</span>    <a class="code hl_enumvalue" href="namespacememseek.html#a4946032421c302524685b740208c4e08a95bf9671279cf7d14bf57442f22f416a">REGION_MISMATCH</a> =</div>
+<div class="line"><a id="l00037" name="l00037"></a><span class="lineno">   37</span>        11,  <span class="comment">// Target region ID does not match the writable mapping</span></div>
+<div class="line"><a id="l00038" name="l00038"></a><span class="lineno">   38</span>    <a class="code hl_enumvalue" href="namespacememseek.html#a4946032421c302524685b740208c4e08aa60144393a4691f4453a3fefc835b14e">SHORT_TRANSFER</a> = 12,  <span class="comment">// Transfer was shorter than expected</span></div>
+<div class="line"><a id="l00039" name="l00039"></a><span class="lineno">   39</span>    <a class="code hl_enumvalue" href="namespacememseek.html#a4946032421c302524685b740208c4e08ad23ab418e9275b11a5938c36eb82323e">NO_BASELINE</a> = 13,     <span class="comment">// shapshot baseline is not available for comparison</span></div>
+<div class="line"><a id="l00040" name="l00040"></a><span class="lineno">   40</span>};</div>
+</div>
+<div class="line"><a id="l00041" name="l00041"></a><span class="lineno">   41</span> </div>
+<div class="foldopen" id="foldopen00042" data-start="{" data-end="};">
+<div class="line"><a id="l00042" name="l00042"></a><span class="lineno"><a class="line" href="structmemseek_1_1MemSeekError.html">   42</a></span><span class="keyword">struct </span><a class="code hl_struct" href="structmemseek_1_1MemSeekError.html">MemSeekError</a> {</div>
+<div class="line"><a id="l00043" name="l00043"></a><span class="lineno"><a class="line" href="structmemseek_1_1MemSeekError.html#a8b862ef57e95087a37bcff0f9abd5d46">   43</a></span>    <a class="code hl_function" href="structmemseek_1_1MemSeekError.html#a8b862ef57e95087a37bcff0f9abd5d46">MemSeekError</a>() = <span class="keywordflow">default</span>;</div>
+<div class="line"><a id="l00044" name="l00044"></a><span class="lineno"><a class="line" href="structmemseek_1_1MemSeekError.html#a4dcf9eb556ab0d1914c990cb121ccb44">   44</a></span>    <a class="code hl_function" href="structmemseek_1_1MemSeekError.html#a4dcf9eb556ab0d1914c990cb121ccb44">MemSeekError</a>(std::string <a class="code hl_function" href="namespacememseek.html#ab577b87dc7dadd822ef978fe05903a83">text</a>) : <a class="code hl_variable" href="structmemseek_1_1MemSeekError.html#ae763af948ea63f72aa37a33ce68d2e70">message</a>(<a class="code hl_function" href="namespacememseek.html#ab577b87dc7dadd822ef978fe05903a83">std</a>::<a class="code hl_function" href="namespacememseek.html#ab577b87dc7dadd822ef978fe05903a83">move</a>(<a class="code hl_function" href="namespacememseek.html#ab577b87dc7dadd822ef978fe05903a83">text</a>)) {}</div>
+<div class="line"><a id="l00045" name="l00045"></a><span class="lineno"><a class="line" href="structmemseek_1_1MemSeekError.html#af8de361a51b676ef4920502b13d1daab">   45</a></span>    <a class="code hl_function" href="structmemseek_1_1MemSeekError.html#af8de361a51b676ef4920502b13d1daab">MemSeekError</a>(<span class="keyword">const</span> <span class="keywordtype">char</span>* <a class="code hl_function" href="namespacememseek.html#ab577b87dc7dadd822ef978fe05903a83">text</a>) : <a class="code hl_variable" href="structmemseek_1_1MemSeekError.html#ae763af948ea63f72aa37a33ce68d2e70">message</a>(<a class="code hl_function" href="namespacememseek.html#ab577b87dc7dadd822ef978fe05903a83">text</a>) {}</div>
+<div class="line"><a id="l00046" name="l00046"></a><span class="lineno">   46</span> </div>
+<div class="line"><a id="l00047" name="l00047"></a><span class="lineno"><a class="line" href="structmemseek_1_1MemSeekError.html#a4cbeb43486617279c5edd717cf8b7e56">   47</a></span>    <a class="code hl_enumeration" href="namespacememseek.html#a4946032421c302524685b740208c4e08">ErrorCode</a> <a class="code hl_variable" href="structmemseek_1_1MemSeekError.html#a4cbeb43486617279c5edd717cf8b7e56">code</a>{<a class="code hl_enumvalue" href="namespacememseek.html#a4946032421c302524685b740208c4e08af295a0c3e37c94f078e1c5476479132d">ErrorCode::INVALID_ARGUMENT</a>};</div>
+<div class="line"><a id="l00048" name="l00048"></a><span class="lineno"><a class="line" href="structmemseek_1_1MemSeekError.html#ae763af948ea63f72aa37a33ce68d2e70">   48</a></span>    std::string <a class="code hl_variable" href="structmemseek_1_1MemSeekError.html#ae763af948ea63f72aa37a33ce68d2e70">message</a>;</div>
+<div class="line"><a id="l00049" name="l00049"></a><span class="lineno"><a class="line" href="structmemseek_1_1MemSeekError.html#ae619e8d2bc20ae6158342502ca913720">   49</a></span>    std::error_code <a class="code hl_variable" href="structmemseek_1_1MemSeekError.html#ae619e8d2bc20ae6158342502ca913720">systemError</a>;</div>
+<div class="line"><a id="l00050" name="l00050"></a><span class="lineno"><a class="line" href="structmemseek_1_1MemSeekError.html#a7f77918ea9f9835a8363e9afbee6a54a">   50</a></span>    std::optional&lt;pid_t&gt; <a class="code hl_variable" href="structmemseek_1_1MemSeekError.html#a7f77918ea9f9835a8363e9afbee6a54a">pid</a>;</div>
+<div class="line"><a id="l00051" name="l00051"></a><span class="lineno"><a class="line" href="structmemseek_1_1MemSeekError.html#a86481a733d0e28d1d0571b055033dcc0">   51</a></span>    std::optional&lt;std::uintptr_t&gt; <a class="code hl_variable" href="structmemseek_1_1MemSeekError.html#a86481a733d0e28d1d0571b055033dcc0">address</a>;</div>
+<div class="line"><a id="l00052" name="l00052"></a><span class="lineno"><a class="line" href="structmemseek_1_1MemSeekError.html#a0c4d350ba813af2f1baab1494b2fe369">   52</a></span>    std::optional&lt;std::size_t&gt; <a class="code hl_variable" href="structmemseek_1_1MemSeekError.html#a0c4d350ba813af2f1baab1494b2fe369">size</a>;</div>
+<div class="line"><a id="l00053" name="l00053"></a><span class="lineno"><a class="line" href="structmemseek_1_1MemSeekError.html#aa21b6b6d7fe564564678f5999b468892">   53</a></span>    std::optional&lt;std::size_t&gt; <a class="code hl_variable" href="structmemseek_1_1MemSeekError.html#aa21b6b6d7fe564564678f5999b468892">bytesTransferred</a>;</div>
+<div class="line"><a id="l00054" name="l00054"></a><span class="lineno">   54</span> </div>
+<div class="line"><a id="l00055" name="l00055"></a><span class="lineno"><a class="line" href="structmemseek_1_1MemSeekError.html#a6a9a1afb5e5b02d403259ff063a462ba">   55</a></span>    <span class="keywordtype">bool</span> <a class="code hl_function" href="structmemseek_1_1MemSeekError.html#a6a9a1afb5e5b02d403259ff063a462ba">operator==</a>(<span class="keyword">const</span> <a class="code hl_struct" href="structmemseek_1_1MemSeekError.html">MemSeekError</a>&amp;) <span class="keyword">const</span> = <span class="keywordflow">default</span>;</div>
+<div class="line"><a id="l00056" name="l00056"></a><span class="lineno">   56</span>};</div>
+</div>
+<div class="line"><a id="l00057" name="l00057"></a><span class="lineno">   57</span> </div>
+<div class="line"><a id="l00058" name="l00058"></a><span class="lineno">   58</span><span class="keyword">template</span> &lt;<span class="keyword">typename</span> T&gt;</div>
+<div class="line"><a id="l00059" name="l00059"></a><span class="lineno"><a class="line" href="namespacememseek.html#a530d433f013353e7f59702f5d6db7b51">   59</a></span><span class="keyword">using </span><a class="code hl_typedef" href="namespacememseek.html#a530d433f013353e7f59702f5d6db7b51">Result</a> = std::expected&lt;T, MemSeekError&gt;;</div>
+<div class="line"><a id="l00060" name="l00060"></a><span class="lineno">   60</span> </div>
+<div class="line"><a id="l00061" name="l00061"></a><span class="lineno">   61</span>[[<a class="code hl_function" href="namespacememseek.html#ab577b87dc7dadd822ef978fe05903a83">nodiscard</a>]]</div>
+<div class="line"><a id="l00062" name="l00062"></a><span class="lineno">   62</span><span class="keyword">auto</span> <a class="code hl_function" href="namespacememseek.html#a966d6a93f2ca1abbdc3ee56586bcb7ca">makeError</a>(<a class="code hl_enumeration" href="namespacememseek.html#a4946032421c302524685b740208c4e08">ErrorCode</a> code, std::string message) -&gt; <a class="code hl_struct" href="structmemseek_1_1MemSeekError.html">MemSeekError</a>;</div>
+<div class="line"><a id="l00063" name="l00063"></a><span class="lineno">   63</span> </div>
+<div class="line"><a id="l00064" name="l00064"></a><span class="lineno">   64</span>[[<a class="code hl_function" href="namespacememseek.html#ab577b87dc7dadd822ef978fe05903a83">nodiscard</a>]]</div>
+<div class="line"><a id="l00065" name="l00065"></a><span class="lineno">   65</span><span class="keyword">auto</span> <a class="code hl_function" href="namespacememseek.html#a5d7c84b4858c9cc6a9595f93ca36d6fd">errorCodeName</a>(<a class="code hl_enumeration" href="namespacememseek.html#a4946032421c302524685b740208c4e08">ErrorCode</a> code) <span class="keyword">noexcept</span> -&gt; <span class="keyword">const</span> <span class="keywordtype">char</span>*;</div>
+<div class="line"><a id="l00066" name="l00066"></a><span class="lineno">   66</span> </div>
+<div class="line"><a id="l00067" name="l00067"></a><span class="lineno">   67</span>[[<a class="code hl_function" href="namespacememseek.html#ab577b87dc7dadd822ef978fe05903a83">nodiscard</a>]]</div>
+<div class="line"><a id="l00068" name="l00068"></a><span class="lineno">   68</span><span class="keyword">auto</span> <a class="code hl_function" href="namespacememseek.html#a3313ab0ee2891c7cc24f29e9d0fd8730">formatError</a>(<span class="keyword">const</span> <a class="code hl_struct" href="structmemseek_1_1MemSeekError.html">MemSeekError</a>&amp; error) -&gt; std::string;</div>
+<div class="line"><a id="l00069" name="l00069"></a><span class="lineno">   69</span> </div>
+<div class="line"><a id="l00070" name="l00070"></a><span class="lineno">   70</span>}  <span class="comment">// namespace memseek</span></div>
+<div class="ttc" id="anamespacememseek_html"><div class="ttname"><a href="namespacememseek.html">memseek</a></div><div class="ttdef"><b>Definition</b> scan_session.hpp:16</div></div>
+<div class="ttc" id="anamespacememseek_html_a3313ab0ee2891c7cc24f29e9d0fd8730"><div class="ttname"><a href="namespacememseek.html#a3313ab0ee2891c7cc24f29e9d0fd8730">memseek::formatError</a></div><div class="ttdeci">auto formatError(const MemSeekError &amp;error) -&gt; std::string</div><div class="ttdef"><b>Definition</b> error.cpp:47</div></div>
+<div class="ttc" id="anamespacememseek_html_a4946032421c302524685b740208c4e08"><div class="ttname"><a href="namespacememseek.html#a4946032421c302524685b740208c4e08">memseek::ErrorCode</a></div><div class="ttdeci">ErrorCode</div><div class="ttdef"><b>Definition</b> error.hpp:16</div></div>
+<div class="ttc" id="anamespacememseek_html_a4946032421c302524685b740208c4e08a12821497c2947762acaa03ea482b1103"><div class="ttname"><a href="namespacememseek.html#a4946032421c302524685b740208c4e08a12821497c2947762acaa03ea482b1103">memseek::ErrorCode::ADDRESS_OUT_OF_RANGE</a></div><div class="ttdeci">@ ADDRESS_OUT_OF_RANGE</div></div>
+<div class="ttc" id="anamespacememseek_html_a4946032421c302524685b740208c4e08a3cfc468f5825854d2661952214f89dc0"><div class="ttname"><a href="namespacememseek.html#a4946032421c302524685b740208c4e08a3cfc468f5825854d2661952214f89dc0">memseek::ErrorCode::UNSUPPORTED_PLATFORM</a></div><div class="ttdeci">@ UNSUPPORTED_PLATFORM</div></div>
+<div class="ttc" id="anamespacememseek_html_a4946032421c302524685b740208c4e08a5a2ff7a2f2c3b40268e57995408f8e9d"><div class="ttname"><a href="namespacememseek.html#a4946032421c302524685b740208c4e08a5a2ff7a2f2c3b40268e57995408f8e9d">memseek::ErrorCode::UNSUPPORTED_OPERATION</a></div><div class="ttdeci">@ UNSUPPORTED_OPERATION</div></div>
+<div class="ttc" id="anamespacememseek_html_a4946032421c302524685b740208c4e08a77cdef16b3182b83e017a72a9a07151a"><div class="ttname"><a href="namespacememseek.html#a4946032421c302524685b740208c4e08a77cdef16b3182b83e017a72a9a07151a">memseek::ErrorCode::PROCESS_ACCESS_FAILED</a></div><div class="ttdeci">@ PROCESS_ACCESS_FAILED</div></div>
+<div class="ttc" id="anamespacememseek_html_a4946032421c302524685b740208c4e08a92baa693d6fc18e588c8015dd987ecb8"><div class="ttname"><a href="namespacememseek.html#a4946032421c302524685b740208c4e08a92baa693d6fc18e588c8015dd987ecb8">memseek::ErrorCode::MEMORY_WRITE_FAILED</a></div><div class="ttdeci">@ MEMORY_WRITE_FAILED</div></div>
+<div class="ttc" id="anamespacememseek_html_a4946032421c302524685b740208c4e08a95bf9671279cf7d14bf57442f22f416a"><div class="ttname"><a href="namespacememseek.html#a4946032421c302524685b740208c4e08a95bf9671279cf7d14bf57442f22f416a">memseek::ErrorCode::REGION_MISMATCH</a></div><div class="ttdeci">@ REGION_MISMATCH</div></div>
+<div class="ttc" id="anamespacememseek_html_a4946032421c302524685b740208c4e08aa60144393a4691f4453a3fefc835b14e"><div class="ttname"><a href="namespacememseek.html#a4946032421c302524685b740208c4e08aa60144393a4691f4453a3fefc835b14e">memseek::ErrorCode::SHORT_TRANSFER</a></div><div class="ttdeci">@ SHORT_TRANSFER</div></div>
+<div class="ttc" id="anamespacememseek_html_a4946032421c302524685b740208c4e08ab957aa10f1244583a8eb443ca8330409"><div class="ttname"><a href="namespacememseek.html#a4946032421c302524685b740208c4e08ab957aa10f1244583a8eb443ca8330409">memseek::ErrorCode::MAPPING_QUERY_FAILED</a></div><div class="ttdeci">@ MAPPING_QUERY_FAILED</div></div>
+<div class="ttc" id="anamespacememseek_html_a4946032421c302524685b740208c4e08ad23ab418e9275b11a5938c36eb82323e"><div class="ttname"><a href="namespacememseek.html#a4946032421c302524685b740208c4e08ad23ab418e9275b11a5938c36eb82323e">memseek::ErrorCode::NO_BASELINE</a></div><div class="ttdeci">@ NO_BASELINE</div></div>
+<div class="ttc" id="anamespacememseek_html_a4946032421c302524685b740208c4e08ad87d76d94e12aed12dc2acf63d5b1ac6"><div class="ttname"><a href="namespacememseek.html#a4946032421c302524685b740208c4e08ad87d76d94e12aed12dc2acf63d5b1ac6">memseek::ErrorCode::MAPPING_NOT_WRITABLE</a></div><div class="ttdeci">@ MAPPING_NOT_WRITABLE</div></div>
+<div class="ttc" id="anamespacememseek_html_a4946032421c302524685b740208c4e08ad8f24f388e990b9ccf8905b7993b99ae"><div class="ttname"><a href="namespacememseek.html#a4946032421c302524685b740208c4e08ad8f24f388e990b9ccf8905b7993b99ae">memseek::ErrorCode::INVALID_VALUE</a></div><div class="ttdeci">@ INVALID_VALUE</div></div>
+<div class="ttc" id="anamespacememseek_html_a4946032421c302524685b740208c4e08adbe0cc579cb3efa261ae1617a0205635"><div class="ttname"><a href="namespacememseek.html#a4946032421c302524685b740208c4e08adbe0cc579cb3efa261ae1617a0205635">memseek::ErrorCode::MEMORY_READ_FAILED</a></div><div class="ttdeci">@ MEMORY_READ_FAILED</div></div>
+<div class="ttc" id="anamespacememseek_html_a4946032421c302524685b740208c4e08af295a0c3e37c94f078e1c5476479132d"><div class="ttname"><a href="namespacememseek.html#a4946032421c302524685b740208c4e08af295a0c3e37c94f078e1c5476479132d">memseek::ErrorCode::INVALID_ARGUMENT</a></div><div class="ttdeci">@ INVALID_ARGUMENT</div></div>
+<div class="ttc" id="anamespacememseek_html_a530d433f013353e7f59702f5d6db7b51"><div class="ttname"><a href="namespacememseek.html#a530d433f013353e7f59702f5d6db7b51">memseek::Result</a></div><div class="ttdeci">std::expected&lt; T, MemSeekError &gt; Result</div><div class="ttdef"><b>Definition</b> error.hpp:59</div></div>
+<div class="ttc" id="anamespacememseek_html_a5d7c84b4858c9cc6a9595f93ca36d6fd"><div class="ttname"><a href="namespacememseek.html#a5d7c84b4858c9cc6a9595f93ca36d6fd">memseek::errorCodeName</a></div><div class="ttdeci">auto errorCodeName(ErrorCode code) noexcept -&gt; const char *</div><div class="ttdef"><b>Definition</b> error.cpp:15</div></div>
+<div class="ttc" id="anamespacememseek_html_a966d6a93f2ca1abbdc3ee56586bcb7ca"><div class="ttname"><a href="namespacememseek.html#a966d6a93f2ca1abbdc3ee56586bcb7ca">memseek::makeError</a></div><div class="ttdeci">auto makeError(ErrorCode code, std::string message) -&gt; MemSeekError</div><div class="ttdef"><b>Definition</b> error.cpp:8</div></div>
+<div class="ttc" id="anamespacememseek_html_ab577b87dc7dadd822ef978fe05903a83"><div class="ttname"><a href="namespacememseek.html#ab577b87dc7dadd822ef978fe05903a83">memseek::getValueType</a></div><div class="ttdeci">constexpr ValueType getValueType()</div><div class="ttdef"><b>Definition</b> value.hpp:74</div></div>
+<div class="ttc" id="astructmemseek_1_1MemSeekError_html"><div class="ttname"><a href="structmemseek_1_1MemSeekError.html">memseek::MemSeekError</a></div><div class="ttdef"><b>Definition</b> error.hpp:42</div></div>
+<div class="ttc" id="astructmemseek_1_1MemSeekError_html_a0c4d350ba813af2f1baab1494b2fe369"><div class="ttname"><a href="structmemseek_1_1MemSeekError.html#a0c4d350ba813af2f1baab1494b2fe369">memseek::MemSeekError::size</a></div><div class="ttdeci">std::optional&lt; std::size_t &gt; size</div><div class="ttdef"><b>Definition</b> error.hpp:52</div></div>
+<div class="ttc" id="astructmemseek_1_1MemSeekError_html_a4cbeb43486617279c5edd717cf8b7e56"><div class="ttname"><a href="structmemseek_1_1MemSeekError.html#a4cbeb43486617279c5edd717cf8b7e56">memseek::MemSeekError::code</a></div><div class="ttdeci">ErrorCode code</div><div class="ttdef"><b>Definition</b> error.hpp:47</div></div>
+<div class="ttc" id="astructmemseek_1_1MemSeekError_html_a4dcf9eb556ab0d1914c990cb121ccb44"><div class="ttname"><a href="structmemseek_1_1MemSeekError.html#a4dcf9eb556ab0d1914c990cb121ccb44">memseek::MemSeekError::MemSeekError</a></div><div class="ttdeci">MemSeekError(std::string text)</div><div class="ttdef"><b>Definition</b> error.hpp:44</div></div>
+<div class="ttc" id="astructmemseek_1_1MemSeekError_html_a6a9a1afb5e5b02d403259ff063a462ba"><div class="ttname"><a href="structmemseek_1_1MemSeekError.html#a6a9a1afb5e5b02d403259ff063a462ba">memseek::MemSeekError::operator==</a></div><div class="ttdeci">bool operator==(const MemSeekError &amp;) const =default</div></div>
+<div class="ttc" id="astructmemseek_1_1MemSeekError_html_a7f77918ea9f9835a8363e9afbee6a54a"><div class="ttname"><a href="structmemseek_1_1MemSeekError.html#a7f77918ea9f9835a8363e9afbee6a54a">memseek::MemSeekError::pid</a></div><div class="ttdeci">std::optional&lt; pid_t &gt; pid</div><div class="ttdef"><b>Definition</b> error.hpp:50</div></div>
+<div class="ttc" id="astructmemseek_1_1MemSeekError_html_a86481a733d0e28d1d0571b055033dcc0"><div class="ttname"><a href="structmemseek_1_1MemSeekError.html#a86481a733d0e28d1d0571b055033dcc0">memseek::MemSeekError::address</a></div><div class="ttdeci">std::optional&lt; std::uintptr_t &gt; address</div><div class="ttdef"><b>Definition</b> error.hpp:51</div></div>
+<div class="ttc" id="astructmemseek_1_1MemSeekError_html_a8b862ef57e95087a37bcff0f9abd5d46"><div class="ttname"><a href="structmemseek_1_1MemSeekError.html#a8b862ef57e95087a37bcff0f9abd5d46">memseek::MemSeekError::MemSeekError</a></div><div class="ttdeci">MemSeekError()=default</div></div>
+<div class="ttc" id="astructmemseek_1_1MemSeekError_html_aa21b6b6d7fe564564678f5999b468892"><div class="ttname"><a href="structmemseek_1_1MemSeekError.html#aa21b6b6d7fe564564678f5999b468892">memseek::MemSeekError::bytesTransferred</a></div><div class="ttdeci">std::optional&lt; std::size_t &gt; bytesTransferred</div><div class="ttdef"><b>Definition</b> error.hpp:53</div></div>
+<div class="ttc" id="astructmemseek_1_1MemSeekError_html_ae619e8d2bc20ae6158342502ca913720"><div class="ttname"><a href="structmemseek_1_1MemSeekError.html#ae619e8d2bc20ae6158342502ca913720">memseek::MemSeekError::systemError</a></div><div class="ttdeci">std::error_code systemError</div><div class="ttdef"><b>Definition</b> error.hpp:49</div></div>
+<div class="ttc" id="astructmemseek_1_1MemSeekError_html_ae763af948ea63f72aa37a33ce68d2e70"><div class="ttname"><a href="structmemseek_1_1MemSeekError.html#ae763af948ea63f72aa37a33ce68d2e70">memseek::MemSeekError::message</a></div><div class="ttdeci">std::string message</div><div class="ttdef"><b>Definition</b> error.hpp:48</div></div>
+<div class="ttc" id="astructmemseek_1_1MemSeekError_html_af8de361a51b676ef4920502b13d1daab"><div class="ttname"><a href="structmemseek_1_1MemSeekError.html#af8de361a51b676ef4920502b13d1daab">memseek::MemSeekError::MemSeekError</a></div><div class="ttdeci">MemSeekError(const char *text)</div><div class="ttdef"><b>Definition</b> error.hpp:45</div></div>
+</div><!-- fragment --></div><!-- contents -->
+</div><!-- doc-content -->
+<!-- start footer part -->
+<div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
+  <ul>
+    <li class="navelem"><a class="el" href="dir_d44c64559bbebec7f509842c48db8b23.html">include</a></li><li class="navelem"><a class="el" href="dir_228224e106b34a496deab9a6a7e801a4.html">memseek</a></li><li class="navelem"><a class="el" href="error_8hpp.html">error.hpp</a></li>
+    <li class="footer">制作者 <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
+  </ul>
+</div>
+</body>
+</html>

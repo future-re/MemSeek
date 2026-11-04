@@ -1,0 +1,19 @@
+<map id="include/memseek/error.hpp" name="include/memseek/error.hpp">
+<area shape="rect" id="Node000001" title=" " alt="" coords="304,5,504,31"/>
+<area shape="rect" id="Node000002" title=" " alt="" coords="5,79,101,104"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="348,33,116,80,115,75,347,28"/>
+<area shape="rect" id="Node000003" title=" " alt="" coords="126,79,197,104"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="366,33,210,79,209,73,364,28"/>
+<area shape="rect" id="Node000004" title=" " alt="" coords="221,79,288,104"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="381,33,293,75,290,70,379,28"/>
+<area shape="rect" id="Node000005" title=" " alt="" coords="312,79,395,104"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="398,33,372,69,367,66,393,29"/>
+<area shape="rect" id="Node000006" title=" " alt="" coords="419,79,493,104"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="415,29,442,66,437,69,410,33"/>
+<area shape="rect" id="Node000007" title=" " alt="" coords="517,79,576,104"/>
+<area shape="poly" id="edge6_Node000001_Node000007" title=" " alt="" coords="428,28,512,70,510,75,426,33"/>
+<area shape="rect" id="Node000008" title=" " alt="" coords="601,79,709,104"/>
+<area shape="poly" id="edge7_Node000001_Node000008" title=" " alt="" coords="445,28,602,72,600,77,444,33"/>
+<area shape="rect" id="Node000009" title=" " alt="" coords="733,79,793,104"/>
+<area shape="poly" id="edge8_Node000001_Node000009" title=" " alt="" coords="475,28,586,48,720,76,719,81,585,53,474,33"/>
+</map>

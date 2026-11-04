@@ -1,0 +1,211 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "https://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="zh">
+<head>
+<meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=11"/>
+<meta name="generator" content="Doxygen 1.9.8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>memseek: include/memseek/memory/reader.hpp 文件参考</title>
+<link href="tabs.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="jquery.js"></script>
+<script type="text/javascript" src="dynsections.js"></script>
+<link href="navtree.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="resize.js"></script>
+<script type="text/javascript" src="navtreedata.js"></script>
+<script type="text/javascript" src="navtree.js"></script>
+<link href="search/search.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="search/searchdata.js"></script>
+<script type="text/javascript" src="search/search.js"></script>
+<link href="doxygen.css" rel="stylesheet" type="text/css" />
+<link href="doxygen-awesome.css" rel="stylesheet" type="text/css"/>
+</head>
+<body>
+<div id="top"><!-- do not remove this div, it is closed by doxygen! -->
+<div id="titlearea">
+<table cellspacing="0" cellpadding="0">
+ <tbody>
+ <tr id="projectrow">
+  <td id="projectalign">
+   <div id="projectname">memseek
+   </div>
+   <div id="projectbrief">Modern C++20 Memory Scanner</div>
+  </td>
+ </tr>
+ </tbody>
+</table>
+</div>
+<!-- end header part -->
+<!-- 制作者 Doxygen 1.9.8 -->
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+var searchBox = new SearchBox("searchBox", "search/",'.html');
+/* @license-end */
+</script>
+<script type="text/javascript" src="menudata.js"></script>
+<script type="text/javascript" src="menu.js"></script>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(function() {
+  initMenu('',true,false,'search.php','搜索');
+  $(document).ready(function() { init_search(); });
+});
+/* @license-end */
+</script>
+<div id="main-nav"></div>
+</div><!-- top -->
+<div id="side-nav" class="ui-resizable side-nav-resizable">
+  <div id="nav-tree">
+    <div id="nav-tree-contents">
+      <div id="nav-sync" class="sync"></div>
+    </div>
+  </div>
+  <div id="splitbar" style="-moz-user-select:none;" 
+       class="ui-resizable-handle">
+  </div>
+</div>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(document).ready(function(){initNavTree('reader_8hpp.html',''); initResizable(); });
+/* @license-end */
+</script>
+<div id="doc-content">
+<!-- window showing the filter options -->
+<div id="MSearchSelectWindow"
+     onmouseover="return searchBox.OnSearchSelectShow()"
+     onmouseout="return searchBox.OnSearchSelectHide()"
+     onkeydown="return searchBox.OnSearchSelectKey(event)">
+</div>
+
+<!-- iframe showing the search results (closed by default) -->
+<div id="MSearchResultsWindow">
+<div id="MSearchResults">
+<div class="SRPage">
+<div id="SRIndex">
+<div id="SRResults"></div>
+<div class="SRStatus" id="Loading">载入中...</div>
+<div class="SRStatus" id="Searching">搜索中...</div>
+<div class="SRStatus" id="NoMatches">未找到</div>
+</div>
+</div>
+</div>
+</div>
+
+<div class="header">
+  <div class="summary">
+<a href="#nested-classes">类</a> &#124;
+<a href="#namespaces">命名空间</a>  </div>
+  <div class="headertitle"><div class="title">reader.hpp 文件参考</div></div>
+</div><!--header-->
+<div class="contents">
+<div class="textblock"><code>#include &lt;sys/types.h&gt;</code><br />
+<code>#include &lt;cstddef&gt;</code><br />
+<code>#include &lt;cstdint&gt;</code><br />
+<code>#include &lt;vector&gt;</code><br />
+<code>#include &quot;<a class="el" href="error_8hpp_source.html">memseek/error.hpp</a>&quot;</code><br />
+</div><div class="textblock"><div class="dynheader">
+reader.hpp 的引用(Include)关系图:</div>
+<div class="dyncontent">
+<div class="center"><img src="reader_8hpp__incl.png" border="0" usemap="#ainclude_2memseek_2memory_2reader_8hpp" alt=""/></div>
+<map name="ainclude_2memseek_2memory_2reader_8hpp" id="ainclude_2memseek_2memory_2reader_8hpp">
+<area shape="rect" title=" " alt="" coords="132,5,329,45"/>
+<area shape="rect" title=" " alt="" coords="5,167,101,192"/>
+<area shape="poly" title=" " alt="" coords="210,48,79,159,76,155,207,43"/>
+<area shape="rect" title=" " alt="" coords="126,167,197,192"/>
+<area shape="poly" title=" " alt="" coords="224,47,175,155,170,153,219,45"/>
+<area shape="rect" title=" " alt="" coords="221,167,288,192"/>
+<area shape="poly" title=" " alt="" coords="236,45,253,153,248,153,231,46"/>
+<area shape="rect" title=" " alt="" coords="442,93,505,119"/>
+<area shape="poly" title=" " alt="" coords="290,43,429,88,428,93,288,48"/>
+<area shape="rect" href="error_8hpp.html" title=" " alt="" coords="268,93,417,119"/>
+<area shape="poly" title=" " alt="" coords="259,43,316,83,313,87,256,48"/>
+<area shape="poly" title=" " alt="" coords="297,121,114,166,113,161,296,116"/>
+<area shape="poly" title=" " alt="" coords="315,121,205,164,203,159,313,116"/>
+<area shape="poly" title=" " alt="" coords="330,121,281,160,278,156,327,117"/>
+<area shape="rect" title=" " alt="" coords="397,167,480,192"/>
+<area shape="poly" title=" " alt="" coords="360,117,413,156,410,160,357,121"/>
+<area shape="rect" title=" " alt="" coords="504,167,579,192"/>
+<area shape="poly" title=" " alt="" coords="375,116,497,159,495,164,374,121"/>
+<area shape="rect" title=" " alt="" coords="603,167,661,192"/>
+<area shape="poly" title=" " alt="" coords="393,116,590,164,588,169,392,121"/>
+<area shape="rect" title=" " alt="" coords="686,167,794,192"/>
+<area shape="poly" title=" " alt="" coords="407,116,673,163,672,169,406,121"/>
+<area shape="rect" title=" " alt="" coords="313,167,373,192"/>
+<area shape="poly" title=" " alt="" coords="345,119,345,153,340,153,340,119"/>
+</map>
+</div>
+</div><div class="textblock"><div class="dynheader">
+此图展示该文件直接或间接的被哪些文件引用了:</div>
+<div class="dyncontent">
+<div class="center"><img src="reader_8hpp__dep__incl.png" border="0" usemap="#ainclude_2memseek_2memory_2reader_8hppdep" alt=""/></div>
+<map name="ainclude_2memseek_2memory_2reader_8hppdep" id="ainclude_2memseek_2memory_2reader_8hppdep">
+<area shape="rect" title=" " alt="" coords="699,5,896,45"/>
+<area shape="rect" href="scan_8hpp.html" title=" " alt="" coords="631,93,828,133"/>
+<area shape="poly" title=" " alt="" coords="776,58,747,95,743,91,772,55"/>
+<area shape="rect" href="change_8cpp.html" title=" " alt="" coords="26,365,204,390"/>
+<area shape="poly" title=" " alt="" coords="686,45,587,65,472,93,351,133,292,157,236,184,176,218,154,239,133,271,123,295,118,321,117,365,111,364,113,321,118,294,129,268,150,236,172,214,234,179,290,152,349,128,470,88,585,60,685,40"/>
+<area shape="rect" href="scan_8cpp.html" title=" " alt="" coords="970,189,1132,214"/>
+<area shape="poly" title=" " alt="" coords="821,55,853,94,894,131,954,164,1012,186,1010,191,951,169,891,136,849,98,817,59"/>
+<area shape="rect" href="reader_8cpp.html" title=" " alt="" coords="904,101,1076,126"/>
+<area shape="poly" title=" " alt="" coords="853,49,965,98,963,103,851,53"/>
+<area shape="rect" href="scan__session_8hpp.html" title=" " alt="" coords="677,357,844,397"/>
+<area shape="poly" title=" " alt="" coords="743,146,751,181,761,280,763,357,758,357,756,280,746,182,737,147"/>
+<area shape="rect" href="interactive_8cpp.html" title=" " alt="" coords="212,533,373,559"/>
+<area shape="poly" title=" " alt="" coords="618,125,405,148,306,164,236,184,160,216,103,248,79,267,57,291,36,321,16,358,10,376,8,392,11,408,17,422,40,449,72,472,112,492,155,508,236,531,234,536,153,513,110,497,70,477,36,453,12,425,6,409,3,393,5,375,11,356,32,318,53,287,75,263,100,243,158,211,234,179,305,159,404,143,617,120"/>
+<area shape="rect" href="scan__session_8cpp.html" title=" " alt="" coords="794,453,980,478"/>
+<area shape="poly" title=" " alt="" coords="758,143,789,182,825,234,859,293,886,357,891,383,893,410,891,453,886,452,888,410,886,384,880,358,855,295,821,236,785,185,754,146"/>
+<area shape="rect" href="command_8hpp.html" title=" " alt="" coords="444,357,602,397"/>
+<area shape="poly" title=" " alt="" coords="738,147,740,184,738,227,728,271,706,311,685,332,659,348,603,368,601,363,656,344,681,328,702,308,723,269,733,226,735,184,732,147"/>
+<area shape="rect" href="snapshot_8hpp.html" title=" " alt="" coords="495,181,692,221"/>
+<area shape="poly" title=" " alt="" coords="689,143,625,184,622,179,687,139"/>
+<area shape="poly" title=" " alt="" coords="617,121,513,133,394,159,333,179,274,204,218,234,167,271,148,293,134,319,120,365,115,363,129,317,144,290,164,267,216,230,272,199,331,174,392,154,512,128,617,116"/>
+<area shape="poly" title=" " alt="" coords="814,134,1009,186,1008,191,812,139"/>
+<area shape="rect" href="interactive_8hpp.html" title=" " alt="" coords="562,445,719,485"/>
+<area shape="poly" title=" " alt="" coords="724,408,668,447,665,443,721,403"/>
+<area shape="poly" title=" " alt="" coords="801,403,871,450,868,455,798,407"/>
+<area shape="poly" title=" " alt="" coords="549,490,344,536,342,531,547,485"/>
+<area shape="rect" href="main_8cpp.html" title=" " alt="" coords="636,533,760,559"/>
+<area shape="poly" title=" " alt="" coords="664,495,691,531,687,535,660,498"/>
+<area shape="poly" title=" " alt="" coords="562,404,616,443,613,447,559,408"/>
+<area shape="poly" title=" " alt="" coords="449,405,408,423,370,447,347,469,328,493,301,535,296,532,323,490,343,465,367,443,406,418,447,400"/>
+<area shape="poly" title=" " alt="" coords="616,394,687,416,715,429,733,444,739,455,741,468,735,493,723,516,710,535,706,532,719,514,730,491,735,468,734,457,729,447,712,433,685,421,614,400"/>
+<area shape="rect" href="command_8cpp.html" title=" " alt="" coords="381,453,537,478"/>
+<area shape="poly" title=" " alt="" coords="503,410,470,454,466,451,498,407"/>
+<area shape="poly" title=" " alt="" coords="650,225,679,244,706,267,723,289,738,313,756,356,752,358,733,316,719,292,702,271,676,248,647,230"/>
+<area shape="poly" title=" " alt="" coords="481,213,417,221,354,233,301,250,282,260,269,271,250,303,242,339,241,377,247,415,267,485,289,532,284,534,262,487,241,417,236,378,237,338,246,301,265,268,279,255,299,245,352,228,416,216,481,208"/>
+<area shape="poly" title=" " alt="" coords="668,224,717,245,768,274,818,310,858,356,872,381,881,408,889,452,883,453,876,409,867,383,854,359,814,314,766,278,714,250,666,229"/>
+<area shape="rect" href="change_8hpp.html" title=" " alt="" coords="495,269,692,309"/>
+<area shape="poly" title=" " alt="" coords="596,235,596,269,591,269,591,235"/>
+<area shape="poly" title=" " alt="" coords="482,208,420,215,354,227,287,245,224,272,192,293,164,319,125,366,121,363,160,315,189,289,222,267,286,240,353,222,420,210,481,203"/>
+<area shape="rect" href="snapshot_8cpp.html" title=" " alt="" coords="280,277,470,302"/>
+<area shape="poly" title=" " alt="" coords="534,229,405,279,403,274,532,224"/>
+<area shape="poly" title=" " alt="" coords="643,313,725,355,723,360,641,318"/>
+<area shape="poly" title=" " alt="" coords="518,317,469,338,417,366,368,402,328,447,315,469,306,493,297,534,291,533,301,492,311,467,323,444,364,398,414,361,466,333,516,312"/>
+<area shape="poly" title=" " alt="" coords="610,320,633,360,649,379,667,395,699,415,734,430,804,450,802,455,732,435,697,419,664,399,645,383,629,363,605,323"/>
+<area shape="poly" title=" " alt="" coords="571,322,541,359,537,355,567,318"/>
+<area shape="poly" title=" " alt="" coords="481,313,179,367,178,362,480,308"/>
+</map>
+</div>
+</div>
+<p><a href="reader_8hpp_source.html">浏览源代码.</a></p>
+<table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="nested-classes" name="nested-classes"></a>
+类</h2></td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmemseek_1_1MemoryReader.html">memseek::MemoryReader</a></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="namespaces" name="namespaces"></a>
+命名空间</h2></td></tr>
+<tr class="memitem:namespacememseek" id="r_namespacememseek"><td class="memItemLeft" align="right" valign="top">namespace &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacememseek.html">memseek</a></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table>
+</div><!-- contents -->
+</div><!-- doc-content -->
+<!-- start footer part -->
+<div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
+  <ul>
+    <li class="navelem"><a class="el" href="dir_d44c64559bbebec7f509842c48db8b23.html">include</a></li><li class="navelem"><a class="el" href="dir_228224e106b34a496deab9a6a7e801a4.html">memseek</a></li><li class="navelem"><a class="el" href="dir_44fe6e3ffaa77101a2ce7f9a864aac3c.html">memory</a></li><li class="navelem"><a class="el" href="reader_8hpp.html">reader.hpp</a></li>
+    <li class="footer">制作者 <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
+  </ul>
+</div>
+</body>
+</html>

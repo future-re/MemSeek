@@ -1,0 +1,95 @@
+var namespacememseek =
+[
+    [ "cli", "namespacememseek_1_1cli.html", "namespacememseek_1_1cli" ],
+    [ "MemoryChunk", "structmemseek_1_1MemoryChunk.html", "structmemseek_1_1MemoryChunk" ],
+    [ "MemoryChunkRange", "classmemseek_1_1MemoryChunkRange.html", "classmemseek_1_1MemoryChunkRange" ],
+    [ "MemoryRead", "classmemseek_1_1MemoryRead.html", "classmemseek_1_1MemoryRead" ],
+    [ "MemoryReader", "classmemseek_1_1MemoryReader.html", "classmemseek_1_1MemoryReader" ],
+    [ "MemoryRegion", "structmemseek_1_1MemoryRegion.html", "structmemseek_1_1MemoryRegion" ],
+    [ "MemoryRegionList", "classmemseek_1_1MemoryRegionList.html", "classmemseek_1_1MemoryRegionList" ],
+    [ "MemoryScanLevel", "structmemseek_1_1MemoryScanLevel.html", "structmemseek_1_1MemoryScanLevel" ],
+    [ "MemoryScanner", "classmemseek_1_1MemoryScanner.html", "classmemseek_1_1MemoryScanner" ],
+    [ "MemorySnapshot", "classmemseek_1_1MemorySnapshot.html", "classmemseek_1_1MemorySnapshot" ],
+    [ "MemoryWriter", "classmemseek_1_1MemoryWriter.html", "classmemseek_1_1MemoryWriter" ],
+    [ "MemoryWriteTarget", "structmemseek_1_1MemoryWriteTarget.html", "structmemseek_1_1MemoryWriteTarget" ],
+    [ "MemSeekError", "structmemseek_1_1MemSeekError.html", "structmemseek_1_1MemSeekError" ],
+    [ "ScanResult", "classmemseek_1_1ScanResult.html", "classmemseek_1_1ScanResult" ],
+    [ "ScanSession", "classmemseek_1_1ScanSession.html", "classmemseek_1_1ScanSession" ],
+    [ "Value", "classmemseek_1_1Value.html", "classmemseek_1_1Value" ],
+    [ "ValueNumericType", "conceptmemseek_1_1ValueNumericType.html", null ],
+    [ "ValueSupportedType", "conceptmemseek_1_1ValueSupportedType.html", null ],
+    [ "Result", "namespacememseek.html#a530d433f013353e7f59702f5d6db7b51", null ],
+    [ "ByteOrder", "namespacememseek.html#ad0a21e41b3905118505710c83fbcb741", [
+      [ "NATIVE", "namespacememseek.html#ad0a21e41b3905118505710c83fbcb741af78504d96ba7177dc0c6784905ac8743", null ],
+      [ "LITTLE", "namespacememseek.html#ad0a21e41b3905118505710c83fbcb741a1314341b466dcb5e2c880b76414c49fe", null ],
+      [ "BIG", "namespacememseek.html#ad0a21e41b3905118505710c83fbcb741aa60c6c694491d75b439073b8cb05b139", null ]
+    ] ],
+    [ "ChangeType", "namespacememseek.html#ac9991f561eb3f244a026c586dc8f5189", [
+      [ "CHANGED", "namespacememseek.html#ac9991f561eb3f244a026c586dc8f5189ae6b94e58bfd13b21bc786578d9f8ba4a", null ],
+      [ "UNCHANGED", "namespacememseek.html#ac9991f561eb3f244a026c586dc8f5189a46335765005ff44b1fe1e38e5d2ddfcc", null ]
+    ] ],
+    [ "ErrorCode", "namespacememseek.html#a4946032421c302524685b740208c4e08", [
+      [ "INVALID_ARGUMENT", "namespacememseek.html#a4946032421c302524685b740208c4e08af295a0c3e37c94f078e1c5476479132d", null ],
+      [ "INVALID_VALUE", "namespacememseek.html#a4946032421c302524685b740208c4e08ad8f24f388e990b9ccf8905b7993b99ae", null ],
+      [ "UNSUPPORTED_OPERATION", "namespacememseek.html#a4946032421c302524685b740208c4e08a5a2ff7a2f2c3b40268e57995408f8e9d", null ],
+      [ "UNSUPPORTED_PLATFORM", "namespacememseek.html#a4946032421c302524685b740208c4e08a3cfc468f5825854d2661952214f89dc0", null ],
+      [ "MAPPING_QUERY_FAILED", "namespacememseek.html#a4946032421c302524685b740208c4e08ab957aa10f1244583a8eb443ca8330409", null ],
+      [ "PROCESS_ACCESS_FAILED", "namespacememseek.html#a4946032421c302524685b740208c4e08a77cdef16b3182b83e017a72a9a07151a", null ],
+      [ "ADDRESS_OUT_OF_RANGE", "namespacememseek.html#a4946032421c302524685b740208c4e08a12821497c2947762acaa03ea482b1103", null ],
+      [ "MEMORY_READ_FAILED", "namespacememseek.html#a4946032421c302524685b740208c4e08adbe0cc579cb3efa261ae1617a0205635", null ],
+      [ "MEMORY_WRITE_FAILED", "namespacememseek.html#a4946032421c302524685b740208c4e08a92baa693d6fc18e588c8015dd987ecb8", null ],
+      [ "MAPPING_NOT_WRITABLE", "namespacememseek.html#a4946032421c302524685b740208c4e08ad87d76d94e12aed12dc2acf63d5b1ac6", null ],
+      [ "REGION_MISMATCH", "namespacememseek.html#a4946032421c302524685b740208c4e08a95bf9671279cf7d14bf57442f22f416a", null ],
+      [ "SHORT_TRANSFER", "namespacememseek.html#a4946032421c302524685b740208c4e08aa60144393a4691f4453a3fefc835b14e", null ],
+      [ "NO_BASELINE", "namespacememseek.html#a4946032421c302524685b740208c4e08ad23ab418e9275b11a5938c36eb82323e", null ]
+    ] ],
+    [ "MemoryProtection", "namespacememseek.html#a64fca1485aa2e00f57cbaae4730e66ef", [
+      [ "NONE", "namespacememseek.html#a64fca1485aa2e00f57cbaae4730e66efab50339a10e1de285ac99d4c3990b8693", null ],
+      [ "READ", "namespacememseek.html#a64fca1485aa2e00f57cbaae4730e66efa3466fab4975481651940ed328aa990e4", null ],
+      [ "WRITE", "namespacememseek.html#a64fca1485aa2e00f57cbaae4730e66efad4b9e47f65b6e79b010582f15785867e", null ],
+      [ "EXECUTE", "namespacememseek.html#a64fca1485aa2e00f57cbaae4730e66efa5d76688e2261e6805ee36ad961b3fa7a", null ]
+    ] ],
+    [ "MemoryRegionType", "namespacememseek.html#a579a7e0df520627cce5a0f40ab449606", [
+      [ "UNKNOWN", "namespacememseek.html#a579a7e0df520627cce5a0f40ab449606a696b031073e74bf2cb98e5ef201d4aa3", null ],
+      [ "HEAP", "namespacememseek.html#a579a7e0df520627cce5a0f40ab449606ab6722804f5872cdd88347da194d42087", null ],
+      [ "STACK", "namespacememseek.html#a579a7e0df520627cce5a0f40ab449606a0fac686d86aba414411b58f6bce53a76", null ],
+      [ "ANONYMOUS", "namespacememseek.html#a579a7e0df520627cce5a0f40ab449606a9bab2b4c50d8359fc53c582d09ca21df", null ],
+      [ "MODULE", "namespacememseek.html#a579a7e0df520627cce5a0f40ab449606a1cf5e1f5569acda3c4a88a91c5130a69", null ]
+    ] ],
+    [ "ScanType", "namespacememseek.html#a62fc59d52513d15b15466fedb4a09357", [
+      [ "UNKNOWN", "namespacememseek.html#a62fc59d52513d15b15466fedb4a09357a696b031073e74bf2cb98e5ef201d4aa3", null ],
+      [ "EXACT", "namespacememseek.html#a62fc59d52513d15b15466fedb4a09357ac41e056424136b6e8c4e23dd6326efa1", null ],
+      [ "RANGE", "namespacememseek.html#a62fc59d52513d15b15466fedb4a09357a01036ddcc971d02f6c32c3da31a119f2", null ],
+      [ "GREATER", "namespacememseek.html#a62fc59d52513d15b15466fedb4a09357ae7e72355289e404b762d4cf88824d23b", null ],
+      [ "LESS", "namespacememseek.html#a62fc59d52513d15b15466fedb4a09357a1798e8c3621ca53d9e3a80d257306000", null ]
+    ] ],
+    [ "ValueType", "namespacememseek.html#a8e370678d2eaba97293111b0f35bf7a3", [
+      [ "UNKNOWN", "namespacememseek.html#a8e370678d2eaba97293111b0f35bf7a3a696b031073e74bf2cb98e5ef201d4aa3", null ],
+      [ "U_INT8", "namespacememseek.html#a8e370678d2eaba97293111b0f35bf7a3a680c1dffa13d7ca4f6a1f47ca421ab32", null ],
+      [ "U_INT16", "namespacememseek.html#a8e370678d2eaba97293111b0f35bf7a3a368fc9d2e384ae7abd72c632935c3adc", null ],
+      [ "U_INT32", "namespacememseek.html#a8e370678d2eaba97293111b0f35bf7a3a34a3d899c1e77631a514cee4898710ac", null ],
+      [ "U_INT64", "namespacememseek.html#a8e370678d2eaba97293111b0f35bf7a3a70153ec39d9d79462068c014b0a02ab6", null ],
+      [ "INT8", "namespacememseek.html#a8e370678d2eaba97293111b0f35bf7a3aee9d73311ff0658494edfff14c3ec1e3", null ],
+      [ "INT16", "namespacememseek.html#a8e370678d2eaba97293111b0f35bf7a3a5f90af42814c0a419d715d43ae54fd7a", null ],
+      [ "INT32", "namespacememseek.html#a8e370678d2eaba97293111b0f35bf7a3a6495adba09844fac8eeb0aba86e6f1bf", null ],
+      [ "INT64", "namespacememseek.html#a8e370678d2eaba97293111b0f35bf7a3a4e866b275c85fbb439f6484251cfb31c", null ],
+      [ "FLOAT32", "namespacememseek.html#a8e370678d2eaba97293111b0f35bf7a3a967d280b5c16d95f2947647dd2ca6cc2", null ],
+      [ "FLOAT64", "namespacememseek.html#a8e370678d2eaba97293111b0f35bf7a3a139882c654db8a57f7c3092de1dd0b02", null ],
+      [ "STR", "namespacememseek.html#a8e370678d2eaba97293111b0f35bf7a3a3fe0dfff438296bb525e0e8642586c2d", null ],
+      [ "BIN_ARRAY", "namespacememseek.html#a8e370678d2eaba97293111b0f35bf7a3aabc89e384cd3b575d69b419016ca65c0", null ]
+    ] ],
+    [ "captureChanges", "namespacememseek.html#a9fd37e964ae168593be32be42381bb37", null ],
+    [ "errorCodeName", "namespacememseek.html#a5d7c84b4858c9cc6a9595f93ca36d6fd", null ],
+    [ "formatError", "namespacememseek.html#a3313ab0ee2891c7cc24f29e9d0fd8730", null ],
+    [ "getValueType", "namespacememseek.html#ab577b87dc7dadd822ef978fe05903a83", null ],
+    [ "isNumericValueType", "namespacememseek.html#afd6703ec85a306b547e4df21b155a642", null ],
+    [ "makeError", "namespacememseek.html#a966d6a93f2ca1abbdc3ee56586bcb7ca", null ],
+    [ "matchesChange", "namespacememseek.html#aaed20ad2239f8930ca07c5ba902d3023", null ],
+    [ "operator|", "namespacememseek.html#ad65f9ccb509cc33e13667287d91741b8", null ],
+    [ "operator|", "namespacememseek.html#a7e1ca3e170e13ffe4dae7e352056ecb2", null ],
+    [ "operator|=", "namespacememseek.html#a380682e2727729d7e7147a74bb055dd8", null ],
+    [ "operator|=", "namespacememseek.html#a9c23595a7daa49f2846ea8673d363ef8", null ],
+    [ "readProcess", "namespacememseek.html#a6edc33a0f50a5d4df1012f16634860b8", null ],
+    [ "readProcess", "namespacememseek.html#af4671f5af9e335cd6108a312759e4c69", null ],
+    [ "DEFAULT_CHUNK_SIZE", "namespacememseek.html#a2073cf9046d91f917d542c742d7702ca", null ]
+];

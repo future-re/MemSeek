@@ -1,0 +1,265 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "https://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="zh">
+<head>
+<meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=11"/>
+<meta name="generator" content="Doxygen 1.9.8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>memseek: include/memseek/memory/region.hpp 文件参考</title>
+<link href="tabs.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="jquery.js"></script>
+<script type="text/javascript" src="dynsections.js"></script>
+<link href="navtree.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="resize.js"></script>
+<script type="text/javascript" src="navtreedata.js"></script>
+<script type="text/javascript" src="navtree.js"></script>
+<link href="search/search.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="search/searchdata.js"></script>
+<script type="text/javascript" src="search/search.js"></script>
+<link href="doxygen.css" rel="stylesheet" type="text/css" />
+<link href="doxygen-awesome.css" rel="stylesheet" type="text/css"/>
+</head>
+<body>
+<div id="top"><!-- do not remove this div, it is closed by doxygen! -->
+<div id="titlearea">
+<table cellspacing="0" cellpadding="0">
+ <tbody>
+ <tr id="projectrow">
+  <td id="projectalign">
+   <div id="projectname">memseek
+   </div>
+   <div id="projectbrief">Modern C++20 Memory Scanner</div>
+  </td>
+ </tr>
+ </tbody>
+</table>
+</div>
+<!-- end header part -->
+<!-- 制作者 Doxygen 1.9.8 -->
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+var searchBox = new SearchBox("searchBox", "search/",'.html');
+/* @license-end */
+</script>
+<script type="text/javascript" src="menudata.js"></script>
+<script type="text/javascript" src="menu.js"></script>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(function() {
+  initMenu('',true,false,'search.php','搜索');
+  $(document).ready(function() { init_search(); });
+});
+/* @license-end */
+</script>
+<div id="main-nav"></div>
+</div><!-- top -->
+<div id="side-nav" class="ui-resizable side-nav-resizable">
+  <div id="nav-tree">
+    <div id="nav-tree-contents">
+      <div id="nav-sync" class="sync"></div>
+    </div>
+  </div>
+  <div id="splitbar" style="-moz-user-select:none;" 
+       class="ui-resizable-handle">
+  </div>
+</div>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(document).ready(function(){initNavTree('region_8hpp.html',''); initResizable(); });
+/* @license-end */
+</script>
+<div id="doc-content">
+<!-- window showing the filter options -->
+<div id="MSearchSelectWindow"
+     onmouseover="return searchBox.OnSearchSelectShow()"
+     onmouseout="return searchBox.OnSearchSelectHide()"
+     onkeydown="return searchBox.OnSearchSelectKey(event)">
+</div>
+
+<!-- iframe showing the search results (closed by default) -->
+<div id="MSearchResultsWindow">
+<div id="MSearchResults">
+<div class="SRPage">
+<div id="SRIndex">
+<div id="SRResults"></div>
+<div class="SRStatus" id="Loading">载入中...</div>
+<div class="SRStatus" id="Searching">搜索中...</div>
+<div class="SRStatus" id="NoMatches">未找到</div>
+</div>
+</div>
+</div>
+</div>
+
+<div class="header">
+  <div class="summary">
+<a href="#nested-classes">类</a> &#124;
+<a href="#namespaces">命名空间</a> &#124;
+<a href="#enum-members">枚举</a> &#124;
+<a href="#func-members">函数</a>  </div>
+  <div class="headertitle"><div class="title">region.hpp 文件参考</div></div>
+</div><!--header-->
+<div class="contents">
+<div class="textblock"><code>#include &lt;cstdint&gt;</code><br />
+<code>#include &lt;string&gt;</code><br />
+<code>#include &lt;vector&gt;</code><br />
+<code>#include &quot;<a class="el" href="error_8hpp_source.html">memseek/error.hpp</a>&quot;</code><br />
+</div><div class="textblock"><div class="dynheader">
+region.hpp 的引用(Include)关系图:</div>
+<div class="dyncontent">
+<div class="center"><img src="region_8hpp__incl.png" border="0" usemap="#ainclude_2memseek_2memory_2region_8hpp" alt=""/></div>
+<map name="ainclude_2memseek_2memory_2region_8hpp" id="ainclude_2memseek_2memory_2region_8hpp">
+<area shape="rect" title=" " alt="" coords="107,5,304,45"/>
+<area shape="rect" title=" " alt="" coords="5,167,72,192"/>
+<area shape="poly" title=" " alt="" coords="186,48,63,159,60,155,183,44"/>
+<area shape="rect" title=" " alt="" coords="96,167,155,192"/>
+<area shape="poly" title=" " alt="" coords="198,47,140,155,136,153,193,45"/>
+<area shape="rect" title=" " alt="" coords="409,93,471,119"/>
+<area shape="poly" title=" " alt="" coords="262,43,396,87,395,92,261,48"/>
+<area shape="rect" href="error_8hpp.html" title=" " alt="" coords="235,93,384,119"/>
+<area shape="poly" title=" " alt="" coords="232,43,285,83,281,87,229,48"/>
+<area shape="poly" title=" " alt="" coords="267,121,86,168,85,163,265,116"/>
+<area shape="poly" title=" " alt="" coords="281,121,169,164,167,159,279,116"/>
+<area shape="rect" title=" " alt="" coords="179,167,275,192"/>
+<area shape="poly" title=" " alt="" coords="298,121,252,160,249,155,294,117"/>
+<area shape="rect" title=" " alt="" coords="299,167,370,192"/>
+<area shape="poly" title=" " alt="" coords="316,118,329,153,324,155,311,120"/>
+<area shape="rect" title=" " alt="" coords="395,167,477,192"/>
+<area shape="poly" title=" " alt="" coords="331,116,405,157,402,162,328,121"/>
+<area shape="rect" title=" " alt="" coords="501,167,576,192"/>
+<area shape="poly" title=" " alt="" coords="347,116,489,160,487,165,345,121"/>
+<area shape="rect" title=" " alt="" coords="601,167,709,192"/>
+<area shape="poly" title=" " alt="" coords="365,116,588,162,587,167,364,121"/>
+<area shape="rect" title=" " alt="" coords="733,167,793,192"/>
+<area shape="poly" title=" " alt="" coords="384,114,558,138,719,164,719,169,557,143,384,120"/>
+</map>
+</div>
+</div><div class="textblock"><div class="dynheader">
+此图展示该文件直接或间接的被哪些文件引用了:</div>
+<div class="dyncontent">
+<div class="center"><img src="region_8hpp__dep__incl.png" border="0" usemap="#ainclude_2memseek_2memory_2region_8hppdep" alt=""/></div>
+<map name="ainclude_2memseek_2memory_2region_8hppdep" id="ainclude_2memseek_2memory_2region_8hppdep">
+<area shape="rect" title=" " alt="" coords="808,5,1005,45"/>
+<area shape="rect" href="scan__session_8hpp.html" title=" " alt="" coords="397,445,563,485"/>
+<area shape="poly" title=" " alt="" coords="794,39,646,58,565,72,487,90,418,112,362,137,341,151,325,167,315,183,312,200,312,290,315,317,325,341,339,363,357,384,399,418,441,443,438,447,396,422,354,388,335,367,320,343,310,318,307,291,307,200,310,181,321,163,338,147,359,132,416,107,486,85,564,67,645,53,794,34"/>
+<area shape="rect" href="interactive_8cpp.html" title=" " alt="" coords="914,621,1075,647"/>
+<area shape="poly" title=" " alt="" coords="1019,38,1121,60,1163,74,1191,91,1210,116,1218,141,1217,200,1217,467,1212,498,1198,526,1178,551,1152,572,1094,603,1039,624,1037,619,1092,599,1149,567,1174,547,1194,524,1207,497,1212,466,1212,200,1212,142,1205,119,1188,95,1161,79,1120,65,1018,44"/>
+<area shape="rect" href="scan__session_8cpp.html" title=" " alt="" coords="241,541,428,566"/>
+<area shape="poly" title=" " alt="" coords="794,28,621,30,418,39,320,48,230,60,154,76,98,96,61,115,32,136,14,162,8,200,8,378,14,415,31,446,56,471,88,493,125,510,164,523,242,540,241,545,163,528,123,515,85,497,53,476,26,449,9,417,3,379,3,200,9,160,29,132,58,111,96,91,153,70,229,55,319,43,418,34,621,25,794,23"/>
+<area shape="rect" href="command_8hpp.html" title=" " alt="" coords="749,445,907,485"/>
+<area shape="poly" title=" " alt="" coords="917,58,960,221,969,244,976,269,979,290,976,310,953,354,922,392,888,423,858,447,855,443,885,419,918,388,948,351,971,308,974,290,971,270,964,246,955,222,912,60"/>
+<area shape="rect" href="render_8hpp.html" title=" " alt="" coords="1020,93,1177,133"/>
+<area shape="poly" title=" " alt="" coords="962,49,1058,91,1056,96,960,53"/>
+<area shape="rect" href="render_8cpp.html" title=" " alt="" coords="970,189,1102,214"/>
+<area shape="poly" title=" " alt="" coords="931,55,1029,187,1025,190,927,58"/>
+<area shape="rect" href="chunk_8hpp.html" title=" " alt="" coords="647,93,844,133"/>
+<area shape="poly" title=" " alt="" coords="861,54,782,96,779,91,858,49"/>
+<area shape="rect" href="scan_8hpp.html" title=" " alt="" coords="528,181,725,221"/>
+<area shape="poly" title=" " alt="" coords="795,43,699,64,661,78,637,95,626,115,622,138,625,181,619,181,616,137,621,113,633,92,658,74,697,59,794,38"/>
+<area shape="rect" href="change_8cpp.html" title=" " alt="" coords="119,453,297,478"/>
+<area shape="poly" title=" " alt="" coords="794,29,582,36,459,46,339,61,229,83,182,97,140,113,106,131,80,152,64,175,59,200,59,290,62,318,73,344,88,368,107,390,150,426,188,450,185,455,147,430,103,394,84,371,68,347,57,320,53,291,53,200,59,172,76,148,103,127,138,108,180,92,228,78,338,56,459,40,581,31,794,24"/>
+<area shape="rect" href="scan_8cpp.html" title=" " alt="" coords="801,277,962,302"/>
+<area shape="poly" title=" " alt="" coords="906,59,885,277,880,276,901,59"/>
+<area shape="rect" href="region_8cpp.html" title=" " alt="" coords="1253,101,1425,126"/>
+<area shape="poly" title=" " alt="" coords="1015,45,1282,98,1281,103,1014,51"/>
+<area shape="rect" href="writer_8cpp.html" title=" " alt="" coords="1449,101,1617,126"/>
+<area shape="poly" title=" " alt="" coords="1020,36,1215,59,1438,91,1479,98,1478,103,1437,96,1214,64,1019,41"/>
+<area shape="rect" href="interactive_8hpp.html" title=" " alt="" coords="517,533,675,573"/>
+<area shape="poly" title=" " alt="" coords="518,492,572,531,569,535,515,496"/>
+<area shape="poly" title=" " alt="" coords="438,495,355,543,353,538,435,490"/>
+<area shape="poly" title=" " alt="" coords="689,570,937,619,936,624,688,575"/>
+<area shape="rect" href="main_8cpp.html" title=" " alt="" coords="477,621,601,647"/>
+<area shape="poly" title=" " alt="" coords="576,586,549,623,545,619,572,583"/>
+<area shape="poly" title=" " alt="" coords="765,493,648,536,646,531,763,488"/>
+<area shape="poly" title=" " alt="" coords="870,491,919,531,960,579,989,619,985,622,956,582,915,535,867,495"/>
+<area shape="poly" title=" " alt="" coords="736,482,593,508,536,522,507,535,502,545,500,555,505,579,517,601,530,619,526,623,512,604,500,581,495,555,497,543,504,531,534,517,592,502,735,477"/>
+<area shape="rect" href="command_8cpp.html" title=" " alt="" coords="750,541,906,566"/>
+<area shape="poly" title=" " alt="" coords="831,499,831,540,825,540,825,499"/>
+<area shape="poly" title=" " alt="" coords="1114,146,1133,210,1140,249,1143,288,1143,467,1139,494,1129,520,1114,544,1095,565,1054,600,1018,623,1015,619,1051,596,1091,561,1109,541,1124,518,1134,493,1137,466,1137,288,1135,250,1127,212,1108,147"/>
+<area shape="poly" title=" " alt="" coords="1079,146,1047,190,1043,187,1075,143"/>
+<area shape="poly" title=" " alt="" coords="709,144,654,183,651,179,706,139"/>
+<area shape="poly" title=" " alt="" coords="771,143,874,275,870,278,766,146"/>
+<area shape="poly" title=" " alt="" coords="633,235,635,272,632,314,622,358,602,399,573,428,539,447,536,443,570,423,598,396,617,356,626,313,629,271,628,236"/>
+<area shape="poly" title=" " alt="" coords="674,226,739,267,764,288,789,307,823,321,853,328,881,336,914,355,955,394,980,432,994,476,1004,533,1005,582,1000,621,995,621,1000,582,999,534,989,478,975,434,951,397,910,359,879,341,851,333,822,327,787,312,761,292,736,271,671,231"/>
+<area shape="poly" title=" " alt="" coords="515,217,365,239,299,254,253,272,199,307,161,342,134,386,109,446,103,467,104,475,109,484,132,501,170,516,263,538,262,543,169,521,129,505,105,487,99,476,98,466,104,444,129,384,157,339,196,303,251,267,297,249,364,234,514,211"/>
+<area shape="poly" title=" " alt="" coords="654,230,695,269,745,307,764,316,782,321,816,324,847,331,862,340,876,356,883,380,877,404,864,427,849,447,845,443,860,424,872,402,878,380,871,359,858,344,845,336,815,329,781,326,762,321,743,312,692,273,651,234"/>
+<area shape="rect" href="snapshot_8hpp.html" title=" " alt="" coords="392,269,589,309"/>
+<area shape="poly" title=" " alt="" coords="586,231,522,272,519,267,584,227"/>
+<area shape="poly" title=" " alt="" coords="515,212,435,226,352,253,312,272,275,296,242,325,216,359,206,383,203,408,208,452,203,453,198,408,201,381,211,356,239,321,272,292,309,267,350,248,434,221,514,207"/>
+<area shape="poly" title=" " alt="" coords="696,223,848,274,847,279,695,228"/>
+<area shape="poly" title=" " alt="" coords="430,318,406,336,388,359,382,377,388,396,410,423,438,443,435,447,406,427,383,399,376,377,383,356,402,332,427,314"/>
+<area shape="poly" title=" " alt="" coords="604,297,681,305,759,318,828,334,855,344,875,355,907,385,933,420,953,458,969,498,988,571,996,621,991,622,983,572,964,499,948,460,928,423,903,388,872,359,853,349,826,339,758,323,680,311,603,302"/>
+<area shape="poly" title=" " alt="" coords="427,318,400,336,377,359,363,382,353,407,341,459,336,507,337,541,331,541,331,507,335,458,348,405,358,379,373,356,396,332,424,313"/>
+<area shape="rect" href="change_8hpp.html" title=" " alt="" coords="664,357,861,397"/>
+<area shape="poly" title=" " alt="" coords="564,311,704,355,702,360,563,316"/>
+<area shape="poly" title=" " alt="" coords="379,299,342,307,306,319,272,336,242,359,226,381,217,407,211,453,205,452,212,406,221,379,238,355,269,332,304,314,341,302,377,294"/>
+<area shape="rect" href="snapshot_8cpp.html" title=" " alt="" coords="398,365,589,390"/>
+<area shape="poly" title=" " alt="" coords="494,323,496,364,490,364,489,323"/>
+<area shape="poly" title=" " alt="" coords="688,404,543,448,541,443,687,399"/>
+<area shape="poly" title=" " alt="" coords="748,411,733,448,723,490,723,534,729,554,739,572,766,589,809,604,914,622,913,628,808,609,764,594,735,575,724,556,717,534,717,490,728,446,743,409"/>
+<area shape="poly" title=" " alt="" coords="725,407,656,448,576,488,479,521,391,543,390,538,477,516,574,483,654,443,722,403"/>
+<area shape="poly" title=" " alt="" coords="787,407,816,443,811,447,783,410"/>
+<area shape="poly" title=" " alt="" coords="650,399,282,455,282,450,650,393"/>
+</map>
+</div>
+</div>
+<p><a href="region_8hpp_source.html">浏览源代码.</a></p>
+<table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="nested-classes" name="nested-classes"></a>
+类</h2></td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmemseek_1_1MemoryScanLevel.html">memseek::MemoryScanLevel</a></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmemseek_1_1MemoryRegion.html">memseek::MemoryRegion</a></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmemseek_1_1MemoryRegionList.html">memseek::MemoryRegionList</a></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="namespaces" name="namespaces"></a>
+命名空间</h2></td></tr>
+<tr class="memitem:namespacememseek" id="r_namespacememseek"><td class="memItemLeft" align="right" valign="top">namespace &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacememseek.html">memseek</a></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="enum-members" name="enum-members"></a>
+枚举</h2></td></tr>
+<tr class="memitem:a64fca1485aa2e00f57cbaae4730e66ef" id="r_a64fca1485aa2e00f57cbaae4730e66ef"><td class="memItemLeft" align="right" valign="top">enum class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacememseek.html#a64fca1485aa2e00f57cbaae4730e66ef">memseek::MemoryProtection</a> : std::uint8_t { <a class="el" href="namespacememseek.html#a64fca1485aa2e00f57cbaae4730e66efab50339a10e1de285ac99d4c3990b8693">memseek::NONE</a> = 0
+, <a class="el" href="namespacememseek.html#a64fca1485aa2e00f57cbaae4730e66efa3466fab4975481651940ed328aa990e4">memseek::READ</a> = 1 &lt;&lt; 0
+, <a class="el" href="namespacememseek.html#a64fca1485aa2e00f57cbaae4730e66efad4b9e47f65b6e79b010582f15785867e">memseek::WRITE</a> = 1 &lt;&lt; 1
+, <a class="el" href="namespacememseek.html#a64fca1485aa2e00f57cbaae4730e66efa5d76688e2261e6805ee36ad961b3fa7a">memseek::EXECUTE</a> = 1 &lt;&lt; 2
+ }</td></tr>
+<tr class="separator:a64fca1485aa2e00f57cbaae4730e66ef"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a579a7e0df520627cce5a0f40ab449606" id="r_a579a7e0df520627cce5a0f40ab449606"><td class="memItemLeft" align="right" valign="top">enum class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacememseek.html#a579a7e0df520627cce5a0f40ab449606">memseek::MemoryRegionType</a> : std::uint8_t { <br />
+&#160;&#160;<a class="el" href="namespacememseek.html#a579a7e0df520627cce5a0f40ab449606a696b031073e74bf2cb98e5ef201d4aa3">memseek::UNKNOWN</a> = 0
+, <a class="el" href="namespacememseek.html#a579a7e0df520627cce5a0f40ab449606ab6722804f5872cdd88347da194d42087">memseek::HEAP</a> = 1 &lt;&lt; 0
+, <a class="el" href="namespacememseek.html#a579a7e0df520627cce5a0f40ab449606a0fac686d86aba414411b58f6bce53a76">memseek::STACK</a> = 1 &lt;&lt; 1
+, <a class="el" href="namespacememseek.html#a579a7e0df520627cce5a0f40ab449606a9bab2b4c50d8359fc53c582d09ca21df">memseek::ANONYMOUS</a> = 1 &lt;&lt; 2
+, <br />
+&#160;&#160;<a class="el" href="namespacememseek.html#a579a7e0df520627cce5a0f40ab449606a1cf5e1f5569acda3c4a88a91c5130a69">memseek::MODULE</a> = 1 &lt;&lt; 3
+<br />
+ }</td></tr>
+<tr class="separator:a579a7e0df520627cce5a0f40ab449606"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="func-members" name="func-members"></a>
+函数</h2></td></tr>
+<tr class="memitem:ad65f9ccb509cc33e13667287d91741b8" id="r_ad65f9ccb509cc33e13667287d91741b8"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacememseek.html#ab577b87dc7dadd822ef978fe05903a83">constexpr</a> <a class="el" href="namespacememseek.html#ab577b87dc7dadd822ef978fe05903a83">auto</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacememseek.html#ad65f9ccb509cc33e13667287d91741b8">memseek::operator|</a> (<a class="el" href="namespacememseek.html#a64fca1485aa2e00f57cbaae4730e66ef">MemoryProtection</a> <a class="el" href="namespacememseek.html#ab577b87dc7dadd822ef978fe05903a83">lhs</a>, <a class="el" href="namespacememseek.html#a64fca1485aa2e00f57cbaae4730e66ef">MemoryProtection</a> <a class="el" href="namespacememseek.html#ab577b87dc7dadd822ef978fe05903a83">rhs</a>) <a class="el" href="namespacememseek.html#ab577b87dc7dadd822ef978fe05903a83">noexcept</a> -&gt; <a class="el" href="namespacememseek.html#a64fca1485aa2e00f57cbaae4730e66ef">MemoryProtection</a></td></tr>
+<tr class="separator:ad65f9ccb509cc33e13667287d91741b8"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a380682e2727729d7e7147a74bb055dd8" id="r_a380682e2727729d7e7147a74bb055dd8"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacememseek.html#ab577b87dc7dadd822ef978fe05903a83">constexpr</a> <a class="el" href="namespacememseek.html#ab577b87dc7dadd822ef978fe05903a83">auto</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacememseek.html#a380682e2727729d7e7147a74bb055dd8">memseek::operator|=</a> (<a class="el" href="namespacememseek.html#a64fca1485aa2e00f57cbaae4730e66ef">MemoryProtection</a> &amp;<a class="el" href="namespacememseek.html#ab577b87dc7dadd822ef978fe05903a83">lhs</a>, <a class="el" href="namespacememseek.html#a64fca1485aa2e00f57cbaae4730e66ef">MemoryProtection</a> <a class="el" href="namespacememseek.html#ab577b87dc7dadd822ef978fe05903a83">rhs</a>) <a class="el" href="namespacememseek.html#ab577b87dc7dadd822ef978fe05903a83">noexcept</a> -&gt; <a class="el" href="namespacememseek.html#a64fca1485aa2e00f57cbaae4730e66ef">MemoryProtection</a> &amp;</td></tr>
+<tr class="separator:a380682e2727729d7e7147a74bb055dd8"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a7e1ca3e170e13ffe4dae7e352056ecb2" id="r_a7e1ca3e170e13ffe4dae7e352056ecb2"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacememseek.html#ab577b87dc7dadd822ef978fe05903a83">constexpr</a> <a class="el" href="namespacememseek.html#ab577b87dc7dadd822ef978fe05903a83">auto</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacememseek.html#a7e1ca3e170e13ffe4dae7e352056ecb2">memseek::operator|</a> (<a class="el" href="namespacememseek.html#a579a7e0df520627cce5a0f40ab449606">MemoryRegionType</a> <a class="el" href="namespacememseek.html#ab577b87dc7dadd822ef978fe05903a83">lhs</a>, <a class="el" href="namespacememseek.html#a579a7e0df520627cce5a0f40ab449606">MemoryRegionType</a> <a class="el" href="namespacememseek.html#ab577b87dc7dadd822ef978fe05903a83">rhs</a>) <a class="el" href="namespacememseek.html#ab577b87dc7dadd822ef978fe05903a83">noexcept</a> -&gt; <a class="el" href="namespacememseek.html#a579a7e0df520627cce5a0f40ab449606">MemoryRegionType</a></td></tr>
+<tr class="separator:a7e1ca3e170e13ffe4dae7e352056ecb2"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a9c23595a7daa49f2846ea8673d363ef8" id="r_a9c23595a7daa49f2846ea8673d363ef8"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacememseek.html#ab577b87dc7dadd822ef978fe05903a83">constexpr</a> <a class="el" href="namespacememseek.html#ab577b87dc7dadd822ef978fe05903a83">auto</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacememseek.html#a9c23595a7daa49f2846ea8673d363ef8">memseek::operator|=</a> (<a class="el" href="namespacememseek.html#a579a7e0df520627cce5a0f40ab449606">MemoryRegionType</a> &amp;<a class="el" href="namespacememseek.html#ab577b87dc7dadd822ef978fe05903a83">lhs</a>, <a class="el" href="namespacememseek.html#a579a7e0df520627cce5a0f40ab449606">MemoryRegionType</a> <a class="el" href="namespacememseek.html#ab577b87dc7dadd822ef978fe05903a83">rhs</a>) <a class="el" href="namespacememseek.html#ab577b87dc7dadd822ef978fe05903a83">noexcept</a> -&gt; <a class="el" href="namespacememseek.html#a579a7e0df520627cce5a0f40ab449606">MemoryRegionType</a> &amp;</td></tr>
+<tr class="separator:a9c23595a7daa49f2846ea8673d363ef8"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:af4671f5af9e335cd6108a312759e4c69" id="r_af4671f5af9e335cd6108a312759e4c69"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacememseek.html#ab577b87dc7dadd822ef978fe05903a83">auto</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacememseek.html#af4671f5af9e335cd6108a312759e4c69">memseek::readProcess</a> (<a class="el" href="namespacememseek.html#ab577b87dc7dadd822ef978fe05903a83">pid_t</a> pid, <a class="el" href="structmemseek_1_1MemoryScanLevel.html">MemoryScanLevel</a> level=<a class="el" href="structmemseek_1_1MemoryScanLevel.html">MemoryScanLevel</a>{}) -&gt; <a class="el" href="namespacememseek.html#a530d433f013353e7f59702f5d6db7b51">Result</a>&lt; <a class="el" href="classmemseek_1_1MemoryRegionList.html">MemoryRegionList</a> &gt;</td></tr>
+<tr class="separator:af4671f5af9e335cd6108a312759e4c69"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a6edc33a0f50a5d4df1012f16634860b8" id="r_a6edc33a0f50a5d4df1012f16634860b8"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacememseek.html#ab577b87dc7dadd822ef978fe05903a83">auto</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacememseek.html#a6edc33a0f50a5d4df1012f16634860b8">memseek::readProcess</a> (<a class="el" href="namespacememseek.html#ab577b87dc7dadd822ef978fe05903a83">pid_t</a> pid, <a class="el" href="structmemseek_1_1MemoryScanLevel.html">MemoryScanLevel</a> level, <a class="el" href="namespacememseek.html#ab577b87dc7dadd822ef978fe05903a83">bool</a> <a class="el" href="namespacememseek.html#ab577b87dc7dadd822ef978fe05903a83">requireReadable</a>) -&gt; <a class="el" href="namespacememseek.html#a530d433f013353e7f59702f5d6db7b51">Result</a>&lt; <a class="el" href="classmemseek_1_1MemoryRegionList.html">MemoryRegionList</a> &gt;</td></tr>
+<tr class="separator:a6edc33a0f50a5d4df1012f16634860b8"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table>
+</div><!-- contents -->
+</div><!-- doc-content -->
+<!-- start footer part -->
+<div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
+  <ul>
+    <li class="navelem"><a class="el" href="dir_d44c64559bbebec7f509842c48db8b23.html">include</a></li><li class="navelem"><a class="el" href="dir_228224e106b34a496deab9a6a7e801a4.html">memseek</a></li><li class="navelem"><a class="el" href="dir_44fe6e3ffaa77101a2ce7f9a864aac3c.html">memory</a></li><li class="navelem"><a class="el" href="region_8hpp.html">region.hpp</a></li>
+    <li class="footer">制作者 <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
+  </ul>
+</div>
+</body>
+</html>
