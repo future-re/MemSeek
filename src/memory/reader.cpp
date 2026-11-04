@@ -4,6 +4,7 @@
 #include <sys/uio.h>
 #include <unistd.h>
 
+#include <cerrno>
 #include <cstddef>
 #include <cstdint>
 #include <cstring>
@@ -64,59 +65,41 @@ auto readProcMem(const pid_t pid, const std::uintptr_t address,
 
 namespace memseek {
 
-Result<MemoryRead> MemoryReader::read(const MemoryChunk& chunk,
-                                      const MemoryRegion& region,
-                                      std::size_t overlap) const {
+auto MemoryReader::read(const std::uintptr_t address,
+                        const std::size_t size) const
+    -> Result<std::vector<std::byte>> {
 #ifdef __linux__
 
-    if (region.size >
-        std::numeric_limits<std::uintptr_t>::max() - region.start) {
+    if (size > std::numeric_limits<std::uintptr_t>::max() - address) {
         auto error = makeError(ErrorCode::ADDRESS_OUT_OF_RANGE,
-                               "memory region address range overflows");
+                               "memory read address range overflows");
         error.pid = m_pid;
-        error.address = region.start;
-        error.size = region.size;
+        error.address = address;
+        error.size = size;
         return std::unexpected(std::move(error));
     }
 
-    const auto regionEnd = region.start + region.size;
-
-    if (chunk.size == 0 || chunk.address < region.start ||
-        chunk.address > regionEnd || chunk.size > regionEnd - chunk.address) {
-        auto error = makeError(ErrorCode::ADDRESS_OUT_OF_RANGE,
-                               "memory chunk is outside the region");
-        error.pid = m_pid;
-        error.address = chunk.address;
-        error.size = chunk.size;
-        return std::unexpected(std::move(error));
+    if (size == 0) {
+        return std::vector<std::byte>{};
     }
 
-    const auto maxReadable = regionEnd - chunk.address;
-    const auto requestedSize =
-        chunk.size > std::numeric_limits<std::size_t>::max() - overlap
-            ? std::numeric_limits<std::size_t>::max()
-            : chunk.size + overlap;
-    const auto readSize = std::min(requestedSize, maxReadable);
-
-    MemoryRead result{chunk.address, chunk.size,
-                      std::vector<std::byte>(readSize), chunk.parentRegionId};
+    std::vector<std::byte> result(size);
 
     iovec local{
-        .iov_base = result.buffer().data(),
+        .iov_base = result.data(),
         .iov_len = result.size(),
     };
 
     iovec remote{
-        .iov_base = reinterpret_cast<void*>(chunk.address),
-        .iov_len = readSize,
+        .iov_base = reinterpret_cast<void*>(address),
+        .iov_len = size,
     };
 
     auto bytesRead = ::process_vm_readv(m_pid, &local, 1, &remote, 1, 0);
 
     if (bytesRead < 0) {
         const auto processVmError = errno;
-        const auto fallback =
-            readProcMem(m_pid, chunk.address, result.buffer().data(), readSize);
+        const auto fallback = readProcMem(m_pid, address, result.data(), size);
         if (!fallback) {
             auto error = fallback.error();
             error.message = std::format(
@@ -124,31 +107,31 @@ Result<MemoryRead> MemoryReader::read(const MemoryChunk& chunk,
                 std::strerror(processVmError), error.message);
             error.code = ErrorCode::MEMORY_READ_FAILED;
             error.pid = m_pid;
-            error.address = chunk.address;
-            error.size = readSize;
+            error.address = address;
+            error.size = size;
             return std::unexpected(std::move(error));
         }
         bytesRead = static_cast<ssize_t>(*fallback);
     }
 
-    if (std::cmp_not_equal(bytesRead, readSize)) {
+    if (std::cmp_not_equal(bytesRead, size)) {
         auto error =
             makeError(ErrorCode::SHORT_TRANSFER,
                       std::format("short read: expected {} bytes, received {}",
-                                  readSize, bytesRead));
+                                  size, bytesRead));
         error.pid = m_pid;
-        error.address = chunk.address;
-        error.size = readSize;
+        error.address = address;
+        error.size = size;
         error.bytesTransferred = static_cast<std::size_t>(bytesRead);
         return std::unexpected(std::move(error));
     }
-
-    result.buffer().resize(static_cast<std::size_t>(bytesRead));
 
     return result;
 
 #else
 
+    (void)address;
+    (void)size;
     return std::unexpected(makeError(ErrorCode::UNSUPPORTED_PLATFORM,
                                      "MemoryReader requires Linux"));
 

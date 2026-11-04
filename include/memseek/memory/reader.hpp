@@ -2,10 +2,11 @@
 
 #include <sys/types.h>
 
-#include <string>
+#include <cstddef>
+#include <cstdint>
+#include <vector>
 
-#include "memseek/memory/chunk.hpp"
-#include "memseek/memory/read.hpp"
+#include "memseek/error.hpp"
 
 namespace memseek {
 
@@ -13,10 +14,11 @@ class MemoryReader {
    public:
     explicit MemoryReader(pid_t pid) noexcept : m_pid(pid) {}
 
+    // Reads exactly size bytes, or returns an error without partial data.
+    // An empty request succeeds without accessing the process.
     [[nodiscard]]
-    Result<MemoryRead> read(const MemoryChunk& chunk,
-                            const MemoryRegion& region,
-                            std::size_t overlap) const;
+    auto read(std::uintptr_t address, std::size_t size) const
+        -> Result<std::vector<std::byte>>;
 
    private:
     pid_t m_pid{};

@@ -16,7 +16,9 @@
 #include <vector>
 
 #include "memseek/error.hpp"
+#include "memseek/memory/chunk.hpp"
 #include "memseek/memory/read.hpp"
+#include "memseek/memory/reader.hpp"
 #include "memseek/memory/region.hpp"
 #include "memseek/value.hpp"
 
@@ -139,6 +141,26 @@ class MemoryScanner {
                                                   const Value* upperBound,
                                                   ScanType scanType,
                                                   ByteOrder byteOrder);
+
+    static ScanOutcome scanChunk(MemoryReader& reader, pid_t pid,
+                                 const MemoryRegion& region,
+                                 const MemoryChunk& chunk,
+                                 const Value& lowerBound,
+                                 const Value* upperBound, ScanType scanType,
+                                 ByteOrder byteOrder);
+
+    static ScanOutcome getChunkOutcome(std::future<ScanOutcome>& future,
+                                       pid_t pid, const MemoryChunk& chunk);
+
+    static ScanOutcome collectChunkResults(
+        std::vector<std::future<ScanOutcome>>& futures,
+        const std::vector<MemoryChunk>& chunks, pid_t pid);
+
+    ScanOutcome scanChunksParallel(MemoryReader& reader, pid_t pid,
+                                   const MemoryRegion& region,
+                                   const Value& lowerBound,
+                                   const Value* upperBound, ScanType scanType,
+                                   ByteOrder byteOrder);
 
     template <typename Function>
     auto submit(Function&& function)

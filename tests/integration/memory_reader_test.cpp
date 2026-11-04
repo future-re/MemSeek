@@ -6,11 +6,11 @@
 #include <cstddef>
 #include <cstdint>
 #include <cstring>
+#include <limits>
+#include <span>
 #include <stdexcept>
 
-#include "memseek/memory/chunk.hpp"
 #include "memseek/memory/reader.hpp"
-#include "memseek/memory/region.hpp"
 #include "memseek/value.hpp"
 
 namespace memseek {
@@ -58,87 +58,84 @@ class AnonymousMapping {
     std::size_t m_size{};
 };
 
-auto makeRegion(const AnonymousMapping& mapping, std::size_t size)
-    -> MemoryRegion {
-    return {.id = 1,
-            .start = mapping.address(),
-            .size = size,
-            .protection = MemoryProtection::READ | MemoryProtection::WRITE,
-            .regionType = MemoryRegionType::ANONYMOUS};
-}
-
 }  // namespace
 
-TEST(MemoryReaderTest, ReadsChunkAndIncludesTargetOverlap) {
+TEST(MemoryReaderTest, ReadsExactAddressRange) {
     AnonymousMapping mapping(4096);
     constexpr std::uint32_t value = 0x11223344;
     std::memcpy(mapping.bytes() + 16, &value, sizeof(value));
 
-    const auto region = makeRegion(mapping, 4096);
-    const MemoryChunk chunk{.address = mapping.address() + 16,
-                            .size = 8,
-                            .parentRegionId = region.id};
     const MemoryReader reader(getpid());
 
-    const std::size_t overlap = sizeof(value) - 1;
-
-    const auto result = reader.read(chunk, region, overlap);
+    const auto result = reader.read(mapping.address() + 16, 8);
 
     if (!result) {
         FAIL() << formatError(result.error());
     }
-    EXPECT_EQ(result->address(), chunk.address);
-    EXPECT_EQ(result->logicalSize(), chunk.size);
-    EXPECT_EQ(result->size(), chunk.size + sizeof(value) - 1);
-    EXPECT_TRUE(std::ranges::equal(result->data().subspan(0, sizeof(value)),
+    EXPECT_EQ(result->size(), 8);
+    EXPECT_TRUE(std::ranges::equal(std::span(*result).first(sizeof(value)),
                                    Value(value).data()));
 }
 
-TEST(MemoryReaderTest, ClampsOverlapAtRegionEnd) {
+TEST(MemoryReaderTest, ReadsRangeEndingAtMappingBoundary) {
     AnonymousMapping mapping(4096);
     constexpr std::uint64_t value = 0x0102030405060708ULL;
     std::memcpy(mapping.bytes() + 4080, &value, sizeof(value));
 
-    const auto region = makeRegion(mapping, 4096);
-    const MemoryChunk chunk{.address = mapping.address() + 4080,
-                            .size = 16,
-                            .parentRegionId = region.id};
     const MemoryReader reader(getpid());
 
-    const std::size_t overlap = sizeof(value) - 1;
-    const auto result = reader.read(chunk, region, overlap);
+    const auto result = reader.read(mapping.address() + 4080, 16);
 
     if (!result) {
         FAIL() << formatError(result.error());
     }
     EXPECT_EQ(result->size(), 16);
+    EXPECT_TRUE(std::ranges::equal(std::span(*result).first(sizeof(value)),
+                                   Value(value).data()));
 }
 
 TEST(MemoryReaderTest, ReportsInvalidProcess) {
     AnonymousMapping mapping(4096);
-    const auto region = makeRegion(mapping, 4096);
-    const MemoryChunk chunk{
-        .address = mapping.address(), .size = 16, .parentRegionId = region.id};
     const MemoryReader reader(-1);
 
-    const std::size_t overlap = sizeof(std::uint32_t) - 1;
-    const auto result = reader.read(chunk, region, overlap);
+    const auto result = reader.read(mapping.address(), 16);
 
-    EXPECT_FALSE(result.has_value());
+    ASSERT_FALSE(result.has_value());
+    EXPECT_EQ(result.error().code, ErrorCode::MEMORY_READ_FAILED);
 }
 
-TEST(MemoryReaderTest, RejectsChunkOutsideRegion) {
-    AnonymousMapping mapping(4096);
-    const auto region = makeRegion(mapping, 4096);
-    const MemoryChunk chunk{.address = mapping.address() + 4090,
-                            .size = 16,
-                            .parentRegionId = region.id};
+TEST(MemoryReaderTest, RejectsAddressRangeOverflow) {
     const MemoryReader reader(getpid());
-    const std::size_t overlap = sizeof(std::uint32_t) - 1;
-    const auto result = reader.read(chunk, region, overlap);
+    const auto address = std::numeric_limits<std::uintptr_t>::max() - 7;
+    const auto result = reader.read(address, 16);
 
     ASSERT_FALSE(result.has_value());
     EXPECT_EQ(result.error().code, ErrorCode::ADDRESS_OUT_OF_RANGE);
+    EXPECT_EQ(result.error().address, address);
+    EXPECT_EQ(result.error().size, 16);
+}
+
+TEST(MemoryReaderTest, EmptyReadDoesNotAccessProcess) {
+    const MemoryReader reader(-1);
+    const auto result = reader.read(0, 0);
+
+    ASSERT_TRUE(result.has_value());
+    EXPECT_TRUE(result->empty());
+}
+
+TEST(MemoryReaderTest, ReportsShortReadWithoutReturningPartialData) {
+    const auto pageSize = static_cast<std::size_t>(::sysconf(_SC_PAGESIZE));
+    AnonymousMapping mapping(pageSize * 2);
+    ASSERT_EQ(::munmap(mapping.bytes() + pageSize, pageSize), 0);
+    const MemoryReader reader(getpid());
+
+    const auto result = reader.read(mapping.address(), pageSize * 2);
+
+    ASSERT_FALSE(result.has_value());
+    EXPECT_EQ(result.error().code, ErrorCode::SHORT_TRANSFER);
+    EXPECT_EQ(result.error().address, mapping.address());
+    EXPECT_EQ(result.error().size, pageSize * 2);
+    EXPECT_EQ(result.error().bytesTransferred, pageSize);
 }
 
 }  // namespace memseek

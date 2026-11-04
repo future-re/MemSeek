@@ -8,6 +8,7 @@
 #include <cstddef>
 #include <cstdint>
 #include <cstring>
+#include <limits>
 #include <stdexcept>
 #include <vector>
 
@@ -199,6 +200,23 @@ TEST(ScanRegionTest, ReportsMemoryReadFailure) {
     ASSERT_FALSE(result.has_value());
     EXPECT_EQ(result.error().code, ErrorCode::MEMORY_READ_FAILED);
     EXPECT_TRUE(result.error().address.has_value());
+}
+
+TEST(ScanRegionTest, RejectsRegionAddressOverflowBeforeChunking) {
+    const MemoryRegion region{
+        .id = 7,
+        .start = std::numeric_limits<std::uintptr_t>::max() - 7,
+        .size = 16,
+    };
+    MemoryScanner scanner(1);
+
+    const auto result =
+        scanner.scanRegion(getpid(), region, Value(std::uint8_t{1}));
+
+    ASSERT_FALSE(result.has_value());
+    EXPECT_EQ(result.error().code, ErrorCode::ADDRESS_OUT_OF_RANGE);
+    EXPECT_EQ(result.error().address, region.start);
+    EXPECT_EQ(result.error().size, region.size);
 }
 
 TEST(ScanRegionTest, ReportsShortReadInsteadOfReturningPartialMatches) {

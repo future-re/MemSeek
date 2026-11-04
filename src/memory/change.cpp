@@ -8,7 +8,6 @@
 #include <string>
 #include <utility>
 
-#include "memseek/memory/chunk.hpp"
 #include "memseek/memory/reader.hpp"
 #include "memseek/memory/region.hpp"
 #include "memseek/memory/scan.hpp"
@@ -63,14 +62,9 @@ auto captureChanges(const MemorySnapshot& previous, const ChangeType type)
         if (region == regions->getRegions().end()) {
             continue;
         }
-        const MemoryChunk chunk{
-            .address = candidate.address(),
-            .size = width,
-            .parentRegionId = region->id,
-        };
-        const auto current = reader.read(chunk, *region, 0);
-        if (current && matchesChange(candidate.data(), current->data(), type)) {
-            results.emplace_back(candidate.address(), current->data());
+        const auto current = reader.read(candidate.address(), width);
+        if (current && matchesChange(candidate.data(), *current, type)) {
+            results.emplace_back(candidate.address(), *current);
         }
     }
     return MemorySnapshot::fromScanResults(previous.pid(), std::move(results));
