@@ -53,13 +53,12 @@ auto captureChanges(const MemorySnapshot& previous, const ChangeType type)
             continue;
         }
         const auto region = std::ranges::find_if(
-            regions->getRegions(),
-            [&candidate, width](const MemoryRegion& item) {
+            *regions, [&candidate, width](const MemoryRegion& item) {
                 return candidate.address() >= item.start &&
                        candidate.address() - item.start < item.size &&
                        width <= item.size - (candidate.address() - item.start);
             });
-        if (region == regions->getRegions().end()) {
+        if (region == regions->end()) {
             continue;
         }
         const auto current = reader.read(candidate.address(), width);
@@ -67,7 +66,7 @@ auto captureChanges(const MemorySnapshot& previous, const ChangeType type)
             results.emplace_back(candidate.address(), *current);
         }
     }
-    return MemorySnapshot::fromScanResults(previous.pid(), std::move(results));
+    return MemorySnapshot(previous.pid(), std::move(results));
 }
 
 }  // namespace memseek

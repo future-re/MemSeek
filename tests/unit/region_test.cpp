@@ -22,7 +22,7 @@ TEST(RegionTest, ReadProcessFiltersByProtection) {
     auto regions = readProcess(getpid(), level);
     ASSERT_TRUE(regions.has_value());
 
-    for (const auto& region : regions->getRegions()) {
+    for (const auto& region : *regions) {
         const auto bits = protectionBits(region);
         EXPECT_NE(bits & static_cast<std::uint8_t>(MemoryProtection::READ), 0);
         EXPECT_NE(bits & static_cast<std::uint8_t>(MemoryProtection::WRITE), 0);
@@ -37,13 +37,13 @@ TEST(RegionTest, ReadProcessFiltersByRegionType) {
     auto regions = readProcess(getpid(), level);
     ASSERT_TRUE(regions.has_value());
 
-    for (const auto& region : regions->getRegions()) {
+    for (const auto& region : *regions) {
         EXPECT_EQ(region.regionType, MemoryRegionType::HEAP);
     }
 }
 
 TEST(RegionTest, RejectsInvalidProcess) {
-    const auto regions = readProcess(-1);
+    const auto regions = readProcess(-1, MemoryScanLevel{});
 
     EXPECT_FALSE(regions.has_value());
 }

@@ -27,7 +27,7 @@ void checkByteOrder(T lower, T middle, T upper) {
              std::endian::native == std::endian::big)) {
             std::ranges::reverse(bytes);
         }
-        const MemoryRead memory(0x1000, bytes.size(), bytes);
+        const MemoryRead memory(0x1000, bytes);
         const auto exact =
             MemoryScanner::scanBuffer(memory, target, ScanType::EXACT, order);
         ASSERT_EQ(exact.size(), 1);
@@ -69,13 +69,12 @@ TEST(ByteOrderTest, SupportsAllNumericTypesAndRetainsRawBytes) {
 }
 
 TEST(ByteOrderTest, ExplicitOrderMatchesKnownBytes) {
-    const MemoryRead memory(0x1000, 4,
-                            {
-                                std::byte{0x12},
-                                std::byte{0x34},
-                                std::byte{0x56},
-                                std::byte{0x78},
-                            });
+    const MemoryRead memory(0x1000, {
+                                        std::byte{0x12},
+                                        std::byte{0x34},
+                                        std::byte{0x56},
+                                        std::byte{0x78},
+                                    });
     const Value target(std::uint32_t{0x12345678});
     EXPECT_EQ(MemoryScanner::scanBuffer(memory, target, ScanType::EXACT,
                                         ByteOrder::BIG)
@@ -91,7 +90,7 @@ TEST(ByteOrderTest, DoesNotReverseStringsOrByteArrays) {
         std::byte{'a'},
         std::byte{'b'},
     };
-    const MemoryRead memory(0x1000, bytes.size(), bytes);
+    const MemoryRead memory(0x1000, bytes);
     for (const auto order : {ByteOrder::LITTLE, ByteOrder::BIG}) {
         EXPECT_EQ(MemoryScanner::scanBuffer(memory, Value(std::string{"ab"}),
                                             ScanType::EXACT, order)

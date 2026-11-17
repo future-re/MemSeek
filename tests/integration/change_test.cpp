@@ -22,8 +22,7 @@ TEST(CaptureChangesTest, RetainsCurrentValuesAndSupportsRepeatedFiltering) {
         ScanResult{stableAddress, Value(stable).data()},
         ScanResult{0, Value(changing).data()},
     };
-    const auto previous =
-        MemorySnapshot::fromScanResults(getpid(), std::move(results));
+    const auto previous = MemorySnapshot(getpid(), std::move(results));
     changing = 43;
 
     const auto changed = captureChanges(previous, ChangeType::CHANGED);
@@ -49,9 +48,9 @@ TEST(CaptureChangesTest, RetainsCurrentValuesAndSupportsRepeatedFiltering) {
 }
 
 TEST(CaptureChangesTest, ReportsInvalidProcessAndHandlesEmptyBaseline) {
-    const auto invalid = MemorySnapshot::fromScanResults(-1, {});
+    const auto invalid = MemorySnapshot(-1, {});
     EXPECT_FALSE(captureChanges(invalid, ChangeType::CHANGED).has_value());
-    const auto empty = MemorySnapshot::fromScanResults(getpid(), {});
+    const auto empty = MemorySnapshot(getpid(), {});
     const auto result = captureChanges(empty, ChangeType::CHANGED);
     ASSERT_TRUE(result.has_value());
     EXPECT_TRUE(result->empty());

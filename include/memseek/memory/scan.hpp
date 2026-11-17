@@ -2,17 +2,11 @@
 
 #include <sys/types.h>
 
-#include <boost/asio/post.hpp>
 #include <boost/asio/thread_pool.hpp>
 #include <cstddef>
 #include <cstdint>
-#include <future>
-#include <memory>
 #include <span>
-#include <string>
 #include <thread>
-#include <type_traits>
-#include <utility>
 #include <vector>
 
 #include "memseek/error.hpp"
@@ -72,13 +66,26 @@ enum class ByteOrder : std::uint8_t {
     BIG,
 };
 
+struct ScanIssue {
+    std::uintptr_t address{};
+    std::size_t size{};
+    MemSeekError error;
+};
+
+struct ScanReport {
+    std::vector<ScanResult> results;
+    std::vector<ScanIssue> issues;
+
+    [[nodiscard]]
+    bool complete() const noexcept {
+        return issues.empty();
+    }
+};
+
 // Numeric Value inputs retain their native representation. byteOrder describes
 // the memory being scanned, not the input Value. Results contain raw bytes.
 class MemoryScanner {
    public:
-    using ScanResults = std::vector<ScanResult>;
-    using ScanOutcome = Result<ScanResults>;
-
     explicit MemoryScanner(
         std::size_t workerCount = std::thread::hardware_concurrency());
 
@@ -90,27 +97,34 @@ class MemoryScanner {
     MemoryScanner(MemoryScanner&&) = delete;
     MemoryScanner& operator=(MemoryScanner&&) = delete;
 
+    // level.memoryScanStrategy selects strict failure or a partial report.
+    // Fatal errors are returned as unexpected in either strategy.
     [[nodiscard]]
-    ScanOutcome scanProcess(pid_t pid, MemoryScanLevel level,
-                            const Value& target,
-                            ScanType scanType = ScanType::EXACT,
-                            ByteOrder byteOrder = ByteOrder::NATIVE);
+    Result<ScanReport> scanProcess(pid_t pid, MemoryScanLevel level,
+                                   const Value& target,
+                                   ScanType scanType = ScanType::EXACT,
+                                   ByteOrder byteOrder = ByteOrder::NATIVE);
 
     [[nodiscard]]
-    ScanOutcome scanProcess(pid_t pid, MemoryScanLevel level,
-                            const Value& lowerBound, const Value& upperBound,
-                            ByteOrder byteOrder = ByteOrder::NATIVE);
+    Result<ScanReport> scanProcess(pid_t pid, MemoryScanLevel level,
+                                   const Value& lowerBound,
+                                   const Value& upperBound,
+                                   ByteOrder byteOrder = ByteOrder::NATIVE);
+
+    // Both region overloads report local read failures in issues. A successful
+    // Result may be incomplete; check report.complete(). Fatal errors still
+    // return unexpected. Process-level strict/tolerance policy is not applied.
+    [[nodiscard]]
+    Result<ScanReport> scanRegion(pid_t pid, const MemoryRegion& region,
+                                  const Value& target,
+                                  ScanType scanType = ScanType::EXACT,
+                                  ByteOrder byteOrder = ByteOrder::NATIVE);
 
     [[nodiscard]]
-    ScanOutcome scanRegion(pid_t pid, const MemoryRegion& region,
-                           const Value& target,
-                           ScanType scanType = ScanType::EXACT,
-                           ByteOrder byteOrder = ByteOrder::NATIVE);
-
-    [[nodiscard]]
-    ScanOutcome scanRegion(pid_t pid, const MemoryRegion& region,
-                           const Value& lowerBound, const Value& upperBound,
-                           ByteOrder byteOrder = ByteOrder::NATIVE);
+    Result<ScanReport> scanRegion(pid_t pid, const MemoryRegion& region,
+                                  const Value& lowerBound,
+                                  const Value& upperBound,
+                                  ByteOrder byteOrder = ByteOrder::NATIVE);
 
     // RANGE, GREATER, and LESS require Value::isNumeric() to be true.
     // EXACT remains available for numeric values, strings, and byte arrays.
@@ -127,14 +141,15 @@ class MemoryScanner {
         const Value& upperBound, ByteOrder byteOrder = ByteOrder::NATIVE);
 
    private:
-    ScanOutcome scanProcessImpl(pid_t pid, MemoryScanLevel level,
-                                const Value& lowerBound,
-                                const Value* upperBound, ScanType scanType,
-                                ByteOrder byteOrder);
+    Result<ScanReport> scanProcessImpl(pid_t pid, MemoryScanLevel level,
+                                       const Value& lowerBound,
+                                       const Value* upperBound,
+                                       ScanType scanType, ByteOrder byteOrder);
 
-    ScanOutcome scanRegionImpl(pid_t pid, const MemoryRegion& region,
-                               const Value& lowerBound, const Value* upperBound,
-                               ScanType scanType, ByteOrder byteOrder);
+    Result<ScanReport> scanRegionImpl(pid_t pid, const MemoryRegion& region,
+                                      const Value& lowerBound,
+                                      const Value* upperBound,
+                                      ScanType scanType, ByteOrder byteOrder);
 
     static std::vector<ScanResult> scanBufferImpl(const MemoryRead& memory,
                                                   const Value& lowerBound,
@@ -142,47 +157,21 @@ class MemoryScanner {
                                                   ScanType scanType,
                                                   ByteOrder byteOrder);
 
-    static ScanOutcome scanChunk(MemoryReader& reader, pid_t pid,
-                                 const MemoryRegion& region,
-                                 const MemoryChunk& chunk,
-                                 const Value& lowerBound,
-                                 const Value* upperBound, ScanType scanType,
-                                 ByteOrder byteOrder);
+    static Result<ScanReport> scanChunk(MemoryReader& reader, pid_t pid,
+                                        const MemoryRegion& region,
+                                        const MemoryChunk& chunk,
+                                        const Value& lowerBound,
+                                        const Value* upperBound,
+                                        ScanType scanType, ByteOrder byteOrder);
 
-    static ScanOutcome getChunkOutcome(std::future<ScanOutcome>& future,
-                                       pid_t pid, const MemoryChunk& chunk);
-
-    static ScanOutcome collectChunkResults(
-        std::vector<std::future<ScanOutcome>>& futures,
-        const std::vector<MemoryChunk>& chunks, pid_t pid);
-
-    ScanOutcome scanChunksParallel(MemoryReader& reader, pid_t pid,
-                                   const MemoryRegion& region,
-                                   const Value& lowerBound,
-                                   const Value* upperBound, ScanType scanType,
-                                   ByteOrder byteOrder);
-
-    template <typename Function>
-    auto submit(Function&& function)
-        -> std::future<std::invoke_result_t<std::decay_t<Function>&>>;
+    Result<ScanReport> scanChunksParallel(MemoryReader& reader, pid_t pid,
+                                          const MemoryRegion& region,
+                                          const Value& lowerBound,
+                                          const Value* upperBound,
+                                          ScanType scanType,
+                                          ByteOrder byteOrder);
 
     boost::asio::thread_pool m_pool;
 };
-
-template <typename Function>
-auto MemoryScanner::submit(Function&& function)
-    -> std::future<std::invoke_result_t<std::decay_t<Function>&>> {
-    using Task = std::decay_t<Function>;
-    using Result = std::invoke_result_t<Task&>;
-
-    auto task = std::make_shared<std::packaged_task<Result()>>(
-        std::forward<Function>(function));
-
-    auto future = task->get_future();
-
-    boost::asio::post(m_pool, [task] { (*task)(); });
-
-    return future;
-}
 
 }  // namespace memseek

@@ -4,6 +4,7 @@
 
 #include <algorithm>
 #include <bit>
+#include <boost/asio/post.hpp>
 #include <boost/asio/thread_pool.hpp>
 #include <cstddef>
 #include <cstdint>
@@ -13,9 +14,11 @@
 #include <future>
 #include <iterator>
 #include <limits>
+#include <memory>
 #include <optional>
 #include <span>
 #include <stdexcept>
+#include <system_error>
 #include <type_traits>
 #include <utility>
 #include <vector>
@@ -89,17 +92,24 @@ auto chunkReadSize(const MemoryChunk& chunk, const MemoryRegion& region,
     return chunk.size + extra;
 }
 
-auto withChunkContext(MemSeekError error, const pid_t pid,
-                      const MemoryChunk& chunk) -> MemSeekError {
-    error.message =
-        std::format("memory range [{:#x}, {:#x}): {}", chunk.address,
-                    chunk.address + chunk.size, error.message);
-    error.pid = pid;
-    error.address = chunk.address;
-    if (!error.size) {
-        error.size = chunk.size;
+void appendReport(ScanReport& destination, ScanReport&& source) {
+    destination.results.insert(destination.results.end(),
+                               std::make_move_iterator(source.results.begin()),
+                               std::make_move_iterator(source.results.end()));
+    destination.issues.insert(destination.issues.end(),
+                              std::make_move_iterator(source.issues.begin()),
+                              std::make_move_iterator(source.issues.end()));
+}
+
+auto isLocalReadFailure(const MemSeekError& error) -> bool {
+    // Worker exceptions carry no system error and must remain fatal. Only
+    // known local memory failures can be represented as gaps in the report.
+    if (error.code == ErrorCode::SHORT_TRANSFER) {
+        return true;
     }
-    return error;
+    return error.code == ErrorCode::MEMORY_READ_FAILED &&
+           (error.systemError == std::errc::bad_address ||
+            error.systemError == std::errc::io_error);
 }
 
 template <ValueNumericType T>
@@ -164,11 +174,10 @@ MemoryScanner::MemoryScanner(std::size_t workerCount)
 MemoryScanner::~MemoryScanner() { m_pool.join(); }
 
 [[nodiscard]]
-MemoryScanner::ScanOutcome MemoryScanner::scanProcess(pid_t pid,
-                                                      MemoryScanLevel level,
-                                                      const Value& target,
-                                                      ScanType scanType,
-                                                      ByteOrder byteOrder) {
+Result<ScanReport> MemoryScanner::scanProcess(pid_t pid, MemoryScanLevel level,
+                                              const Value& target,
+                                              ScanType scanType,
+                                              ByteOrder byteOrder) {
     if (scanType == ScanType::RANGE) {
         throw std::invalid_argument(
             "RANGE scans require both lower and upper bounds");
@@ -177,18 +186,25 @@ MemoryScanner::ScanOutcome MemoryScanner::scanProcess(pid_t pid,
     return scanProcessImpl(pid, level, target, nullptr, scanType, byteOrder);
 }
 
-MemoryScanner::ScanOutcome MemoryScanner::scanProcess(pid_t pid,
-                                                      MemoryScanLevel level,
-                                                      const Value& lowerBound,
-                                                      const Value& upperBound,
-                                                      ByteOrder byteOrder) {
+Result<ScanReport> MemoryScanner::scanProcess(pid_t pid, MemoryScanLevel level,
+                                              const Value& lowerBound,
+                                              const Value& upperBound,
+                                              ByteOrder byteOrder) {
     return scanProcessImpl(pid, level, lowerBound, &upperBound, ScanType::RANGE,
                            byteOrder);
 }
 
-MemoryScanner::ScanOutcome MemoryScanner::scanProcessImpl(
+Result<ScanReport> MemoryScanner::scanProcessImpl(
     pid_t pid, MemoryScanLevel level, const Value& lowerBound,
     const Value* upperBound, ScanType scanType, ByteOrder byteOrder) {
+    if (level.memoryScanStrategy != ScanStrategy::STRICT &&
+        level.memoryScanStrategy != ScanStrategy::TOLERANCE) {
+        auto error = makeError(ErrorCode::INVALID_ARGUMENT,
+                               "invalid memory scan strategy");
+        error.pid = pid;
+        return std::unexpected(std::move(error));
+    }
+
     auto regionList = readProcess(pid, level);
     if (!regionList) {
         auto error = regionList.error();
@@ -198,18 +214,21 @@ MemoryScanner::ScanOutcome MemoryScanner::scanProcessImpl(
         return std::unexpected(std::move(error));
     }
 
-    std::vector<ScanResult> results;
-    for (const auto& region : regionList->getRegions()) {
+    ScanReport processReport;
+    for (const auto& region : *regionList) {
         auto regionResults = scanRegionImpl(pid, region, lowerBound, upperBound,
                                             scanType, byteOrder);
         if (!regionResults) {
             return std::unexpected(regionResults.error());
         }
-        results.insert(results.end(),
-                       std::make_move_iterator(regionResults->begin()),
-                       std::make_move_iterator(regionResults->end()));
+        if (level.memoryScanStrategy == ScanStrategy::STRICT &&
+            !regionResults->complete()) {
+            return std::unexpected(
+                std::move(regionResults->issues.front().error));
+        }
+        appendReport(processReport, std::move(*regionResults));
     }
-    return results;
+    return processReport;
 }
 
 std::vector<ScanResult> MemoryScanner::scanBuffer(const MemoryRead& memory,
@@ -311,11 +330,11 @@ std::vector<ScanResult> MemoryScanner::scanBufferImpl(const MemoryRead& memory,
     return {};
 }
 
-MemoryScanner::ScanOutcome MemoryScanner::scanRegion(pid_t pid,
-                                                     const MemoryRegion& region,
-                                                     const Value& target,
-                                                     ScanType scanType,
-                                                     ByteOrder byteOrder) {
+Result<ScanReport> MemoryScanner::scanRegion(pid_t pid,
+                                             const MemoryRegion& region,
+                                             const Value& target,
+                                             ScanType scanType,
+                                             ByteOrder byteOrder) {
     if (scanType == ScanType::RANGE) {
         throw std::invalid_argument(
             "RANGE scans require both lower and upper bounds");
@@ -324,16 +343,16 @@ MemoryScanner::ScanOutcome MemoryScanner::scanRegion(pid_t pid,
     return scanRegionImpl(pid, region, target, nullptr, scanType, byteOrder);
 }
 
-MemoryScanner::ScanOutcome MemoryScanner::scanRegion(pid_t pid,
-                                                     const MemoryRegion& region,
-                                                     const Value& lowerBound,
-                                                     const Value& upperBound,
-                                                     ByteOrder byteOrder) {
+Result<ScanReport> MemoryScanner::scanRegion(pid_t pid,
+                                             const MemoryRegion& region,
+                                             const Value& lowerBound,
+                                             const Value& upperBound,
+                                             ByteOrder byteOrder) {
     return scanRegionImpl(pid, region, lowerBound, &upperBound, ScanType::RANGE,
                           byteOrder);
 }
 
-MemoryScanner::ScanOutcome MemoryScanner::scanRegionImpl(
+Result<ScanReport> MemoryScanner::scanRegionImpl(
     pid_t pid, const MemoryRegion& region, const Value& lowerBound,
     const Value* upperBound, ScanType scanType, ByteOrder byteOrder) {
     if (region.size == 0) {
@@ -367,128 +386,113 @@ MemoryScanner::ScanOutcome MemoryScanner::scanRegionImpl(
                               scanType, byteOrder);
 }
 
-MemoryScanner::ScanOutcome MemoryScanner::scanChunk(
+Result<ScanReport> MemoryScanner::scanChunk(
     MemoryReader& reader, pid_t pid, const MemoryRegion& region,
     const MemoryChunk& chunk, const Value& lowerBound, const Value* upperBound,
     ScanType scanType, ByteOrder byteOrder) {
-    const std::size_t overlap = lowerBound.empty() ? 0 : lowerBound.size() - 1;
-
-    auto bytes =
-        reader.read(chunk.address, chunkReadSize(chunk, region, overlap));
-
-    if (!bytes) {
-        return std::unexpected(withChunkContext(bytes.error(), pid, chunk));
-    }
-
-    const MemoryRead memory{chunk.address, chunk.size, std::move(*bytes),
-                            chunk.parentRegionId};
-
-    auto results =
-        scanBufferImpl(memory, lowerBound, upperBound, scanType, byteOrder);
-
-    const auto logicalEnd = chunk.address + chunk.size;
-
-    std::erase_if(results, [logicalEnd](const ScanResult& result) {
-        return result.address() >= logicalEnd;
-    });
-
-    return results;
-}
-
-MemoryScanner::ScanOutcome MemoryScanner::getChunkOutcome(
-    std::future<ScanOutcome>& future, pid_t pid, const MemoryChunk& chunk) {
     try {
-        return future.get();
-    } catch (const std::exception& e) {
-        auto error = makeError(ErrorCode::MEMORY_READ_FAILED,
-                               std::format("scan worker failed: {}", e.what()));
+        const std::size_t overlap =
+            lowerBound.empty() ? 0 : lowerBound.size() - 1;
+        auto bytes =
+            reader.read(chunk.address, chunkReadSize(chunk, region, overlap));
 
-        return std::unexpected(withChunkContext(std::move(error), pid, chunk));
-    } catch (...) {
-        auto error = makeError(ErrorCode::MEMORY_READ_FAILED,
-                               "scan worker failed with unknown error");
-
-        return std::unexpected(withChunkContext(std::move(error), pid, chunk));
-    }
-}
-
-MemoryScanner::ScanOutcome MemoryScanner::collectChunkResults(
-    std::vector<std::future<ScanOutcome>>& futures,
-    const std::vector<MemoryChunk>& chunks, pid_t pid) {
-    std::vector<std::vector<ScanResult>> chunkResults;
-    chunkResults.reserve(futures.size());
-
-    std::size_t totalMatches = 0;
-    std::optional<MemSeekError> firstError;
-
-    for (std::size_t index = 0; index < futures.size(); ++index) {
-        auto outcome =
-            getChunkOutcome(futures[index], pid, chunks[index]);  // NOLINT
-
-        if (!outcome) {
-            if (!firstError) {
-                firstError = std::move(outcome).error();
+        ScanReport report;
+        if (!bytes) {
+            auto error = std::move(bytes).error();
+            if (!isLocalReadFailure(error)) {
+                return std::unexpected(std::move(error));
             }
-
-            continue;
+            report.issues.push_back({
+                .address = chunk.address,
+                .size = chunk.size,
+                .error = std::move(error),
+            });
+            return report;
         }
 
-        totalMatches += outcome->size();
-        chunkResults.push_back(std::move(*outcome));
+        const MemoryRead memory{chunk.address, std::move(*bytes),
+                                chunk.parentRegionId};
+        report.results =
+            scanBufferImpl(memory, lowerBound, upperBound, scanType, byteOrder);
+
+        const auto logicalEnd = chunk.address + chunk.size;
+        std::erase_if(report.results, [logicalEnd](const ScanResult& result) {
+            return result.address() >= logicalEnd;
+        });
+        return report;
+    } catch (const std::exception& e) {
+        auto error = makeError(ErrorCode::MEMORY_READ_FAILED,
+                               std::format("scan chunk failed: {}", e.what()));
+        error.pid = pid;
+        error.address = chunk.address;
+        error.size = chunk.size;
+        return std::unexpected(std::move(error));
+    } catch (...) {
+        auto error = makeError(ErrorCode::MEMORY_READ_FAILED,
+                               "scan chunk failed with unknown error");
+        error.pid = pid;
+        error.address = chunk.address;
+        error.size = chunk.size;
+        return std::unexpected(std::move(error));
     }
-
-    if (firstError) {
-        return std::unexpected(std::move(*firstError));
-    }
-
-    std::vector<ScanResult> results;
-    results.reserve(totalMatches);
-
-    for (auto& chunkResult : chunkResults) {
-        results.insert(results.end(),
-                       std::make_move_iterator(chunkResult.begin()),
-                       std::make_move_iterator(chunkResult.end()));
-    }
-
-    return results;
 }
 
-MemoryScanner::ScanOutcome MemoryScanner::scanChunksParallel(
+Result<ScanReport> MemoryScanner::scanChunksParallel(
     MemoryReader& reader, pid_t pid, const MemoryRegion& region,
     const Value& lowerBound, const Value* upperBound, ScanType scanType,
     ByteOrder byteOrder) {
     const std::size_t chunkCount = ((region.size - 1) / DEFAULT_CHUNK_SIZE) + 1;
 
-    std::vector<std::future<ScanOutcome>> futures;
-    std::vector<MemoryChunk> chunks;
-
+    std::vector<std::future<Result<ScanReport>>> futures;
     futures.reserve(chunkCount);
-    chunks.reserve(chunkCount);
+    try {
+        for (const auto& chunk : MemoryChunkRange(region)) {
+            auto task =
+                std::make_shared<std::packaged_task<Result<ScanReport>()>>(
+                    [&, chunk] {
+                        return scanChunk(reader, pid, region, chunk, lowerBound,
+                                         upperBound, scanType, byteOrder);
+                    });
+            futures.push_back(task->get_future());
+            boost::asio::post(m_pool, [task] { (*task)(); });
+        }
 
-    for (const auto& chunk : MemoryChunkRange(region)) {
-        chunks.push_back(chunk);
-
-        futures.emplace_back(submit([&, chunk]() -> ScanOutcome {
+        ScanReport report;
+        std::optional<MemSeekError> firstError;
+        std::size_t index = 0;
+        for (const auto& chunk : MemoryChunkRange(region)) {
+            Result<ScanReport> outcome;
             try {
-                return scanChunk(reader, pid, region, chunk, lowerBound,
-                                 upperBound, scanType, byteOrder);
+                outcome = futures.at(index++).get();
             } catch (const std::exception& e) {
                 auto error =
                     makeError(ErrorCode::MEMORY_READ_FAILED,
                               std::format("scan worker failed: {}", e.what()));
-
-                return std::unexpected(
-                    withChunkContext(std::move(error), pid, chunk));
-            } catch (...) {
-                auto error = makeError(ErrorCode::MEMORY_READ_FAILED,
-                                       "scan worker failed with unknown error");
-
-                return std::unexpected(
-                    withChunkContext(std::move(error), pid, chunk));
+                error.pid = pid;
+                error.address = chunk.address;
+                error.size = chunk.size;
+                outcome = std::unexpected(std::move(error));
             }
-        }));
+            if (!outcome) {
+                if (!firstError) {
+                    firstError = std::move(outcome).error();
+                }
+                continue;
+            }
+            appendReport(report, std::move(*outcome));
+        }
+        if (firstError) {
+            return std::unexpected(std::move(*firstError));
+        }
+        return report;
+    } catch (...) {
+        // Tasks hold references to this scan. Finish them before unwinding.
+        for (auto& future : futures) {
+            if (future.valid()) {
+                future.wait();
+            }
+        }
+        throw;
     }
-
-    return collectChunkResults(futures, chunks, pid);
 }
 }  // namespace memseek

@@ -42,9 +42,11 @@ class MemoryChunkRange {
 
             const auto remaining = end - m_current;
 
-            return {.address = m_current,
-                    .size = std::min(m_chunkSize, remaining),
-                    .parentRegionId = m_region->id};
+            return {
+                .address = m_current,
+                .size = std::min(m_chunkSize, remaining),
+                .parentRegionId = m_region->id,
+            };
         }
 
         Iterator& operator++() {

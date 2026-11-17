@@ -6,7 +6,6 @@
 #include <cstddef>
 #include <cstdint>
 #include <expected>
-#include <iterator>
 #include <string>
 #include <type_traits>
 #include <utility>
@@ -94,21 +93,11 @@ auto ScanSession::scan(const Value& target, const MemoryScanLevel level,
             makeError(ErrorCode::INVALID_VALUE,
                       "ordering scans require a numeric target"));
     }
-    const auto regions = readProcess(m_pid, level);
-    if (!regions) {
-        return std::unexpected(regions.error());
+    auto report = m_scanner.scanProcess(m_pid, level, target, type, byteOrder);
+    if (!report) {
+        return std::unexpected(std::move(report).error());
     }
-    MemorySnapshot::Results results;
-    for (const auto& region : regions->getRegions()) {
-        auto matches =
-            m_scanner.scanRegion(m_pid, region, target, type, byteOrder);
-        if (!matches) {
-            return std::unexpected(matches.error());
-        }
-        results.insert(results.end(), std::make_move_iterator(matches->begin()),
-                       std::make_move_iterator(matches->end()));
-    }
-    m_snapshot = MemorySnapshot::fromScanResults(m_pid, std::move(results));
+    m_snapshot = MemorySnapshot(m_pid, std::move(report->results));
     return {};
 }
 
@@ -138,21 +127,12 @@ auto ScanSession::scan(const Value& lowerBound, const Value& upperBound,
                       "range lower bound must not exceed upper bound"));
     }
 
-    const auto regions = readProcess(m_pid, level);
-    if (!regions) {
-        return std::unexpected(regions.error());
+    auto report =
+        m_scanner.scanProcess(m_pid, level, lowerBound, upperBound, byteOrder);
+    if (!report) {
+        return std::unexpected(std::move(report).error());
     }
-    MemorySnapshot::Results results;
-    for (const auto& region : regions->getRegions()) {
-        auto matches = m_scanner.scanRegion(m_pid, region, lowerBound,
-                                            upperBound, byteOrder);
-        if (!matches) {
-            return std::unexpected(matches.error());
-        }
-        results.insert(results.end(), std::make_move_iterator(matches->begin()),
-                       std::make_move_iterator(matches->end()));
-    }
-    m_snapshot = MemorySnapshot::fromScanResults(m_pid, std::move(results));
+    m_snapshot = MemorySnapshot(m_pid, std::move(report->results));
     return {};
 }
 

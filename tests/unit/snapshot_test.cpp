@@ -18,7 +18,7 @@ TEST(MemorySnapshotTest, StoresTheCompleteScanResultSet) {
                    std::vector<std::byte>{std::byte{0x01}, std::byte{0x02}}},
         ScanResult{0x2000, std::vector<std::byte>{std::byte{0x2a}}},
     };
-    const auto snapshot = MemorySnapshot::fromScanResults(1234, results);
+    const auto snapshot = MemorySnapshot(1234, results);
 
     ASSERT_EQ(snapshot.pid(), 1234);
     ASSERT_EQ(snapshot.size(), results.size());
@@ -36,7 +36,7 @@ TEST(MemorySnapshotTest, StoresTheCompleteScanResultSet) {
 TEST(MemorySnapshotTest, CopiesScanResultValues) {
     std::vector<std::byte> bytes{std::byte{0x10}};
     const std::vector<ScanResult> results{ScanResult{0x1000, bytes}};
-    const auto snapshot = MemorySnapshot::fromScanResults(1234, results);
+    const auto snapshot = MemorySnapshot(1234, results);
     bytes.at(0) = std::byte{0x20};
 
     EXPECT_EQ(snapshot.results().front().data().front(), std::byte{0x10});
@@ -49,8 +49,7 @@ TEST(MemorySnapshotTest, MovesLargeResultSetIntoSnapshot) {
                    std::vector<std::byte>{std::byte{0x30}, std::byte{0x40}}},
     };
     auto movableResults = results;
-    const auto snapshot =
-        MemorySnapshot::fromScanResults(1234, std::move(movableResults));
+    const auto snapshot = MemorySnapshot(1234, std::move(movableResults));
 
     ASSERT_EQ(snapshot.size(), 2);
     EXPECT_EQ(snapshot.results().at(1).address(), 0x1000);

@@ -19,16 +19,16 @@ template <ValueNumericType T>
 void expectNumericOrdering(T lower, T target, T upper) {
     const auto scan = [](T memoryValue, const Value& bound, ScanType scanType) {
         auto data = test::encodeValue(memoryValue);
-        const auto dataSize = data.size();
-        const MemoryRead memory(0x6000, dataSize, std::move(data));
+
+        const MemoryRead memory(0x6000, std::move(data));
         return MemoryScanner::scanBuffer(memory, bound, scanType);
     };
 
     const auto scanRange = [](T memoryValue, const Value& lowerBound,
                               const Value& upperBound) {
         auto data = test::encodeValue(memoryValue);
-        const auto dataSize = data.size();
-        const MemoryRead memory(0x6000, dataSize, std::move(data));
+
+        const MemoryRead memory(0x6000, std::move(data));
         return MemoryScanner::scanBuffer(memory, lowerBound, upperBound);
     };
 
@@ -53,8 +53,8 @@ TEST(NumericScanTest, SupportsLessGreaterAndInclusiveRange) {
     data.insert(data.end(), nine.begin(), nine.end());
 
     constexpr std::uintptr_t address = 0x3000;
-    const auto dataSize = data.size();
-    const MemoryRead memory(address, dataSize, std::move(data));
+
+    const MemoryRead memory(address, std::move(data));
 
     const auto less = MemoryScanner::scanBuffer(memory, Value(std::uint8_t{5}),
                                                 ScanType::LESS);
@@ -89,7 +89,7 @@ TEST(NumericScanTest, SupportsOrderingForEveryNumericValueType) {
 TEST(NumericScanTest, RejectsNonNumericValues) {
     const std::vector<std::byte> data{std::byte{'a'}, std::byte{'b'},
                                       std::byte{'c'}};
-    const MemoryRead memory(0x4000, data.size(), data);
+    const MemoryRead memory(0x4000, data);
 
     EXPECT_TRUE(MemoryScanner::scanBuffer(memory, Value(std::string{"b"}),
                                           ScanType::GREATER)
@@ -105,7 +105,7 @@ TEST(NumericScanTest, RejectsNonNumericValues) {
 
 TEST(NumericScanTest, RejectsInvalidRanges) {
     const auto data = test::encodeValue(std::uint32_t{5});
-    const MemoryRead memory(0x5000, data.size(), data);
+    const MemoryRead memory(0x5000, data);
 
     EXPECT_TRUE(MemoryScanner::scanBuffer(memory, Value(std::uint32_t{9}),
                                           Value(std::uint32_t{1}))
@@ -122,7 +122,7 @@ TEST(NumericScanTest, RejectsInvalidRanges) {
 TEST(NumericScanTest, DoesNotMatchNaN) {
     const auto data =
         test::encodeValue(std::numeric_limits<float>::quiet_NaN());
-    const MemoryRead memory(0x5000, data.size(), data);
+    const MemoryRead memory(0x5000, data);
 
     EXPECT_TRUE(
         MemoryScanner::scanBuffer(memory, Value(1.0F), ScanType::GREATER)

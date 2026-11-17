@@ -17,11 +17,9 @@ class MemorySnapshot {
    public:
     using Results = std::vector<ScanResult>;
 
-    // Build one baseline from the complete result set of a scan. Taking the
-    // vector by value lets callers move a large result set into the snapshot;
-    // the stored representation is still independent from ScanResult.
-    [[nodiscard]]
-    static auto fromScanResults(pid_t pid, Results results) -> MemorySnapshot;
+    // Move a result set into a baseline, or copy it by passing an lvalue.
+    MemorySnapshot(pid_t pid, Results results) noexcept
+        : m_pid(pid), m_results(std::move(results)) {}
 
     [[nodiscard]]
     pid_t pid() const noexcept {
@@ -43,12 +41,7 @@ class MemorySnapshot {
         return m_results.empty();
     }
 
-    MemorySnapshot() = delete;
-
    private:
-    MemorySnapshot(pid_t pid, Results results) noexcept
-        : m_pid(pid), m_results(std::move(results)) {}
-
     pid_t m_pid{};
     Results m_results;
 };

@@ -40,11 +40,12 @@ class RegionFixture {
 
         const auto address = reinterpret_cast<std::uintptr_t>(m_storage.data());
 
-        auto regions = memseek::readProcess(getpid());
+        auto regions =
+            memseek::readProcess(getpid(), memseek::MemoryScanLevel{});
         if (!regions) {
             return;
         }
-        for (const auto& candidate : regions->getRegions()) {
+        for (const auto& candidate : *regions) {
             if (address >= candidate.start &&
                 address - candidate.start < candidate.size) {
                 m_region = candidate;
@@ -81,18 +82,18 @@ void runScanRegion(benchmark::State& state, std::size_t size) {
     for (auto iteration : state) {
         static_cast<void>(iteration);
         try {
-            const auto results = scanner.scanRegion(getpid(), fixture.region(),
-                                                    fixture.target());
-            if (!results) {
-                const auto error = formatError(results.error());
-                state.SkipWithError(error.c_str());
+            const auto report = scanner.scanRegion(getpid(), fixture.region(),
+                                                   fixture.target());
+            if (!report) {
+                const auto error = formatError(report.error());
+                state.SkipWithError(error);
                 break;
             }
-            if (results->size() < fixture.plantedMatches()) {
+            if (report->results.size() < fixture.plantedMatches()) {
                 state.SkipWithError("region scan missed a planted match");
                 break;
             }
-            benchmark::DoNotOptimize(results->data());
+            benchmark::DoNotOptimize(report->results.data());
         } catch (const std::exception& error) {
             state.SkipWithError(error.what());
             break;

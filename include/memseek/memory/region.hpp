@@ -1,7 +1,11 @@
 #pragma once
 
+#include <sys/types.h>
+
+#include <cstddef>
 #include <cstdint>
 #include <string>
+#include <type_traits>
 #include <vector>
 
 #include "memseek/error.hpp"
@@ -49,14 +53,20 @@ constexpr auto operator|=(MemoryRegionType& lhs, MemoryRegionType rhs) noexcept
     return lhs;
 }
 
+enum class ScanStrategy : std::uint8_t { STRICT, TOLERANCE };
+
 struct MemoryScanLevel {
-    uint8_t memoryProtection{static_cast<std::uint8_t>(
-        MemoryProtection::READ | MemoryProtection::WRITE)};
+    uint8_t memoryProtection{
+        static_cast<std::uint8_t>(MemoryProtection::READ |
+                                  MemoryProtection::WRITE),
+    };
     uint8_t memoryRegionType{
         static_cast<std::uint8_t>(MemoryRegionType::HEAP) |
-        static_cast<std::uint8_t>(MemoryRegionType::STACK) |
-        static_cast<std::uint8_t>(MemoryRegionType::ANONYMOUS) |
-        static_cast<std::uint8_t>(MemoryRegionType::MODULE)};
+            static_cast<std::uint8_t>(MemoryRegionType::STACK) |
+            static_cast<std::uint8_t>(MemoryRegionType::ANONYMOUS) |
+            static_cast<std::uint8_t>(MemoryRegionType::MODULE),
+    };
+    ScanStrategy memoryScanStrategy{ScanStrategy::STRICT};
 };
 
 struct MemoryRegion {
@@ -68,38 +78,9 @@ struct MemoryRegion {
     std::string pathname;
 };
 
-class MemoryRegionList {
-   private:
-    std::vector<MemoryRegion> m_regions;
-
-   public:
-    [[nodiscard]]
-    auto getRegions() const -> const std::vector<MemoryRegion>& {
-        return m_regions;
-    }
-
-    auto addRegion(MemoryRegion region) -> void {
-        m_regions.push_back(std::move(region));
-    }
-
-    auto clear() noexcept -> void { m_regions.clear(); }
-
-    [[nodiscard]]
-    auto size() const noexcept -> std::size_t {
-        return m_regions.size();
-    }
-
-    [[nodiscard]]
-    auto empty() const noexcept -> bool {
-        return m_regions.empty();
-    }
-};
-
-auto readProcess(pid_t pid, MemoryScanLevel level = MemoryScanLevel{})
-    -> Result<MemoryRegionList>;
-
 // Set requireReadable to false when selecting mappings for writes only.
-auto readProcess(pid_t pid, MemoryScanLevel level, bool requireReadable)
-    -> Result<MemoryRegionList>;
+[[nodiscard]]
+auto readProcess(pid_t pid, MemoryScanLevel level, bool requireReadable = true)
+    -> Result<std::vector<MemoryRegion>>;
 
 }  // namespace memseek

@@ -5,7 +5,6 @@ set(MEMSEEK_LIBRARY_SOURCES
     memory/reader.cpp
     memory/region.cpp
     memory/scan.cpp
-    memory/snapshot.cpp
     memory/writer.cpp
     utils/error.cpp
 )

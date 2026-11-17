@@ -33,13 +33,9 @@ auto regionMatchesLevel(const MemoryRegion& region,
 
 }  // namespace
 
-Result<MemoryRegionList> readProcess(pid_t pid, MemoryScanLevel level) {
-    return readProcess(pid, level, true);
-}
-
-Result<MemoryRegionList> readProcess(pid_t pid, MemoryScanLevel level,
-                                     const bool requireReadable) {
-    MemoryRegionList regionList{};
+Result<std::vector<MemoryRegion>> readProcess(pid_t pid, MemoryScanLevel level,
+                                              const bool requireReadable) {
+    std::vector<MemoryRegion> regionList;
 
 #ifdef __linux__
 
@@ -156,7 +152,7 @@ Result<MemoryRegionList> readProcess(pid_t pid, MemoryScanLevel level,
             continue;
         }
 
-        regionList.addRegion(std::move(region));
+        regionList.push_back(std::move(region));
     }
 
 #else

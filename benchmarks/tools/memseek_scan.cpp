@@ -24,7 +24,7 @@ std::uint32_t parseValue(const char* text) {
 
 int main(int argc, char** argv) {
     pid_t pid = 0;
-    std::uint32_t value = 0xDEADBEEFu;
+    std::uint32_t value = 0xDEADBEEFU;
 
     for (int index = 1; index < argc; ++index) {
         if (std::strcmp(argv[index], "--pid") == 0 && index + 1 < argc) {
@@ -46,18 +46,13 @@ int main(int argc, char** argv) {
     memseek::MemoryScanner scanner;
 
     const auto start = std::chrono::steady_clock::now();
-    const auto results = scanner.scanProcess(pid, level, target);
+    const auto report = scanner.scanProcess(pid, level, target);
     const auto end = std::chrono::steady_clock::now();
-
-    if (!results) {
-        const auto error = memseek::formatError(results.error());
-        std::fprintf(stderr, "scan failed: %s\n", error.c_str());
-        return 1;
-    }
 
     const auto elapsedMs =
         std::chrono::duration<double, std::milli>(end - start).count();
 
-    std::printf("matches=%zu elapsed_ms=%.3f\n", results->size(), elapsedMs);
+    std::printf("matches=%zu elapsed_ms=%.3f\n", report->results.size(),
+                elapsedMs);
     return 0;
 }

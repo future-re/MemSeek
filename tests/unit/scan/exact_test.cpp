@@ -22,8 +22,8 @@ void expectExactMatchFor(T&& value, std::string_view typeName) {
     const Value target(std::forward<T>(value));
     auto data =
         std::vector<std::byte>(target.data().begin(), target.data().end());
-    const auto dataSize = data.size();
-    const MemoryRead memory(address, dataSize, std::move(data));
+
+    const MemoryRead memory(address, std::move(data));
 
     SCOPED_TRACE(typeName);
     const auto results = MemoryScanner::scanBuffer(memory, target);
@@ -56,8 +56,8 @@ TEST(ExactScanTest, FindsOverlappingMatchesAtFirstAndLastOffset) {
     constexpr std::uintptr_t address = 0x1100;
     const Value target(std::string{"aba"});
     auto data = test::encodeValue(std::string{"ababa"});
-    const auto dataSize = data.size();
-    const MemoryRead memory(address, dataSize, std::move(data));
+
+    const MemoryRead memory(address, std::move(data));
 
     const auto results = MemoryScanner::scanBuffer(memory, target);
 
@@ -78,8 +78,7 @@ TEST(ExactScanTest, FindsUnalignedNumericValue) {
     data.insert(data.end(), encodedTarget.begin(), encodedTarget.end());
     data.push_back(std::byte{0xff});
 
-    const auto dataSize = data.size();
-    const MemoryRead memory(address, dataSize, std::move(data));
+    const MemoryRead memory(address, std::move(data));
     const auto results = MemoryScanner::scanBuffer(memory, target);
 
     ASSERT_EQ(results.size(), 1);
@@ -88,8 +87,8 @@ TEST(ExactScanTest, FindsUnalignedNumericValue) {
 }
 
 TEST(ExactScanTest, RejectsEmptyTargetAndInsufficientInput) {
-    const MemoryRead emptyMemory(0x1300, 0, {});
-    const MemoryRead shortMemory(0x1400, 2, {std::byte{0x01}, std::byte{0x02}});
+    const MemoryRead emptyMemory(0x1300, {});
+    const MemoryRead shortMemory(0x1400, {std::byte{0x01}, std::byte{0x02}});
 
     EXPECT_TRUE(
         MemoryScanner::scanBuffer(emptyMemory, Value(std::uint8_t{1})).empty());
@@ -105,8 +104,8 @@ TEST(ExactScanTest, RejectsEmptyTargetAndInsufficientInput) {
 TEST(ExactScanTest, ReturnsNoPartialMatches) {
     const Value target(std::string{"abcd"});
     auto data = test::encodeValue(std::string{"abc"});
-    const auto dataSize = data.size();
-    const MemoryRead memory(0x1500, dataSize, std::move(data));
+
+    const MemoryRead memory(0x1500, std::move(data));
 
     EXPECT_TRUE(MemoryScanner::scanBuffer(memory, target).empty());
 }

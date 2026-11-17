@@ -64,7 +64,7 @@ auto MemoryWriter::write(const MemoryWriteTarget& target,
     }
 
     const auto region = std::ranges::find_if(
-        regions->getRegions(), [&target, &data](const MemoryRegion& candidate) {
+        *regions, [&target, &data](const MemoryRegion& candidate) {
             if (target.address < candidate.start) {
                 return false;
             }
@@ -72,7 +72,7 @@ auto MemoryWriter::write(const MemoryWriteTarget& target,
             return offset <= candidate.size &&
                    data.size() <= candidate.size - offset;
         });
-    if (region == regions->getRegions().end()) {
+    if (region == regions->end()) {
         return std::unexpected(makeWriteError(
             ErrorCode::MAPPING_NOT_WRITABLE,
             "write range is not contained in one writable mapping"));

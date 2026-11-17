@@ -229,8 +229,7 @@ auto InteractiveCli::executeResults(const ResultsCommand& command) -> void {
             .address = result.address(),
             .currentBytes = {bytes.begin(), bytes.end()},
             .previousBytes = std::move(previous),
-            .region = findRegion(regions->getRegions(), result.address(),
-                                 bytes.size()),
+            .region = findRegion(*regions, result.address(), bytes.size()),
         });
     }
 
@@ -247,7 +246,7 @@ auto InteractiveCli::executeRegions(const RegionsCommand& command) -> void {
     if (!regions) {
         throw std::runtime_error(formatError(regions.error()));
     }
-    m_output << renderRegionsText(regions->getRegions());
+    m_output << renderRegionsText(*regions);
 }
 
 auto InteractiveCli::executeInfo() -> void {

@@ -87,9 +87,10 @@ TEST(ScanRegionTest, SupportsNumericRangeScan) {
 
     ASSERT_TRUE(results.has_value())
         << (results ? "" : formatError(results.error()));
-    ASSERT_EQ(results->size(), 2);
-    EXPECT_EQ(results->at(0).address(), mapping.address());
-    EXPECT_EQ(results->at(1).address(), mapping.address() + 1);
+    ASSERT_EQ(results->results.size(), 2);
+    EXPECT_TRUE(results->complete());
+    EXPECT_EQ(results->results.at(0).address(), mapping.address());
+    EXPECT_EQ(results->results.at(1).address(), mapping.address() + 1);
 }
 
 TEST(ScanRegionTest, SupportsGreaterAndLessScans) {
@@ -105,15 +106,17 @@ TEST(ScanRegionTest, SupportsGreaterAndLessScans) {
     const auto less = scanner.scanRegion(
         getpid(), region, Value(std::uint8_t{5}), ScanType::LESS);
     ASSERT_TRUE(less.has_value()) << (less ? "" : formatError(less.error()));
-    ASSERT_EQ(less->size(), 1);
-    EXPECT_EQ(less->front().address(), mapping.address());
+    ASSERT_EQ(less->results.size(), 1);
+    EXPECT_TRUE(less->complete());
+    EXPECT_EQ(less->results.front().address(), mapping.address());
 
     const auto greater = scanner.scanRegion(
         getpid(), region, Value(std::uint8_t{5}), ScanType::GREATER);
     ASSERT_TRUE(greater.has_value())
         << (greater ? "" : formatError(greater.error()));
-    ASSERT_EQ(greater->size(), 1);
-    EXPECT_EQ(greater->front().address(), mapping.address() + 2);
+    ASSERT_EQ(greater->results.size(), 1);
+    EXPECT_TRUE(greater->complete());
+    EXPECT_EQ(greater->results.front().address(), mapping.address() + 2);
 }
 
 TEST(ScanRegionTest, FindsValueSpanningChunkBoundary) {
@@ -135,7 +138,7 @@ TEST(ScanRegionTest, FindsValueSpanningChunkBoundary) {
 
     std::size_t hits = 0;
 
-    for (const auto& result : *results) {
+    for (const auto& result : results->results) {
         if (result.address() == address + offset) {
             ++hits;
         }
@@ -161,8 +164,8 @@ TEST(ScanRegionTest, FindsMatchAtTheEndOfTheRegion) {
 
     ASSERT_TRUE(results.has_value())
         << (results ? "" : formatError(results.error()));
-    ASSERT_EQ(results->size(), 1);
-    EXPECT_EQ(results->front().address(), mapping.address() + offset);
+    ASSERT_EQ(results->results.size(), 1);
+    EXPECT_EQ(results->results.front().address(), mapping.address() + offset);
 }
 
 TEST(ScanRegionTest, ReturnsNoMatchForAbsentOrOversizedTarget) {
@@ -176,12 +179,14 @@ TEST(ScanRegionTest, ReturnsNoMatchForAbsentOrOversizedTarget) {
         getpid(), region, Value(std::uint64_t{0x1122334455667788ULL}));
     ASSERT_TRUE(absent.has_value())
         << (absent ? "" : formatError(absent.error()));
-    EXPECT_TRUE(absent->empty());
+    EXPECT_TRUE(absent->results.empty());
+    EXPECT_TRUE(absent->complete());
     const auto oversized = scanner.scanRegion(
         getpid(), region, Value(std::vector<std::byte>(8192)));
     ASSERT_TRUE(oversized.has_value())
         << (oversized ? "" : formatError(oversized.error()));
-    EXPECT_TRUE(oversized->empty());
+    EXPECT_TRUE(oversized->results.empty());
+    EXPECT_TRUE(oversized->complete());
 }
 
 TEST(ScanRegionTest, ReportsMemoryReadFailure) {
@@ -197,9 +202,14 @@ TEST(ScanRegionTest, ReportsMemoryReadFailure) {
     const auto result =
         scanner.scanRegion(getpid(), region, Value(std::uint8_t{1}));
 
-    ASSERT_FALSE(result.has_value());
-    EXPECT_EQ(result.error().code, ErrorCode::MEMORY_READ_FAILED);
-    EXPECT_TRUE(result.error().address.has_value());
+    ASSERT_TRUE(result.has_value());
+    EXPECT_FALSE(result->complete());
+    EXPECT_TRUE(result->results.empty());
+    ASSERT_EQ(result->issues.size(), 1);
+    EXPECT_EQ(result->issues.front().address, region.start);
+    EXPECT_EQ(result->issues.front().size, region.size);
+    EXPECT_EQ(result->issues.front().error.code, ErrorCode::MEMORY_READ_FAILED);
+    EXPECT_EQ(result->issues.front().error.pid, getpid());
 }
 
 TEST(ScanRegionTest, RejectsRegionAddressOverflowBeforeChunking) {
@@ -222,17 +232,22 @@ TEST(ScanRegionTest, RejectsRegionAddressOverflowBeforeChunking) {
 TEST(ScanRegionTest, ReportsShortReadInsteadOfReturningPartialMatches) {
     const auto pageSize = static_cast<std::size_t>(::sysconf(_SC_PAGESIZE));
     AnonymousMapping mapping(pageSize * 2);
+    MemoryScanner scanner(1);
     ASSERT_EQ(::munmap(mapping.bytes() + pageSize, pageSize), 0);
     const auto region = makeAnonymousRegion(mapping, pageSize * 2);
-    MemoryScanner scanner(1);
 
     const auto result =
         scanner.scanRegion(getpid(), region, Value(std::uint8_t{1}));
 
-    ASSERT_FALSE(result.has_value());
-    EXPECT_EQ(result.error().code, ErrorCode::SHORT_TRANSFER);
-    EXPECT_EQ(result.error().address, region.start);
-    EXPECT_TRUE(result.error().bytesTransferred.has_value());
+    ASSERT_TRUE(result.has_value());
+    EXPECT_FALSE(result->complete());
+    EXPECT_TRUE(result->results.empty());
+    ASSERT_EQ(result->issues.size(), 1);
+    const auto& issue = result->issues.front();
+    EXPECT_EQ(issue.address, region.start);
+    EXPECT_EQ(issue.size, region.size);
+    EXPECT_EQ(issue.error.code, ErrorCode::SHORT_TRANSFER);
+    EXPECT_EQ(issue.error.bytesTransferred, pageSize);
 }
 
 TEST(ScanProcessTest, FindsPlantedValue) {
@@ -256,8 +271,8 @@ TEST(ScanProcessTest, FindsPlantedValue) {
     ASSERT_TRUE(results.has_value())
         << (results ? "" : formatError(results.error()));
 
-    const bool found =
-        std::ranges::any_of(*results, [address](const ScanResult& result) {
+    const bool found = std::ranges::any_of(
+        results->results, [address](const ScanResult& result) {
             return result.address() == address;
         });
 
@@ -266,10 +281,15 @@ TEST(ScanProcessTest, FindsPlantedValue) {
 
 TEST(ScanProcessTest, ReportsMappingEnumerationFailure) {
     MemoryScanner scanner(1);
-    const auto result =
-        scanner.scanProcess(-1, MemoryScanLevel{}, Value(std::uint8_t{1}));
-    ASSERT_FALSE(result.has_value());
-    EXPECT_EQ(result.error().code, ErrorCode::MAPPING_QUERY_FAILED);
+    for (const auto strategy :
+         {ScanStrategy::STRICT, ScanStrategy::TOLERANCE}) {
+        MemoryScanLevel level;
+        level.memoryScanStrategy = strategy;
+        const auto result =
+            scanner.scanProcess(-1, level, Value(std::uint8_t{1}));
+        ASSERT_FALSE(result.has_value());
+        EXPECT_EQ(result.error().code, ErrorCode::MAPPING_QUERY_FAILED);
+    }
 }
 
 TEST(ScanProcessTest, FindsPlantedValueWithRange) {
@@ -289,10 +309,10 @@ TEST(ScanProcessTest, FindsPlantedValueWithRange) {
     ASSERT_TRUE(results.has_value())
         << (results ? "" : formatError(results.error()));
 
-    EXPECT_TRUE(
-        std::ranges::any_of(*results, [address](const ScanResult& result) {
-            return result.address() == address;
-        }));
+    EXPECT_TRUE(std::ranges::any_of(results->results,
+                                    [address](const ScanResult& result) {
+                                        return result.address() == address;
+                                    }));
 }
 
 TEST(ScanProcessTest, ReturnsMatchesInDeterministicOrderWithDifferentWorkers) {
@@ -314,27 +334,69 @@ TEST(ScanProcessTest, ReturnsMatchesInDeterministicOrderWithDifferentWorkers) {
 
     ASSERT_TRUE(one.has_value()) << (one ? "" : formatError(one.error()));
     ASSERT_TRUE(many.has_value()) << (many ? "" : formatError(many.error()));
-    ASSERT_EQ(one->size(), 2);
-    ASSERT_EQ(many->size(), one->size());
-    ASSERT_EQ(one->at(0).address(), mapping.address() + firstOffset);
-    ASSERT_EQ(one->at(1).address(), mapping.address() + secondOffset);
-    EXPECT_EQ(*many, *one);
+    EXPECT_TRUE(one->complete());
+    EXPECT_TRUE(many->complete());
+    ASSERT_EQ(one->results.size(), 2);
+    ASSERT_EQ(many->results.size(), one->results.size());
+    ASSERT_EQ(one->results.at(0).address(), mapping.address() + firstOffset);
+    ASSERT_EQ(one->results.at(1).address(), mapping.address() + secondOffset);
+    EXPECT_EQ(many->results, one->results);
 }
 
-TEST(ScanRegionTest, ParallelScanFailsWhenAnyChunkIsShortRead) {
+TEST(ScanRegionTest, ParallelScanRetainsMatchesWhenAnotherChunkIsShortRead) {
     const auto regionSize = 2 * DEFAULT_CHUNK_SIZE;
     AnonymousMapping mapping(regionSize);
+    mapping.setByte(16, std::byte{123});
+    MemoryScanner scanner(4);
     const auto pageSize = static_cast<std::size_t>(::sysconf(_SC_PAGESIZE));
     ASSERT_EQ(::munmap(mapping.bytes() + regionSize - pageSize, pageSize), 0);
     const auto region = makeAnonymousRegion(mapping, regionSize);
-    MemoryScanner scanner(4);
 
     const auto result =
-        scanner.scanRegion(getpid(), region, Value(std::uint8_t{1}));
+        scanner.scanRegion(getpid(), region, Value(std::uint8_t{123}));
 
-    ASSERT_FALSE(result.has_value());
-    EXPECT_EQ(result.error().code, ErrorCode::SHORT_TRANSFER);
-    EXPECT_TRUE(result.error().address.has_value());
+    ASSERT_TRUE(result.has_value());
+    EXPECT_FALSE(result->complete());
+    ASSERT_EQ(result->results.size(), 1);
+    EXPECT_EQ(result->results.front().address(), mapping.address() + 16);
+    ASSERT_EQ(result->issues.size(), 1);
+    const auto& issue = result->issues.front();
+    EXPECT_EQ(issue.address, region.start + DEFAULT_CHUNK_SIZE);
+    EXPECT_EQ(issue.size, DEFAULT_CHUNK_SIZE);
+    EXPECT_EQ(issue.error.code, ErrorCode::SHORT_TRANSFER);
+    EXPECT_EQ(issue.error.bytesTransferred, DEFAULT_CHUNK_SIZE - pageSize);
+}
+
+TEST(ScanProcessTest, ToleranceKeepsMatchesFromCompleteRegions) {
+    constexpr std::uint64_t sentinel = 0x123456789abcdef0ULL;
+    AnonymousMapping mapping(4096);
+    std::memcpy(mapping.bytes(), &sentinel, sizeof(sentinel));
+    MemoryScanLevel level;
+    level.memoryRegionType =
+        static_cast<std::uint8_t>(MemoryRegionType::ANONYMOUS);
+    level.memoryScanStrategy = ScanStrategy::TOLERANCE;
+    MemoryScanner scanner(1);
+
+    const auto report = scanner.scanProcess(getpid(), level, Value(sentinel));
+
+    ASSERT_TRUE(report.has_value())
+        << (report ? "" : formatError(report.error()));
+    EXPECT_TRUE(std::ranges::any_of(
+        report->results, [&mapping](const ScanResult& result) {
+            return result.address() == mapping.address();
+        }));
+}
+
+TEST(ScanProcessTest, RejectsInvalidStrategy) {
+    MemoryScanLevel level;
+    level.memoryScanStrategy = static_cast<ScanStrategy>(255);
+    MemoryScanner scanner(1);
+
+    const auto report =
+        scanner.scanProcess(getpid(), level, Value(std::uint8_t{1}));
+
+    ASSERT_FALSE(report.has_value());
+    EXPECT_EQ(report.error().code, ErrorCode::INVALID_ARGUMENT);
 }
 
 }  // namespace memseek

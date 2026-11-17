@@ -3,7 +3,6 @@
 #include <cstddef>
 #include <cstdint>
 #include <span>
-#include <string>
 
 #include "memseek/error.hpp"
 #include "memseek/memory/snapshot.hpp"

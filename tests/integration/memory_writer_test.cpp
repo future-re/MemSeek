@@ -7,6 +7,7 @@
 #include <cstddef>
 #include <cstdint>
 #include <stdexcept>
+#include <vector>
 
 #include "memseek/memory/region.hpp"
 #include "memseek/memory/writer.hpp"
@@ -47,7 +48,7 @@ class WritableMapping {
     std::size_t m_size{};
 };
 
-auto writableMappings(const pid_t pid) -> Result<MemoryRegionList> {
+auto writableMappings(const pid_t pid) -> Result<std::vector<MemoryRegion>> {
     MemoryScanLevel level;
     level.memoryProtection = static_cast<std::uint8_t>(MemoryProtection::WRITE);
     level.memoryRegionType =
@@ -58,9 +59,9 @@ auto writableMappings(const pid_t pid) -> Result<MemoryRegionList> {
     return readProcess(pid, level, false);
 }
 
-auto findMapping(const MemoryRegionList& regions, const std::uintptr_t address)
-    -> const MemoryRegion* {
-    for (const auto& region : regions.getRegions()) {
+auto findMapping(const std::vector<MemoryRegion>& regions,
+                 const std::uintptr_t address) -> const MemoryRegion* {
+    for (const auto& region : regions) {
         if (address >= region.start && address - region.start < region.size) {
             return &region;
         }
