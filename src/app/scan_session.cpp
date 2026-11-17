@@ -2,23 +2,34 @@
 
 #include <sys/types.h>
 
+#include <algorithm>
 #include <cmath>
 #include <cstddef>
 #include <cstdint>
 #include <expected>
-#include <string>
 #include <type_traits>
 #include <utility>
 
 #include "memseek/memory/change.hpp"
+#include "memseek/memory/reader.hpp"
 #include "memseek/memory/region.hpp"
 #include "memseek/memory/scan.hpp"
 #include "memseek/memory/snapshot.hpp"
+#include "memseek/memory/writer.hpp"
 #include "memseek/value.hpp"
 
 namespace memseek {
 
 namespace {
+
+auto contains(const MemoryRegion& region, std::uintptr_t address,
+              std::size_t size) -> bool {
+    if (address < region.start) {
+        return false;
+    }
+    const auto offset = address - region.start;
+    return offset < region.size && size <= region.size - offset;
+}
 
 enum class RangeValidity : std::uint8_t {
     VALID,
@@ -98,6 +109,7 @@ auto ScanSession::scan(const Value& target, const MemoryScanLevel level,
         return std::unexpected(std::move(report).error());
     }
     m_snapshot = MemorySnapshot(m_pid, std::move(report->results));
+    m_regions = std::move(report->regions);
     return {};
 }
 
@@ -133,6 +145,7 @@ auto ScanSession::scan(const Value& lowerBound, const Value& upperBound,
         return std::unexpected(std::move(report).error());
     }
     m_snapshot = MemorySnapshot(m_pid, std::move(report->results));
+    m_regions = std::move(report->regions);
     return {};
 }
 
@@ -149,6 +162,63 @@ auto ScanSession::filter(const ChangeType type) -> Result<void> {
     return {};
 }
 
+auto ScanSession::write(const ScanResult& result,
+                        std::span<const std::byte> data)
+    -> Result<std::size_t> {
+    if (!m_snapshot) {
+        return std::unexpected(
+            makeError(ErrorCode::NO_BASELINE, "no scan baseline"));
+    }
+    const auto candidate = std::ranges::find_if(
+        m_snapshot->results(),
+        [&result](const ScanResult& item) { return &item == &result; });
+    if (candidate == m_snapshot->results().end()) {
+        return std::unexpected(
+            makeError(ErrorCode::INVALID_ARGUMENT,
+                      "result is not in the current snapshot"));
+    }
+    if (candidate->data().empty() || data.empty() ||
+        data.size() > candidate->data().size()) {
+        return std::unexpected(
+            makeError(ErrorCode::INVALID_ARGUMENT, "invalid write size"));
+    }
+    const auto original =
+        std::ranges::find_if(m_regions, [&](const MemoryRegion& region) {
+            return contains(region, candidate->address(),
+                            candidate->data().size());
+        });
+    if (original == m_regions.end()) {
+        return std::unexpected(makeError(ErrorCode::REGION_MISMATCH,
+                                         "original mapping not found"));
+    }
+    MemoryScanLevel level;
+    level.memoryProtection = static_cast<std::uint8_t>(MemoryProtection::WRITE);
+    auto regions = readProcess(m_pid, level, false);
+    if (!regions) {
+        return std::unexpected(regions.error());
+    }
+    const auto current =
+        std::ranges::find_if(*regions, [&](const MemoryRegion& region) {
+            return contains(region, candidate->address(),
+                            candidate->data().size());
+        });
+    if (current == regions->end() || current->start != original->start ||
+        current->size != original->size) {
+        return std::unexpected(makeError(ErrorCode::REGION_MISMATCH,
+                                         "mapping changed or is not writable"));
+    }
+    const auto bytes = MemoryReader(m_pid).read(candidate->address(),
+                                                candidate->data().size());
+    if (!bytes) {
+        return std::unexpected(bytes.error());
+    }
+    if (!std::ranges::equal(*bytes, candidate->data())) {
+        return std::unexpected(
+            makeError(ErrorCode::VALUE_CHANGED, "value changed since scan"));
+    }
+    return MemoryWriter(m_pid).write(candidate->address(), data);
+}
+
 void ScanSession::setPid(const pid_t pid) noexcept {
     if (m_pid != pid) {
         m_pid = pid;
@@ -156,6 +226,9 @@ void ScanSession::setPid(const pid_t pid) noexcept {
     }
 }
 
-void ScanSession::reset() noexcept { m_snapshot.reset(); }
+void ScanSession::reset() noexcept {
+    m_snapshot.reset();
+    m_regions.clear();
+}
 
 }  // namespace memseek

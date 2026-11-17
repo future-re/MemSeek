@@ -15,7 +15,7 @@ namespace memseek {
 
 MemoryWriter::MemoryWriter(pid_t pid) noexcept : m_pid{pid} {}
 
-auto MemoryWriter::write(const MemoryWriteTarget& target,
+auto MemoryWriter::write(const std::uintptr_t address,
                          std::span<const std::byte> data)
     -> Result<std::size_t> {
 #ifdef __linux__
@@ -23,21 +23,16 @@ auto MemoryWriter::write(const MemoryWriteTarget& target,
                                     const std::size_t bytesWritten = 0) {
         auto error = makeError(code, std::move(message));
         error.pid = m_pid;
-        error.address = target.address;
+        error.address = address;
         error.size = data.size();
         error.bytesTransferred = bytesWritten;
         return error;
     };
 
-    if (data.size() > target.size) {
-        return std::unexpected(makeWriteError(
-            ErrorCode::INVALID_ARGUMENT, "write data exceeds target size"));
-    }
     if (data.empty()) {
         return std::size_t{0};
     }
-    if (target.address >
-        std::numeric_limits<std::uintptr_t>::max() - data.size()) {
+    if (address > std::numeric_limits<std::uintptr_t>::max() - data.size()) {
         return std::unexpected(makeWriteError(ErrorCode::ADDRESS_OUT_OF_RANGE,
                                               "write address range overflows"));
     }
@@ -58,17 +53,17 @@ auto MemoryWriter::write(const MemoryWriteTarget& target,
         auto error = regions.error();
         error.message =
             std::format("failed to inspect target mappings: {}", error.message);
-        error.address = target.address;
+        error.address = address;
         error.size = data.size();
         return std::unexpected(std::move(error));
     }
 
     const auto region = std::ranges::find_if(
-        *regions, [&target, &data](const MemoryRegion& candidate) {
-            if (target.address < candidate.start) {
+        *regions, [address, &data](const MemoryRegion& candidate) {
+            if (address < candidate.start) {
                 return false;
             }
-            const auto offset = target.address - candidate.start;
+            const auto offset = address - candidate.start;
             return offset <= candidate.size &&
                    data.size() <= candidate.size - offset;
         });
@@ -77,12 +72,6 @@ auto MemoryWriter::write(const MemoryWriteTarget& target,
             ErrorCode::MAPPING_NOT_WRITABLE,
             "write range is not contained in one writable mapping"));
     }
-    if (target.parentRegionId != 0 && target.parentRegionId != region->id) {
-        return std::unexpected(makeWriteError(
-            ErrorCode::REGION_MISMATCH,
-            "target region id does not match the writable mapping"));
-    }
-
     std::size_t totalWritten = 0;
     while (totalWritten < data.size()) {
         iovec local{
@@ -91,7 +80,7 @@ auto MemoryWriter::write(const MemoryWriteTarget& target,
             .iov_len = data.size() - totalWritten,
         };
         iovec remote{
-            .iov_base = reinterpret_cast<void*>(target.address + totalWritten),
+            .iov_base = reinterpret_cast<void*>(address + totalWritten),
             .iov_len = data.size() - totalWritten,
         };
 
@@ -120,7 +109,7 @@ auto MemoryWriter::write(const MemoryWriteTarget& target,
 
     return totalWritten;
 #else
-    (void)target;
+    (void)address;
     (void)data;
     return std::unexpected(makeError(ErrorCode::UNSUPPORTED_PLATFORM,
                                      "MemoryWriter requires Linux"));

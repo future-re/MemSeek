@@ -33,10 +33,10 @@ enum class ErrorCode : std::uint8_t {
     MEMORY_WRITE_FAILED =
         9,  // Failed to write process memory (e.g., process_vm_writev failed)
     MAPPING_NOT_WRITABLE = 10,  // Memory mapping is not writable
-    REGION_MISMATCH =
-        11,  // Target region ID does not match the writable mapping
-    SHORT_TRANSFER = 12,  // Transfer was shorter than expected
-    NO_BASELINE = 13,     // shapshot baseline is not available for comparison
+    REGION_MISMATCH = 11,       // Target mapping differs from the scan baseline
+    SHORT_TRANSFER = 12,        // Transfer was shorter than expected
+    VALUE_CHANGED = 14,
+    NO_BASELINE = 13,  // shapshot baseline is not available for comparison
 };
 
 struct MemSeekError {

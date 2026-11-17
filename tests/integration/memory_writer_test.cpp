@@ -81,10 +81,7 @@ TEST(MemoryWriterTest, WritesWithinWritableMapping) {
     constexpr std::array value{std::byte{0x12}, std::byte{0x34},
                                std::byte{0x56}, std::byte{0x78}};
     MemoryWriter writer(getpid());
-    const auto result = writer.write({.address = mapping.address() + 32,
-                                      .size = value.size(),
-                                      .parentRegionId = region->id},
-                                     value);
+    const auto result = writer.write(mapping.address() + 32, value);
 
     ASSERT_TRUE(result.has_value())
         << (result ? "" : formatError(result.error()));
@@ -96,46 +93,12 @@ TEST(MemoryWriterTest, RejectsRangeOutsideWritableMapping) {
     MemoryWriter writer(getpid());
     constexpr std::array value{std::byte{0x42}};
 
-    const auto result =
-        writer.write({.address = 1, .size = value.size()}, value);
+    const auto result = writer.write(1, value);
 
     ASSERT_FALSE(result.has_value());
     EXPECT_EQ(result.error().code, ErrorCode::MAPPING_NOT_WRITABLE);
     EXPECT_EQ(result.error().bytesTransferred, 0);
     EXPECT_NE(result.error().message.find("not contained"), std::string::npos);
-}
-
-TEST(MemoryWriterTest, RejectsMismatchedParentRegionId) {
-    WritableMapping mapping(4096);
-    const auto regions = writableMappings(getpid());
-    ASSERT_TRUE(regions.has_value());
-    const auto* region = findMapping(*regions, mapping.address());
-    ASSERT_NE(region, nullptr);
-    MemoryWriter writer(getpid());
-    constexpr std::array value{std::byte{0x42}};
-
-    const auto result = writer.write({.address = mapping.address(),
-                                      .size = value.size(),
-                                      .parentRegionId = region->id + 1},
-                                     value);
-
-    ASSERT_FALSE(result.has_value());
-    EXPECT_EQ(result.error().code, ErrorCode::REGION_MISMATCH);
-    EXPECT_EQ(result.error().bytesTransferred, 0);
-    EXPECT_NE(result.error().message.find("region id"), std::string::npos);
-}
-
-TEST(MemoryWriterTest, ReportsDataLargerThanTarget) {
-    MemoryWriter writer(getpid());
-    constexpr std::array value{std::byte{0x12}, std::byte{0x34}};
-
-    const auto result = writer.write({.address = 1, .size = 1}, value);
-
-    ASSERT_FALSE(result.has_value());
-    EXPECT_EQ(result.error().code, ErrorCode::INVALID_ARGUMENT);
-    EXPECT_EQ(result.error().bytesTransferred, 0);
-    EXPECT_NE(result.error().message.find("exceeds target size"),
-              std::string::npos);
 }
 
 TEST(MemoryWriterTest, RejectsReadOnlyMappingBeforeWriting) {
@@ -145,8 +108,7 @@ TEST(MemoryWriterTest, RejectsReadOnlyMappingBeforeWriting) {
     MemoryWriter writer(getpid());
     constexpr std::array value{std::byte{0x42}};
 
-    const auto result = writer.write(
-        {.address = mapping.address(), .size = value.size()}, value);
+    const auto result = writer.write(mapping.address(), value);
 
     ASSERT_FALSE(result.has_value());
     EXPECT_EQ(result.error().code, ErrorCode::MAPPING_NOT_WRITABLE);

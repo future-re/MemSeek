@@ -4,7 +4,9 @@
 
 #include <cstddef>
 #include <optional>
+#include <span>
 #include <thread>
+#include <vector>
 
 #include "memseek/error.hpp"
 #include "memseek/memory/change.hpp"
@@ -36,6 +38,13 @@ class ScanSession {
     [[nodiscard]]
     auto filter(ChangeType type) -> Result<void>;
 
+    // result must refer to an element of the current snapshot. The saved
+    // baseline is not updated by a write; rescan or filter before writing a
+    // changed value again. Validation and writing are not atomic.
+    [[nodiscard]]
+    auto write(const ScanResult& result, std::span<const std::byte> data)
+        -> Result<std::size_t>;
+
     void setPid(pid_t pid) noexcept;
     void reset() noexcept;
 
@@ -54,6 +63,7 @@ class ScanSession {
     pid_t m_pid;
     MemoryScanner m_scanner;
     std::optional<MemorySnapshot> m_snapshot;
+    std::vector<MemoryRegion> m_regions;
 };
 
 }  // namespace memseek

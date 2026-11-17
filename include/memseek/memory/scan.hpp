@@ -75,6 +75,8 @@ struct ScanIssue {
 struct ScanReport {
     std::vector<ScanResult> results;
     std::vector<ScanIssue> issues;
+    // Mapping snapshot used for this process scan.
+    std::vector<MemoryRegion> regions;
 
     [[nodiscard]]
     bool complete() const noexcept {

@@ -228,6 +228,7 @@ Result<ScanReport> MemoryScanner::scanProcessImpl(
         }
         appendReport(processReport, std::move(*regionResults));
     }
+    processReport.regions = std::move(*regionList);
     return processReport;
 }
 

@@ -38,6 +38,8 @@ auto errorCodeName(const ErrorCode code) noexcept -> const char* {
             return "region_mismatch";
         case ErrorCode::SHORT_TRANSFER:
             return "short_transfer";
+        case ErrorCode::VALUE_CHANGED:
+            return "value_changed";
         case ErrorCode::NO_BASELINE:
             return "no_baseline";
     }

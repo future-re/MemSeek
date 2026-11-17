@@ -1,12 +1,14 @@
 #include "memseek/app/scan_session.hpp"
 
 #include <gtest/gtest.h>
+#include <sys/mman.h>
 #include <unistd.h>
 
 #include <algorithm>
 #include <array>
 #include <cstddef>
 #include <cstdint>
+#include <cstring>
 #include <limits>
 
 #include "memseek/memory/change.hpp"
@@ -134,6 +136,90 @@ TEST(ScanSessionTest, RangeScanValidatesBoundsWithoutReplacingBaseline) {
                            Value(1.0), level)
                      .has_value());
     EXPECT_EQ(session.snapshot()->results(), baseline);
+}
+
+TEST(ScanSessionTest, WritesOnlyCurrentUnchangedCandidates) {
+    std::uint64_t planted = 0x1287abfedc456901ULL;
+    const auto address = reinterpret_cast<std::uintptr_t>(&planted);
+    ScanSession session(getpid(), 1);
+    MemoryScanLevel level;
+    level.memoryRegionType = static_cast<std::uint8_t>(MemoryRegionType::STACK);
+    ASSERT_TRUE(session.scan(Value(planted), level));
+    const auto& results = session.snapshot()->results();
+    const auto candidate =
+        std::ranges::find_if(results, [address](const ScanResult& result) {
+            return result.address() == address;
+        });
+    ASSERT_NE(candidate, results.end());
+
+    const auto copy = *candidate;
+    const Value replacement(std::uint64_t{0x1122334455667788ULL});
+    auto foreign = session.write(copy, replacement.data());
+    ASSERT_FALSE(foreign);
+    EXPECT_EQ(foreign.error().code, ErrorCode::INVALID_ARGUMENT);
+
+    const std::array<std::byte, 9> tooLarge{};
+    auto oversized = session.write(*candidate, tooLarge);
+    ASSERT_FALSE(oversized);
+    EXPECT_EQ(oversized.error().code, ErrorCode::INVALID_ARGUMENT);
+    EXPECT_EQ(planted, 0x1287abfedc456901ULL);
+
+    auto written = session.write(*candidate, replacement.data());
+    ASSERT_TRUE(written) << (written ? "" : formatError(written.error()));
+    EXPECT_EQ(*written, sizeof(planted));
+    EXPECT_EQ(planted, 0x1122334455667788ULL);
+    auto stale = session.write(*candidate, replacement.data());
+    ASSERT_FALSE(stale);
+    EXPECT_EQ(stale.error().code, ErrorCode::VALUE_CHANGED);
+}
+
+TEST(ScanSessionTest, RejectsWriteWithoutBaseline) {
+    ScanSession session(getpid(), 1);
+    const ScanResult result;
+    const std::array<std::byte, 1> data{std::byte{1}};
+    auto written = session.write(result, data);
+    ASSERT_FALSE(written);
+    EXPECT_EQ(written.error().code, ErrorCode::NO_BASELINE);
+}
+
+TEST(ScanSessionTest, RejectsWriteWhenMappingRangeChanges) {
+    const auto pageSize = static_cast<std::size_t>(::sysconf(_SC_PAGESIZE));
+    const auto mappingSize = 2 * pageSize;
+    void* mapping = ::mmap(nullptr, mappingSize, PROT_READ | PROT_WRITE,
+                           MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
+    ASSERT_NE(mapping, MAP_FAILED);
+    struct Unmap {
+        void* address;
+        std::size_t size;
+        ~Unmap() { ::munmap(address, size); }
+    } unmap{mapping, mappingSize};
+
+    const std::uint64_t planted = 0x987a1234bcdef601ULL;
+    std::memcpy(mapping, &planted, sizeof(planted));
+    ScanSession session(getpid(), 1);
+    MemoryScanLevel level;
+    level.memoryRegionType =
+        static_cast<std::uint8_t>(MemoryRegionType::ANONYMOUS);
+    ASSERT_TRUE(session.scan(Value(planted), level));
+    const auto& results = session.snapshot()->results();
+    const auto address = reinterpret_cast<std::uintptr_t>(mapping);
+    const auto candidate =
+        std::ranges::find_if(results, [address](const ScanResult& item) {
+            return item.address() == address;
+        });
+    ASSERT_NE(candidate, results.end());
+    // Split the original mapping while leaving the selected address writable.
+    ASSERT_EQ(::mprotect(static_cast<std::byte*>(mapping) + pageSize, pageSize,
+                         PROT_READ),
+              0);
+
+    const Value replacement(std::uint64_t{42});
+    const auto written = session.write(*candidate, replacement.data());
+    ASSERT_FALSE(written);
+    EXPECT_EQ(written.error().code, ErrorCode::REGION_MISMATCH);
+    std::uint64_t actual{};
+    std::memcpy(&actual, mapping, sizeof(actual));
+    EXPECT_EQ(actual, planted);
 }
 
 }  // namespace memseek
