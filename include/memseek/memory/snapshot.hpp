@@ -3,6 +3,7 @@
 #include <sys/types.h>
 
 #include <cstddef>
+#include <memory>
 #include <utility>
 #include <vector>
 
@@ -18,8 +19,10 @@ class MemorySnapshot {
     using Results = std::vector<ScanResult>;
 
     // Move a result set into a baseline, or copy it by passing an lvalue.
-    MemorySnapshot(pid_t pid, Results results) noexcept
-        : m_pid(pid), m_results(std::move(results)) {}
+    // Copies of the immutable snapshot share the complete result set.
+    MemorySnapshot(pid_t pid, Results results)
+        : m_pid(pid),
+          m_results(std::make_shared<const Results>(std::move(results))) {}
 
     [[nodiscard]]
     pid_t pid() const noexcept {
@@ -28,22 +31,23 @@ class MemorySnapshot {
 
     [[nodiscard]]
     const Results& results() const noexcept {
-        return m_results;
+        static const Results EMPTY;
+        return m_results ? *m_results : EMPTY;
     }
 
     [[nodiscard]]
     std::size_t size() const noexcept {
-        return m_results.size();
+        return results().size();
     }
 
     [[nodiscard]]
     bool empty() const noexcept {
-        return m_results.empty();
+        return results().empty();
     }
 
    private:
     pid_t m_pid{};
-    Results m_results;
+    std::shared_ptr<const Results> m_results;
 };
 
 }  // namespace memseek

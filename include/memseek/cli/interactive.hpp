@@ -5,7 +5,6 @@
 #include <cstddef>
 #include <istream>
 #include <memory>
-#include <optional>
 #include <ostream>
 #include <string>
 #include <string_view>
@@ -13,6 +12,7 @@
 
 #include "memseek/app/scan_session.hpp"
 #include "memseek/cli/command.hpp"
+#include "memseek/memory/scan.hpp"
 
 namespace memseek::cli {
 
@@ -50,7 +50,7 @@ class InteractiveCli {
     std::unique_ptr<ScanSession> m_session;
     pid_t m_pid{};
     std::string m_lastScan;
-    std::vector<std::optional<std::vector<std::byte>>> m_previousBytes;
+    std::vector<ScanResult> m_previousResults;
 };
 
 }  // namespace memseek::cli

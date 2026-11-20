@@ -28,6 +28,7 @@
 #include "memseek/memory/reader.hpp"
 #include "memseek/memory/region.hpp"
 #include "memseek/value.hpp"
+#include "scan_result_builder.hpp"
 
 namespace memseek {
 
@@ -64,20 +65,32 @@ auto decodeNumeric(std::span<const std::byte> data, bool swap) -> T {
 
 template <typename Matcher>
 std::vector<ScanResult> scanWindows(const MemoryRead& memory, std::size_t width,
-                                    Matcher matcher) {
+                                    Matcher matcher,
+                                    bool identicalMatches = false) {
     const auto memoryData = memory.data();
     if (width == 0 || memoryData.size() < width) {
         return {};
     }
 
     std::vector<ScanResult> results;
+    ScanResultBuilder storage;
+    std::optional<ScanResult> sharedMatch;
     const auto lastOffset = memoryData.size() - width;
 
     for (std::size_t offset = 0; offset <= lastOffset; ++offset) {
         const auto current = memoryData.subspan(offset, width);
         if (matcher(current)) {
-            results.emplace_back(memory.address() + offset, current,
-                                 memory.parentRegionId());
+            const auto address = memory.address() + offset;
+            if (identicalMatches) {
+                if (!sharedMatch) {
+                    sharedMatch.emplace(0, current);
+                }
+                results.push_back(ScanResultBuilder::atAddress(
+                    *sharedMatch, address, memory.parentRegionId()));
+            } else {
+                results.push_back(
+                    storage.make(address, current, memory.parentRegionId()));
+            }
         }
     }
 
@@ -93,9 +106,14 @@ auto chunkReadSize(const MemoryChunk& chunk, const MemoryRegion& region,
 }
 
 void appendReport(ScanReport& destination, ScanReport&& source) {
-    destination.results.insert(destination.results.end(),
-                               std::make_move_iterator(source.results.begin()),
-                               std::make_move_iterator(source.results.end()));
+    if (destination.results.empty()) {
+        destination.results = std::move(source.results);
+    } else {
+        destination.results.insert(
+            destination.results.end(),
+            std::make_move_iterator(source.results.begin()),
+            std::make_move_iterator(source.results.end()));
+    }
     destination.issues.insert(destination.issues.end(),
                               std::make_move_iterator(source.issues.begin()),
                               std::make_move_iterator(source.issues.end()));
@@ -282,10 +300,12 @@ std::vector<ScanResult> MemoryScanner::scanBufferImpl(const MemoryRead& memory,
                 targetData = encoded;
             }
             return scanWindows(
-                memory, targetData.size(), [targetData](const auto current) {
+                memory, targetData.size(),
+                [targetData](const auto current) {
                     return std::equal(targetData.begin(), targetData.end(),
                                       current.begin(), current.end());
-                });
+                },
+                true);
         }
         case ScanType::RANGE:
         case ScanType::GREATER:

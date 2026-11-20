@@ -110,4 +110,24 @@ TEST(ExactScanTest, ReturnsNoPartialMatches) {
     EXPECT_TRUE(MemoryScanner::scanBuffer(memory, target).empty());
 }
 
+TEST(ExactScanTest, MatchesShareSavedBytesAndOutliveInputs) {
+    std::vector<ScanResult> results;
+    {
+        const MemoryRead memory(0x1000, std::vector<std::byte>(4096), 7);
+        const Value target(std::uint32_t{0});
+        results = MemoryScanner::scanBuffer(memory, target);
+        ASSERT_EQ(results.size(), 4093);
+        EXPECT_NE(results.front().data().data(), memory.data().data());
+        EXPECT_NE(results.front().data().data(), target.data().data());
+        for (const auto& result : results) {
+            EXPECT_EQ(result.data().data(), results.front().data().data());
+            EXPECT_EQ(result.parentRegionId(), 7);
+        }
+    }
+    const auto saved = results.back();
+    results.clear();
+    EXPECT_EQ(saved.address(), 0x1000 + 4092);
+    EXPECT_TRUE(Value(std::uint32_t{0}) == saved.data());
+}
+
 }  // namespace memseek

@@ -2,11 +2,15 @@
 
 #include <sys/types.h>
 
+#include <algorithm>
 #include <boost/asio/thread_pool.hpp>
 #include <cstddef>
 #include <cstdint>
+#include <cstring>
+#include <memory>
 #include <span>
 #include <thread>
+#include <utility>
 #include <vector>
 
 #include "memseek/error.hpp"
@@ -18,14 +22,19 @@
 
 namespace memseek {
 
+class ScanResultBuilder;
+
+// A result owns a reference to immutable saved bytes. Copies may share storage,
+// but never refer to the input buffer or the target process's live memory.
 class ScanResult {
    public:
     explicit ScanResult(std::uintptr_t address = 0,
                         std::span<const std::byte> data = {},
                         std::uint64_t parentRegionId = 0)
-        : m_address(address),
-          m_parentRegionId(parentRegionId),
-          m_data(data.begin(), data.end()) {}
+        : m_parentRegionId(parentRegionId),
+          m_address(address),
+          m_data(copyData(data)),
+          m_size(data.size()) {}
 
     [[nodiscard]]
     std::uintptr_t address() const noexcept {
@@ -34,7 +43,8 @@ class ScanResult {
 
     [[nodiscard]]
     std::span<const std::byte> data() const noexcept {
-        return m_data;
+        // The default move transfers ownership, leaving an empty source.
+        return {m_data.get(), m_data ? m_size : 0};
     }
 
     [[nodiscard]]
@@ -42,12 +52,39 @@ class ScanResult {
         return m_parentRegionId;
     }
 
-    bool operator==(const ScanResult&) const = default;
+    bool operator==(const ScanResult& other) const noexcept {
+        return m_address == other.m_address &&
+               m_parentRegionId == other.m_parentRegionId &&
+               std::ranges::equal(data(), other.data());
+    }
 
    private:
+    friend class ScanResultBuilder;
+
+    // NOLINTNEXTLINE(modernize-avoid-c-arrays)
+    ScanResult(std::uintptr_t address, std::shared_ptr<const std::byte[]> data,
+               std::size_t size, std::uint64_t parentRegionId) noexcept
+        : m_parentRegionId(parentRegionId),
+          m_address(address),
+          m_data(std::move(data)),
+          m_size(size) {}
+
+    static auto copyData(std::span<const std::byte> data) -> std::shared_ptr<
+        const std::byte[]> {  // NOLINT(modernize-avoid-c-arrays)
+        if (data.empty()) {
+            return {};
+        }
+        // NOLINTNEXTLINE(modernize-avoid-c-arrays)
+        auto storage = std::make_shared_for_overwrite<std::byte[]>(data.size());
+        std::memcpy(storage.get(), data.data(), data.size());
+        return storage;
+    }
+
     std::uint64_t m_parentRegionId{};
     std::uintptr_t m_address{};
-    std::vector<std::byte> m_data;
+    // NOLINTNEXTLINE(modernize-avoid-c-arrays)
+    std::shared_ptr<const std::byte[]> m_data;
+    std::size_t m_size{};
 };
 
 enum class ScanType : std::uint8_t {

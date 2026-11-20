@@ -12,6 +12,7 @@
 #include "memseek/memory/region.hpp"
 #include "memseek/memory/scan.hpp"
 #include "memseek/memory/snapshot.hpp"
+#include "scan_result_builder.hpp"
 
 namespace memseek {
 
@@ -47,6 +48,7 @@ auto captureChanges(const MemorySnapshot& previous, const ChangeType type)
 
     const MemoryReader reader(previous.pid());
     MemorySnapshot::Results results;
+    ScanResultBuilder storage;
     for (const auto& candidate : previous.results()) {
         const auto width = candidate.data().size();
         if (width == 0) {
@@ -63,7 +65,8 @@ auto captureChanges(const MemorySnapshot& previous, const ChangeType type)
         }
         const auto current = reader.read(candidate.address(), width);
         if (current && matchesChange(candidate.data(), *current, type)) {
-            results.emplace_back(candidate.address(), *current);
+            results.push_back(storage.make(candidate.address(), *current,
+                                           candidate.parentRegionId()));
         }
     }
     return MemorySnapshot(previous.pid(), std::move(results));

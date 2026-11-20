@@ -133,4 +133,31 @@ TEST(NumericScanTest, DoesNotMatchNaN) {
         MemoryScanner::scanBuffer(memory, Value(0.0F), Value(2.0F)).empty());
 }
 
+TEST(NumericScanTest, PackedValuesSurviveGrowthCopiesAndInputDestruction) {
+    constexpr std::size_t count = 140000;
+    std::vector<ScanResult> results;
+    {
+        std::vector<std::byte> bytes;
+        bytes.reserve(count);
+        for (std::size_t index = 0; index < count; ++index) {
+            bytes.push_back(static_cast<std::byte>(index % 200 + 1));
+        }
+        const MemoryRead memory(0x2000, std::move(bytes), 9);
+        results = MemoryScanner::scanBuffer(memory, Value(std::uint8_t{0}),
+                                            ScanType::GREATER);
+        ASSERT_EQ(results.size(), count);
+        EXPECT_EQ(results[1].data().data(), results[0].data().data() + 1);
+        EXPECT_NE(results[0].data().data(), memory.data().data());
+    }
+    const auto copies = results;
+    results.clear();
+    for (std::size_t index = 0; index < copies.size(); ++index) {
+        EXPECT_EQ(copies[index].address(), 0x2000 + index);
+        EXPECT_EQ(copies[index].parentRegionId(), 9);
+        ASSERT_EQ(copies[index].data().size(), 1);
+        EXPECT_EQ(copies[index].data().front(),
+                  static_cast<std::byte>(index % 200 + 1));
+    }
+}
+
 }  // namespace memseek

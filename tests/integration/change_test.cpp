@@ -3,8 +3,12 @@
 #include <gtest/gtest.h>
 #include <unistd.h>
 
+#include <algorithm>
+#include <array>
+#include <cstddef>
 #include <cstdint>
 #include <utility>
+#include <vector>
 
 #include "memseek/memory/scan.hpp"
 #include "memseek/memory/snapshot.hpp"
@@ -54,6 +58,33 @@ TEST(CaptureChangesTest, ReportsInvalidProcessAndHandlesEmptyBaseline) {
     const auto result = captureChanges(empty, ChangeType::CHANGED);
     ASSERT_TRUE(result.has_value());
     EXPECT_TRUE(result->empty());
+}
+
+TEST(CaptureChangesTest, RetainsLargeAndSmallSavedValuesAfterFiltering) {
+    std::vector<std::byte> bytes(70 * 1024, std::byte{0xa5});
+    std::array following{std::byte{0x42}};
+    const auto address = reinterpret_cast<std::uintptr_t>(bytes.data());
+    const auto followingAddress =
+        reinterpret_cast<std::uintptr_t>(following.data());
+    const MemorySnapshot previous(
+        getpid(), {ScanResult(address, bytes, 13),
+                   ScanResult(followingAddress, following, 17)});
+    bytes.back() = std::byte{0x43};
+    following.front() = std::byte{0x44};
+
+    ScanResult saved;
+    {
+        const auto changed = captureChanges(previous, ChangeType::CHANGED);
+        ASSERT_TRUE(changed.has_value());
+        ASSERT_EQ(changed->size(), 2);
+        saved = changed->results().front();
+        EXPECT_EQ(saved.parentRegionId(), 13);
+        EXPECT_EQ(changed->results().back().parentRegionId(), 17);
+        EXPECT_TRUE(
+            std::ranges::equal(changed->results().back().data(), following));
+    }
+    EXPECT_TRUE(std::ranges::equal(saved.data(), bytes));
+    EXPECT_EQ(previous.results().front().data().back(), std::byte{0xa5});
 }
 
 }  // namespace memseek

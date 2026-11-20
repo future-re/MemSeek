@@ -158,7 +158,7 @@ auto InteractiveCli::executeScan(const ScanCommand& command) -> void {
         throw std::runtime_error(formatError(result.error()));
     }
 
-    m_previousBytes.clear();
+    m_previousResults = std::vector<ScanResult>{};
     m_lastScan = command.description + " byte-order=" +
                  std::string{byteOrderText(m_settings.byteOrder)};
     m_output << "Found " << session.snapshot()->size() << " candidates\n";
@@ -171,7 +171,8 @@ auto InteractiveCli::executeFilter(const FilterCommand& command) -> void {
         throw std::runtime_error(formatError(makeError(
             ErrorCode::NO_BASELINE, "no baseline available; run scan first")));
     }
-    const auto previousResults = baseline->results();
+    const auto previousSnapshot = *baseline;
+    const auto& previousResults = previousSnapshot.results();
     const auto before = previousResults.size();
     const auto result = session.filter(command.type);
     if (!result) {
@@ -179,8 +180,8 @@ auto InteractiveCli::executeFilter(const FilterCommand& command) -> void {
     }
 
     const auto& currentResults = session.snapshot()->results();
-    m_previousBytes.clear();
-    m_previousBytes.reserve(currentResults.size());
+    std::vector<ScanResult> previousResultsForDisplay;
+    previousResultsForDisplay.reserve(currentResults.size());
     std::size_t previousIndex = 0;
     for (const auto& current : currentResults) {
         while (previousIndex < previousResults.size() &&
@@ -189,13 +190,12 @@ auto InteractiveCli::executeFilter(const FilterCommand& command) -> void {
         }
         if (previousIndex < previousResults.size() &&
             previousResults[previousIndex].address() == current.address()) {
-            const auto bytes = previousResults[previousIndex].data();
-            m_previousBytes.emplace_back(
-                std::vector<std::byte>{bytes.begin(), bytes.end()});
+            previousResultsForDisplay.push_back(previousResults[previousIndex]);
         } else {
-            m_previousBytes.emplace_back(std::nullopt);
+            previousResultsForDisplay.emplace_back();
         }
     }
+    m_previousResults = std::move(previousResultsForDisplay);
     m_output << before << " -> " << currentResults.size() << " candidates\n";
 }
 
@@ -222,8 +222,10 @@ auto InteractiveCli::executeResults(const ResultsCommand& command) -> void {
         const auto& result = snapshot->results()[index];
         const auto bytes = result.data();
         std::optional<std::vector<std::byte>> previous;
-        if (index < m_previousBytes.size()) {
-            previous = m_previousBytes[index];
+        if (index < m_previousResults.size() &&
+            !m_previousResults[index].data().empty()) {
+            const auto saved = m_previousResults[index].data();
+            previous.emplace(saved.begin(), saved.end());
         }
         entries.push_back(ResultEntry{
             .address = result.address(),
@@ -279,7 +281,7 @@ auto InteractiveCli::requireSession() const -> ScanSession& {
 
 auto InteractiveCli::clearScanState() -> void {
     m_lastScan.clear();
-    m_previousBytes.clear();
+    m_previousResults = std::vector<ScanResult>{};
 }
 
 }  // namespace memseek::cli

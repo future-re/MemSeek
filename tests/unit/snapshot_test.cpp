@@ -3,6 +3,7 @@
 #include <gtest/gtest.h>
 
 #include <algorithm>
+#include <array>
 #include <cstddef>
 #include <utility>
 #include <vector>
@@ -53,6 +54,44 @@ TEST(MemorySnapshotTest, MovesLargeResultSetIntoSnapshot) {
 
     ASSERT_EQ(snapshot.size(), 2);
     EXPECT_EQ(snapshot.results().at(1).address(), 0x1000);
+}
+
+TEST(MemorySnapshotTest, CopiesShareImmutableResults) {
+    const std::array bytes{std::byte{0x42}};
+    const MemorySnapshot snapshot(1234, {ScanResult(0x1000, bytes)});
+    const auto copy = snapshot;
+    EXPECT_EQ(&copy.results(), &snapshot.results());
+    EXPECT_EQ(copy.results().data(), snapshot.results().data());
+
+    auto retained = copy;
+    {
+        MemorySnapshot temporary(5678, {ScanResult(0x2000, bytes)});
+        retained = temporary;
+    }
+    ASSERT_EQ(retained.size(), 1);
+    EXPECT_EQ(retained.pid(), 5678);
+    EXPECT_EQ(retained.results().front().data().front(), std::byte{0x42});
+}
+
+TEST(ScanResultTest, EqualityComparesValuesAndMovesLeaveEmptyData) {
+    const std::array bytes{std::byte{1}, std::byte{2}};
+    ScanResult first(0x1000, bytes, 7);
+    const ScanResult equal(0x1000, bytes, 7);
+    EXPECT_NE(first.data().data(), equal.data().data());
+    EXPECT_EQ(first, equal);
+    EXPECT_NE(first, ScanResult(0x1001, bytes, 7));
+    EXPECT_NE(first, ScanResult(0x1000, bytes, 8));
+    EXPECT_NE(first, ScanResult(0x1000, {}, 7));
+
+    const auto copy = first;
+    EXPECT_EQ(copy.data().data(), first.data().data());
+    auto moved = std::move(first);
+    EXPECT_EQ(moved, equal);
+    EXPECT_TRUE(first.data().empty());
+    first = std::move(moved);
+    EXPECT_EQ(first, equal);
+    EXPECT_TRUE(moved.data().empty());
+    EXPECT_TRUE(ScanResult{}.data().empty());
 }
 
 }  // namespace
