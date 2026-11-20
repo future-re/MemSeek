@@ -1,0 +1,399 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "https://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="zh">
+<head>
+<meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=11"/>
+<meta name="generator" content="Doxygen 1.9.8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>memseek: memseek::MemoryChunkRange::Iterator类 参考</title>
+<link href="tabs.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="jquery.js"></script>
+<script type="text/javascript" src="dynsections.js"></script>
+<link href="navtree.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="resize.js"></script>
+<script type="text/javascript" src="navtreedata.js"></script>
+<script type="text/javascript" src="navtree.js"></script>
+<link href="search/search.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="search/searchdata.js"></script>
+<script type="text/javascript" src="search/search.js"></script>
+<link href="doxygen.css" rel="stylesheet" type="text/css" />
+<link href="doxygen-awesome.css" rel="stylesheet" type="text/css"/>
+</head>
+<body>
+<div id="top"><!-- do not remove this div, it is closed by doxygen! -->
+<div id="titlearea">
+<table cellspacing="0" cellpadding="0">
+ <tbody>
+ <tr id="projectrow">
+  <td id="projectalign">
+   <div id="projectname">memseek
+   </div>
+   <div id="projectbrief">Modern C++20 Memory Scanner</div>
+  </td>
+ </tr>
+ </tbody>
+</table>
+</div>
+<!-- end header part -->
+<!-- 制作者 Doxygen 1.9.8 -->
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+var searchBox = new SearchBox("searchBox", "search/",'.html');
+/* @license-end */
+</script>
+<script type="text/javascript" src="menudata.js"></script>
+<script type="text/javascript" src="menu.js"></script>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(function() {
+  initMenu('',true,false,'search.php','搜索');
+  $(document).ready(function() { init_search(); });
+});
+/* @license-end */
+</script>
+<div id="main-nav"></div>
+</div><!-- top -->
+<div id="side-nav" class="ui-resizable side-nav-resizable">
+  <div id="nav-tree">
+    <div id="nav-tree-contents">
+      <div id="nav-sync" class="sync"></div>
+    </div>
+  </div>
+  <div id="splitbar" style="-moz-user-select:none;" 
+       class="ui-resizable-handle">
+  </div>
+</div>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(document).ready(function(){initNavTree('classmemseek_1_1MemoryChunkRange_1_1Iterator.html',''); initResizable(); });
+/* @license-end */
+</script>
+<div id="doc-content">
+<!-- window showing the filter options -->
+<div id="MSearchSelectWindow"
+     onmouseover="return searchBox.OnSearchSelectShow()"
+     onmouseout="return searchBox.OnSearchSelectHide()"
+     onkeydown="return searchBox.OnSearchSelectKey(event)">
+</div>
+
+<!-- iframe showing the search results (closed by default) -->
+<div id="MSearchResultsWindow">
+<div id="MSearchResults">
+<div class="SRPage">
+<div id="SRIndex">
+<div id="SRResults"></div>
+<div class="SRStatus" id="Loading">载入中...</div>
+<div class="SRStatus" id="Searching">搜索中...</div>
+<div class="SRStatus" id="NoMatches">未找到</div>
+</div>
+</div>
+</div>
+</div>
+
+<div class="header">
+  <div class="summary">
+<a href="#pub-types">Public 类型</a> &#124;
+<a href="#pub-methods">Public 成员函数</a> &#124;
+<a href="classmemseek_1_1MemoryChunkRange_1_1Iterator-members.html">所有成员列表</a>  </div>
+  <div class="headertitle"><div class="title">memseek::MemoryChunkRange::Iterator类 参考</div></div>
+</div><!--header-->
+<div class="contents">
+
+<p><code>#include &lt;<a class="el" href="chunk_8hpp_source.html">chunk.hpp</a>&gt;</code></p>
+<table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-types" name="pub-types"></a>
+Public 类型</h2></td></tr>
+<tr class="memitem:a1fe09d5ae9b1bf5caa4a4ca33971765a" id="r_a1fe09d5ae9b1bf5caa4a4ca33971765a"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacememseek.html#ab577b87dc7dadd822ef978fe05903a83">using</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmemseek_1_1MemoryChunkRange_1_1Iterator.html#a1fe09d5ae9b1bf5caa4a4ca33971765a">iterator_concept</a> = std::forward_iterator_tag</td></tr>
+<tr class="separator:a1fe09d5ae9b1bf5caa4a4ca33971765a"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a0280fe8776ff323a99c9b46a4cc5f485" id="r_a0280fe8776ff323a99c9b46a4cc5f485"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacememseek.html#ab577b87dc7dadd822ef978fe05903a83">using</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmemseek_1_1MemoryChunkRange_1_1Iterator.html#a0280fe8776ff323a99c9b46a4cc5f485">iterator_category</a> = std::forward_iterator_tag</td></tr>
+<tr class="separator:a0280fe8776ff323a99c9b46a4cc5f485"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a0ee7c8bb9fc7fa7ef0960d51e324deef" id="r_a0ee7c8bb9fc7fa7ef0960d51e324deef"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacememseek.html#ab577b87dc7dadd822ef978fe05903a83">using</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmemseek_1_1MemoryChunkRange_1_1Iterator.html#a0ee7c8bb9fc7fa7ef0960d51e324deef">value_type</a> = <a class="el" href="structmemseek_1_1MemoryChunk.html">MemoryChunk</a></td></tr>
+<tr class="separator:a0ee7c8bb9fc7fa7ef0960d51e324deef"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad7f20513679de77715d08b45e3c9a909" id="r_ad7f20513679de77715d08b45e3c9a909"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacememseek.html#ab577b87dc7dadd822ef978fe05903a83">using</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmemseek_1_1MemoryChunkRange_1_1Iterator.html#ad7f20513679de77715d08b45e3c9a909">difference_type</a> = std::ptrdiff_t</td></tr>
+<tr class="separator:ad7f20513679de77715d08b45e3c9a909"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-methods" name="pub-methods"></a>
+Public 成员函数</h2></td></tr>
+<tr class="memitem:a33922f153c0eaaf31058c48ca1aa7d91" id="r_a33922f153c0eaaf31058c48ca1aa7d91"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmemseek_1_1MemoryChunkRange_1_1Iterator.html#a33922f153c0eaaf31058c48ca1aa7d91">Iterator</a> ()=<a class="el" href="namespacememseek.html#ab577b87dc7dadd822ef978fe05903a83">default</a></td></tr>
+<tr class="separator:a33922f153c0eaaf31058c48ca1aa7d91"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a279728946d14b42f694a9016d5cfb96e" id="r_a279728946d14b42f694a9016d5cfb96e"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmemseek_1_1MemoryChunkRange_1_1Iterator.html#a279728946d14b42f694a9016d5cfb96e">Iterator</a> (<a class="el" href="namespacememseek.html#ab577b87dc7dadd822ef978fe05903a83">const</a> <a class="el" href="structmemseek_1_1MemoryRegion.html">MemoryRegion</a> *<a class="el" href="command_8cpp.html#a17d4e8a59714345e415b721ff06d994f">region</a>, std::size_t <a class="el" href="namespacememseek.html#ab577b87dc7dadd822ef978fe05903a83">chunkSize</a>, std::uintptr_t <a class="el" href="namespacememseek.html#ab577b87dc7dadd822ef978fe05903a83">current</a>)</td></tr>
+<tr class="separator:a279728946d14b42f694a9016d5cfb96e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a3280d8426055b50d43525a7824470112" id="r_a3280d8426055b50d43525a7824470112"><td class="memItemLeft" align="right" valign="top"><a class="el" href="structmemseek_1_1MemoryChunk.html">MemoryChunk</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmemseek_1_1MemoryChunkRange_1_1Iterator.html#a3280d8426055b50d43525a7824470112">operator*</a> () <a class="el" href="namespacememseek.html#ab577b87dc7dadd822ef978fe05903a83">const</a></td></tr>
+<tr class="separator:a3280d8426055b50d43525a7824470112"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a5c1a5010eec5acb12f5a30070076b6f5" id="r_a5c1a5010eec5acb12f5a30070076b6f5"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classmemseek_1_1MemoryChunkRange_1_1Iterator.html">Iterator</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmemseek_1_1MemoryChunkRange_1_1Iterator.html#a5c1a5010eec5acb12f5a30070076b6f5">operator++</a> ()</td></tr>
+<tr class="separator:a5c1a5010eec5acb12f5a30070076b6f5"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a0b379a6928d3ca4a97dbe5af5e2fb096" id="r_a0b379a6928d3ca4a97dbe5af5e2fb096"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classmemseek_1_1MemoryChunkRange_1_1Iterator.html">Iterator</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmemseek_1_1MemoryChunkRange_1_1Iterator.html#a0b379a6928d3ca4a97dbe5af5e2fb096">operator++</a> (<a class="el" href="namespacememseek.html#ab577b87dc7dadd822ef978fe05903a83">int</a>)</td></tr>
+<tr class="separator:a0b379a6928d3ca4a97dbe5af5e2fb096"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a440caf64884be4693c5089935d362e9b" id="r_a440caf64884be4693c5089935d362e9b"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacememseek.html#ab577b87dc7dadd822ef978fe05903a83">bool</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmemseek_1_1MemoryChunkRange_1_1Iterator.html#a440caf64884be4693c5089935d362e9b">operator==</a> (<a class="el" href="namespacememseek.html#ab577b87dc7dadd822ef978fe05903a83">const</a> <a class="el" href="classmemseek_1_1MemoryChunkRange_1_1Iterator.html">Iterator</a> &amp;<a class="el" href="namespacememseek.html#ab577b87dc7dadd822ef978fe05903a83">other</a>) <a class="el" href="namespacememseek.html#ab577b87dc7dadd822ef978fe05903a83">const</a> <a class="el" href="namespacememseek.html#ab577b87dc7dadd822ef978fe05903a83">noexcept</a></td></tr>
+<tr class="separator:a440caf64884be4693c5089935d362e9b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae8927b2646e361facb21d6b37bc08465" id="r_ae8927b2646e361facb21d6b37bc08465"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacememseek.html#ab577b87dc7dadd822ef978fe05903a83">bool</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmemseek_1_1MemoryChunkRange_1_1Iterator.html#ae8927b2646e361facb21d6b37bc08465">operator==</a> (std::default_sentinel_t) <a class="el" href="namespacememseek.html#ab577b87dc7dadd822ef978fe05903a83">const</a> <a class="el" href="namespacememseek.html#ab577b87dc7dadd822ef978fe05903a83">noexcept</a></td></tr>
+<tr class="separator:ae8927b2646e361facb21d6b37bc08465"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table>
+<h2 class="groupheader">成员类型定义说明</h2>
+<a id="ad7f20513679de77715d08b45e3c9a909" name="ad7f20513679de77715d08b45e3c9a909"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ad7f20513679de77715d08b45e3c9a909">&#9670;&#160;</a></span>difference_type</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="namespacememseek.html#ab577b87dc7dadd822ef978fe05903a83">using</a> <a class="el" href="classmemseek_1_1MemoryChunkRange_1_1Iterator.html#ad7f20513679de77715d08b45e3c9a909">memseek::MemoryChunkRange::Iterator::difference_type</a> =  std::ptrdiff_t</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a0280fe8776ff323a99c9b46a4cc5f485" name="a0280fe8776ff323a99c9b46a4cc5f485"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a0280fe8776ff323a99c9b46a4cc5f485">&#9670;&#160;</a></span>iterator_category</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="namespacememseek.html#ab577b87dc7dadd822ef978fe05903a83">using</a> <a class="el" href="classmemseek_1_1MemoryChunkRange_1_1Iterator.html#a0280fe8776ff323a99c9b46a4cc5f485">memseek::MemoryChunkRange::Iterator::iterator_category</a> =  std::forward_iterator_tag</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a1fe09d5ae9b1bf5caa4a4ca33971765a" name="a1fe09d5ae9b1bf5caa4a4ca33971765a"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a1fe09d5ae9b1bf5caa4a4ca33971765a">&#9670;&#160;</a></span>iterator_concept</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="namespacememseek.html#ab577b87dc7dadd822ef978fe05903a83">using</a> <a class="el" href="classmemseek_1_1MemoryChunkRange_1_1Iterator.html#a1fe09d5ae9b1bf5caa4a4ca33971765a">memseek::MemoryChunkRange::Iterator::iterator_concept</a> =  std::forward_iterator_tag</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a0ee7c8bb9fc7fa7ef0960d51e324deef" name="a0ee7c8bb9fc7fa7ef0960d51e324deef"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a0ee7c8bb9fc7fa7ef0960d51e324deef">&#9670;&#160;</a></span>value_type</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="namespacememseek.html#ab577b87dc7dadd822ef978fe05903a83">using</a> <a class="el" href="classmemseek_1_1MemoryChunkRange_1_1Iterator.html#a0ee7c8bb9fc7fa7ef0960d51e324deef">memseek::MemoryChunkRange::Iterator::value_type</a> =  <a class="el" href="structmemseek_1_1MemoryChunk.html">MemoryChunk</a></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<h2 class="groupheader">构造及析构函数说明</h2>
+<a id="a33922f153c0eaaf31058c48ca1aa7d91" name="a33922f153c0eaaf31058c48ca1aa7d91"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a33922f153c0eaaf31058c48ca1aa7d91">&#9670;&#160;</a></span>Iterator() <span class="overload">[1/2]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">memseek::MemoryChunkRange::Iterator::Iterator </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">default</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a279728946d14b42f694a9016d5cfb96e" name="a279728946d14b42f694a9016d5cfb96e"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a279728946d14b42f694a9016d5cfb96e">&#9670;&#160;</a></span>Iterator() <span class="overload">[2/2]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">memseek::MemoryChunkRange::Iterator::Iterator </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="namespacememseek.html#ab577b87dc7dadd822ef978fe05903a83">const</a> <a class="el" href="structmemseek_1_1MemoryRegion.html">MemoryRegion</a> *&#160;</td>
+          <td class="paramname"><em>region</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">std::size_t&#160;</td>
+          <td class="paramname"><em>chunkSize</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">std::uintptr_t&#160;</td>
+          <td class="paramname"><em>current</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<h2 class="groupheader">成员函数说明</h2>
+<a id="a3280d8426055b50d43525a7824470112" name="a3280d8426055b50d43525a7824470112"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a3280d8426055b50d43525a7824470112">&#9670;&#160;</a></span>operator*()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="structmemseek_1_1MemoryChunk.html">MemoryChunk</a> memseek::MemoryChunkRange::Iterator::operator* </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a5c1a5010eec5acb12f5a30070076b6f5" name="a5c1a5010eec5acb12f5a30070076b6f5"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a5c1a5010eec5acb12f5a30070076b6f5">&#9670;&#160;</a></span>operator++() <span class="overload">[1/2]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classmemseek_1_1MemoryChunkRange_1_1Iterator.html">Iterator</a> &amp; memseek::MemoryChunkRange::Iterator::operator++ </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a0b379a6928d3ca4a97dbe5af5e2fb096" name="a0b379a6928d3ca4a97dbe5af5e2fb096"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a0b379a6928d3ca4a97dbe5af5e2fb096">&#9670;&#160;</a></span>operator++() <span class="overload">[2/2]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classmemseek_1_1MemoryChunkRange_1_1Iterator.html">Iterator</a> memseek::MemoryChunkRange::Iterator::operator++ </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="namespacememseek.html#ab577b87dc7dadd822ef978fe05903a83">int</a>&#160;</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a440caf64884be4693c5089935d362e9b" name="a440caf64884be4693c5089935d362e9b"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a440caf64884be4693c5089935d362e9b">&#9670;&#160;</a></span>operator==() <span class="overload">[1/2]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="namespacememseek.html#ab577b87dc7dadd822ef978fe05903a83">bool</a> memseek::MemoryChunkRange::Iterator::operator== </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="namespacememseek.html#ab577b87dc7dadd822ef978fe05903a83">const</a> <a class="el" href="classmemseek_1_1MemoryChunkRange_1_1Iterator.html">Iterator</a> &amp;&#160;</td>
+          <td class="paramname"><em>other</em></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">noexcept</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="ae8927b2646e361facb21d6b37bc08465" name="ae8927b2646e361facb21d6b37bc08465"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ae8927b2646e361facb21d6b37bc08465">&#9670;&#160;</a></span>operator==() <span class="overload">[2/2]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="namespacememseek.html#ab577b87dc7dadd822ef978fe05903a83">bool</a> memseek::MemoryChunkRange::Iterator::operator== </td>
+          <td>(</td>
+          <td class="paramtype">std::default_sentinel_t&#160;</td>
+          <td class="paramname"></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">noexcept</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<hr/>该类的文档由以下文件生成:<ul>
+<li>include/memseek/memory/<a class="el" href="chunk_8hpp_source.html">chunk.hpp</a></li>
+</ul>
+</div><!-- contents -->
+</div><!-- doc-content -->
+<!-- start footer part -->
+<div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
+  <ul>
+    <li class="navelem"><a class="el" href="namespacememseek.html">memseek</a></li><li class="navelem"><a class="el" href="classmemseek_1_1MemoryChunkRange.html">MemoryChunkRange</a></li><li class="navelem"><a class="el" href="classmemseek_1_1MemoryChunkRange_1_1Iterator.html">Iterator</a></li>
+    <li class="footer">制作者 <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
+  </ul>
+</div>
+</body>
+</html>
